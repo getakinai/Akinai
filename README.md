@@ -24,7 +24,8 @@ Work through these in order. It takes about an hour.
 3. **Learn the rules**: read [CONTRIBUTING.md](CONTRIBUTING.md) for conventions, naming, commit format and the PR checklist.
 4. **Trace one feature**: follow **Locations** from `start/routes.ts` (search `admin.locations`) through its controllers, service, repository and `inertia/pages/admin/locations/`. It is the smallest complete CRUD feature.
 5. **Build something**: use [docs/adding-a-feature.md](docs/adding-a-feature.md) as a checklist for your first change, and check it against [docs/security.md](docs/security.md). 
-6. **PLUGINS**: To add an optional storefront feature that staff can install from **Plugins**, follow [docs/creating-a-plugin.md](docs/creating-a-plugin.md).
+6. **Plugins**: optional storefront features staff install from **Plugins** — see [docs/creating-a-plugin.md](docs/creating-a-plugin.md).
+7. **Themes**: uploadable Edge storefront themes (library, editor, live publish) — see [docs/creating-a-theme.md](docs/creating-a-theme.md).
 
 ## Technology
 
@@ -69,12 +70,14 @@ Inertia pages only receive route ids; records are always fetched from JSON endpo
 ```
 app/
   abilities/      Bouncer abilities and the permission catalog
-  controllers/    Single-action controllers (admin/, customers/)
+  controllers/    Single-action controllers (admin/, customers/, storefront/)
   middleware/     HTTP middleware (auth, guest, permissions, UUID params, ...)
   models/         Lucid models (extend BaseAppModel, UUID v7 ids)
+  plugins/        Plugin loader and registry (#plugin_host)
+  themes/         Theme package validation, renderer, storage (#theme_host)
   policies/       Record-level authorization rules
   repositories/   Database queries and transactions
-  services/       Business logic
+  services/       Business logic (ThemeService, PluginService, …)
   transformers/   Response shaping
   validators/     VineJS validators
 commands/         Custom ace commands (create:admin-user)
@@ -85,15 +88,36 @@ database/
   seeders/        Roles, default location, option definitions, dev admin user
 inertia/
   components/     Shared React components (form/, data_table/, page shell, admin nav)
+  islands/        React widgets Edge themes mount (cart, plugin slots, app blocks)
   layouts/        Admin and storefront layouts
   lib/            http(), form helpers, styles
-  pages/          admin/, customers/, errors/, home.tsx
-  plugins/        PluginSlot, client registry (see docs/creating-a-plugin.md)
-plugins/          Self-contained plugins (hero_slideshow/, …); discovered at boot
+  pages/          admin/ (including themes/, plugins/), customers/, storefront/
+  plugins/        PluginSlot and client registry (import.meta.glob on plugins/*/client)
+plugins/          Bundled plugins (hero_slideshow/, …); one folder per plugin, discovered at boot
+themes/           Bundled Edge theme packages (dawn_lite/, …); Edge + JSON, not Inertia pages
 scripts/          setup.sh (used by yarn setup)
 start/            Routes, kernel (middleware), env validation
 tests/            unit/ and functional/ Japa suites
 ```
+
+### Plugins and themes (where code lives)
+
+Plugins and themes are **not** both under `inertia/`. They solve different jobs:
+
+| | **Plugins** | **Themes** |
+| --- | --- | --- |
+| Storefront output | React (Inertia or islands) | [Edge.js](https://edgejs.dev) templates + JSON settings |
+| Bundled package | [`plugins/<key>/`](plugins/) | [`themes/<key>/`](themes/) |
+| Server runtime | [`app/plugins/`](app/plugins/) + [`app/services/plugin_service.ts`](app/services/plugin_service.ts) | [`app/themes/`](app/themes/) + [`app/services/theme_service.ts`](app/services/theme_service.ts) |
+| Shared frontend glue | [`inertia/plugins/`](inertia/plugins/) (registry → `plugins/*/client/index.tsx`) | [`inertia/islands/`](inertia/islands/) + [`inertia/islands.tsx`](inertia/islands.tsx) entry |
+| Admin UI | [`inertia/pages/admin/plugins/`](inertia/pages/admin/plugins/) and plugin `client/pages/admin/` | [`inertia/pages/admin/themes/`](inertia/pages/admin/themes/) |
+| Guides | [docs/creating-a-plugin.md](docs/creating-a-plugin.md) | [docs/creating-a-theme.md](docs/creating-a-theme.md) |
+
+**Plugins** colocate server code, migrations, tests and a `client/` React entry in one repo folder because the storefront piece is a React component registered by slot.
+
+**Themes** stay at the repo root like Shopify theme folders: `.edge` sections, `templates/*.json`, assets and config. Staff can also upload theme zips; the app stores them in Drive and renders them with `ThemeRenderer`. Only the **editor and library** are Inertia pages under `inertia/pages/admin/themes/`.
+
+The built-in React storefront (when no uploaded theme is live) still uses **Built-in theme** settings under `/admin/storefront/theme` — separate from uploaded themes in `/admin/themes`.
 
 ## Running locally
 
