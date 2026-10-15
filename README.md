@@ -155,10 +155,10 @@ yarn db:seed
 
 - Store settings, storefront theme and a starter menu
 - The built-in roles (`admin`, `manager`, `staff`)
-- The New Zealand (primary, NZD) and Australia (AUD) markets
-- New Zealand GST
 - A default stock location
-- A Manila City (PH) shipping zone with a standard rate in NZD and AUD
+- The help center starter guides
+
+Markets, tax rates and shipping zones come from the country you pick when you create the first admin (step 6). Until then the storefront redirects to `/admin/setup`.
 
 In development only, it also adds a starter catalog (10 products in 5 collections, priced in NZD and AUD). It doesn't create any staff Users; you create the first admin yourself in step 6.
 
