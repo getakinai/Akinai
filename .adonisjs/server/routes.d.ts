@@ -5,9 +5,6 @@ type ParamValue = string | number | bigint | boolean
 export type ScannedRoutes = {
   ALL: {
     'drive.fs.serve': { paramsTuple: [...ParamValue[]]; params: {'*': ParamValue[]} }
-    'event_stream': { paramsTuple?: []; params?: {} }
-    'subscribe': { paramsTuple?: []; params?: {} }
-    'unsubscribe': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'admin.session.create': { paramsTuple?: []; params?: {} }
     'admin.session.store': { paramsTuple?: []; params?: {} }
@@ -219,9 +216,6 @@ export type ScannedRoutes = {
     'admin.discounts.bulk.archive.update': { paramsTuple?: []; params?: {} }
     'admin.discounts.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.discounts.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'admin.newsletter_subscribers.home': { paramsTuple?: []; params?: {} }
-    'admin.newsletter_subscribers.list': { paramsTuple?: []; params?: {} }
-    'admin.newsletter_subscribers.bulk.subscription.update': { paramsTuple?: []; params?: {} }
     'admin.store_settings.home': { paramsTuple?: []; params?: {} }
     'admin.store_settings.view': { paramsTuple?: []; params?: {} }
     'admin.store_settings.business.update': { paramsTuple?: []; params?: {} }
@@ -316,6 +310,7 @@ export type ScannedRoutes = {
     'admin.storefront_promo_banners.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.plugins.home': { paramsTuple?: []; params?: {} }
     'admin.plugins.list': { paramsTuple?: []; params?: {} }
+    'admin.plugins.nav': { paramsTuple?: []; params?: {} }
     'admin.plugins.install': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
     'admin.plugins.uninstall': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
     'admin.themes.home': { paramsTuple?: []; params?: {} }
@@ -402,6 +397,9 @@ export type ScannedRoutes = {
     'admin.storefront_hero.image.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_hero.image.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_hero.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.newsletter_subscribers.home': { paramsTuple?: []; params?: {} }
+    'admin.newsletter_subscribers.list': { paramsTuple?: []; params?: {} }
+    'admin.newsletter_subscribers.bulk.subscription.update': { paramsTuple?: []; params?: {} }
     'storefront.sitemap.view': { paramsTuple?: []; params?: {} }
     'storefront.robots.view': { paramsTuple?: []; params?: {} }
     'storefront.settings.view': { paramsTuple?: []; params?: {} }
@@ -409,6 +407,8 @@ export type ScannedRoutes = {
     'storefront.menu.list': { paramsTuple?: []; params?: {} }
     'storefront.plugins.list': { paramsTuple?: []; params?: {} }
     'storefront.hero_slides.list': { paramsTuple?: []; params?: {} }
+    'storefront.newsletter.store': { paramsTuple?: []; params?: {} }
+    'storefront.maintenance.newsletter.store': { paramsTuple?: []; params?: {} }
     'storefront.theme_assets.show': { paramsTuple: [ParamValue,...ParamValue[]]; params: {'hash': ParamValue,'*': ParamValue[]} }
     'storefront.theme_preview.exit': { paramsTuple?: []; params?: {} }
     'storefront.theme_preview.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -439,8 +439,6 @@ export type ScannedRoutes = {
     'storefront.market.update': { paramsTuple?: []; params?: {} }
     'storefront.cart.prices.update': { paramsTuple?: []; params?: {} }
     'storefront.analytics.events.store': { paramsTuple?: []; params?: {} }
-    'storefront.newsletter.store': { paramsTuple?: []; params?: {} }
-    'storefront.maintenance.newsletter.store': { paramsTuple?: []; params?: {} }
     'storefront.support.chat.view': { paramsTuple?: []; params?: {} }
     'storefront.support.tickets.store': { paramsTuple?: []; params?: {} }
     'storefront.support.tickets.show': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
@@ -520,10 +518,12 @@ export type ScannedRoutes = {
     'customers.account.wishlist.home': { paramsTuple?: []; params?: {} }
     'customers.account.wishlist.list': { paramsTuple?: []; params?: {} }
     'customers.product_reviews.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'event_stream': { paramsTuple?: []; params?: {} }
+    'subscribe': { paramsTuple?: []; params?: {} }
+    'unsubscribe': { paramsTuple?: []; params?: {} }
   }
   GET: {
     'drive.fs.serve': { paramsTuple: [...ParamValue[]]; params: {'*': ParamValue[]} }
-    'event_stream': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'admin.session.create': { paramsTuple?: []; params?: {} }
     'admin.setup.create': { paramsTuple?: []; params?: {} }
@@ -627,8 +627,6 @@ export type ScannedRoutes = {
     'admin.discounts.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.discounts.create': { paramsTuple?: []; params?: {} }
     'admin.discounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'admin.newsletter_subscribers.home': { paramsTuple?: []; params?: {} }
-    'admin.newsletter_subscribers.list': { paramsTuple?: []; params?: {} }
     'admin.store_settings.home': { paramsTuple?: []; params?: {} }
     'admin.store_settings.view': { paramsTuple?: []; params?: {} }
     'admin.maintenance.view': { paramsTuple?: []; params?: {} }
@@ -674,6 +672,7 @@ export type ScannedRoutes = {
     'admin.storefront_featured_reviews.list': { paramsTuple?: []; params?: {} }
     'admin.plugins.home': { paramsTuple?: []; params?: {} }
     'admin.plugins.list': { paramsTuple?: []; params?: {} }
+    'admin.plugins.nav': { paramsTuple?: []; params?: {} }
     'admin.themes.home': { paramsTuple?: []; params?: {} }
     'admin.themes.list': { paramsTuple?: []; params?: {} }
     'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -705,6 +704,8 @@ export type ScannedRoutes = {
     'admin.customers.create': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.home': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.list': { paramsTuple?: []; params?: {} }
+    'admin.newsletter_subscribers.home': { paramsTuple?: []; params?: {} }
+    'admin.newsletter_subscribers.list': { paramsTuple?: []; params?: {} }
     'storefront.sitemap.view': { paramsTuple?: []; params?: {} }
     'storefront.robots.view': { paramsTuple?: []; params?: {} }
     'storefront.settings.view': { paramsTuple?: []; params?: {} }
@@ -789,10 +790,10 @@ export type ScannedRoutes = {
     'customers.account.support.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'customers.account.wishlist.home': { paramsTuple?: []; params?: {} }
     'customers.account.wishlist.list': { paramsTuple?: []; params?: {} }
+    'event_stream': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'drive.fs.serve': { paramsTuple: [...ParamValue[]]; params: {'*': ParamValue[]} }
-    'event_stream': { paramsTuple?: []; params?: {} }
     'home': { paramsTuple?: []; params?: {} }
     'admin.session.create': { paramsTuple?: []; params?: {} }
     'admin.setup.create': { paramsTuple?: []; params?: {} }
@@ -896,8 +897,6 @@ export type ScannedRoutes = {
     'admin.discounts.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.discounts.create': { paramsTuple?: []; params?: {} }
     'admin.discounts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'admin.newsletter_subscribers.home': { paramsTuple?: []; params?: {} }
-    'admin.newsletter_subscribers.list': { paramsTuple?: []; params?: {} }
     'admin.store_settings.home': { paramsTuple?: []; params?: {} }
     'admin.store_settings.view': { paramsTuple?: []; params?: {} }
     'admin.maintenance.view': { paramsTuple?: []; params?: {} }
@@ -943,6 +942,7 @@ export type ScannedRoutes = {
     'admin.storefront_featured_reviews.list': { paramsTuple?: []; params?: {} }
     'admin.plugins.home': { paramsTuple?: []; params?: {} }
     'admin.plugins.list': { paramsTuple?: []; params?: {} }
+    'admin.plugins.nav': { paramsTuple?: []; params?: {} }
     'admin.themes.home': { paramsTuple?: []; params?: {} }
     'admin.themes.list': { paramsTuple?: []; params?: {} }
     'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -974,6 +974,8 @@ export type ScannedRoutes = {
     'admin.customers.create': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.home': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.list': { paramsTuple?: []; params?: {} }
+    'admin.newsletter_subscribers.home': { paramsTuple?: []; params?: {} }
+    'admin.newsletter_subscribers.list': { paramsTuple?: []; params?: {} }
     'storefront.sitemap.view': { paramsTuple?: []; params?: {} }
     'storefront.robots.view': { paramsTuple?: []; params?: {} }
     'storefront.settings.view': { paramsTuple?: []; params?: {} }
@@ -1058,10 +1060,9 @@ export type ScannedRoutes = {
     'customers.account.support.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'customers.account.wishlist.home': { paramsTuple?: []; params?: {} }
     'customers.account.wishlist.list': { paramsTuple?: []; params?: {} }
+    'event_stream': { paramsTuple?: []; params?: {} }
   }
   POST: {
-    'subscribe': { paramsTuple?: []; params?: {} }
-    'unsubscribe': { paramsTuple?: []; params?: {} }
     'admin.session.store': { paramsTuple?: []; params?: {} }
     'admin.session.mfa.store': { paramsTuple?: []; params?: {} }
     'admin.setup.store': { paramsTuple?: []; params?: {} }
@@ -1163,10 +1164,10 @@ export type ScannedRoutes = {
     'admin.roles.store': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.store': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.image.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'storefront.cart.prices.update': { paramsTuple?: []; params?: {} }
-    'storefront.analytics.events.store': { paramsTuple?: []; params?: {} }
     'storefront.newsletter.store': { paramsTuple?: []; params?: {} }
     'storefront.maintenance.newsletter.store': { paramsTuple?: []; params?: {} }
+    'storefront.cart.prices.update': { paramsTuple?: []; params?: {} }
+    'storefront.analytics.events.store': { paramsTuple?: []; params?: {} }
     'storefront.support.tickets.store': { paramsTuple?: []; params?: {} }
     'storefront.support.tickets.messages.store': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'stripe.webhook': { paramsTuple?: []; params?: {} }
@@ -1189,6 +1190,8 @@ export type ScannedRoutes = {
     'customers.account.addresses.store': { paramsTuple?: []; params?: {} }
     'customers.account.support.messages.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'customers.product_reviews.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'subscribe': { paramsTuple?: []; params?: {} }
+    'unsubscribe': { paramsTuple?: []; params?: {} }
   }
   PUT: {
     'admin.account.profile.update': { paramsTuple?: []; params?: {} }
@@ -1232,7 +1235,6 @@ export type ScannedRoutes = {
     'admin.orders.bulk.archive.update': { paramsTuple?: []; params?: {} }
     'admin.discounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.discounts.bulk.archive.update': { paramsTuple?: []; params?: {} }
-    'admin.newsletter_subscribers.bulk.subscription.update': { paramsTuple?: []; params?: {} }
     'admin.store_settings.business.update': { paramsTuple?: []; params?: {} }
     'admin.store_settings.contact.update': { paramsTuple?: []; params?: {} }
     'admin.store_settings.address.update': { paramsTuple?: []; params?: {} }
@@ -1281,6 +1283,7 @@ export type ScannedRoutes = {
     'admin.roles.permissions.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_hero.reorder': { paramsTuple?: []; params?: {} }
     'admin.storefront_hero.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.newsletter_subscribers.bulk.subscription.update': { paramsTuple?: []; params?: {} }
     'storefront.market.update': { paramsTuple?: []; params?: {} }
     'customers.account.location.update': { paramsTuple?: []; params?: {} }
     'customers.account.addresses.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

@@ -12,24 +12,6 @@ const routes = {
     tokens: [{"old":"/uploads/*","type":0,"val":"uploads","end":""},{"old":"/uploads/*","type":2,"val":"*","end":""}],
     types: placeholder as Registry['drive.fs.serve']['types'],
   },
-  'event_stream': {
-    methods: ["GET","HEAD"],
-    pattern: '/__transmit/events',
-    tokens: [{"old":"/__transmit/events","type":0,"val":"__transmit","end":""},{"old":"/__transmit/events","type":0,"val":"events","end":""}],
-    types: placeholder as Registry['event_stream']['types'],
-  },
-  'subscribe': {
-    methods: ["POST"],
-    pattern: '/__transmit/subscribe',
-    tokens: [{"old":"/__transmit/subscribe","type":0,"val":"__transmit","end":""},{"old":"/__transmit/subscribe","type":0,"val":"subscribe","end":""}],
-    types: placeholder as Registry['subscribe']['types'],
-  },
-  'unsubscribe': {
-    methods: ["POST"],
-    pattern: '/__transmit/unsubscribe',
-    tokens: [{"old":"/__transmit/unsubscribe","type":0,"val":"__transmit","end":""},{"old":"/__transmit/unsubscribe","type":0,"val":"unsubscribe","end":""}],
-    types: placeholder as Registry['unsubscribe']['types'],
-  },
   'home': {
     methods: ["GET","HEAD"],
     pattern: '/',
@@ -1296,24 +1278,6 @@ const routes = {
     tokens: [{"old":"/admin/discounts/:id/unarchive","type":0,"val":"admin","end":""},{"old":"/admin/discounts/:id/unarchive","type":0,"val":"discounts","end":""},{"old":"/admin/discounts/:id/unarchive","type":1,"val":"id","end":""},{"old":"/admin/discounts/:id/unarchive","type":0,"val":"unarchive","end":""}],
     types: placeholder as Registry['admin.discounts.unarchive']['types'],
   },
-  'admin.newsletter_subscribers.home': {
-    methods: ["GET","HEAD"],
-    pattern: '/admin/marketing/newsletter',
-    tokens: [{"old":"/admin/marketing/newsletter","type":0,"val":"admin","end":""},{"old":"/admin/marketing/newsletter","type":0,"val":"marketing","end":""},{"old":"/admin/marketing/newsletter","type":0,"val":"newsletter","end":""}],
-    types: placeholder as Registry['admin.newsletter_subscribers.home']['types'],
-  },
-  'admin.newsletter_subscribers.list': {
-    methods: ["GET","HEAD"],
-    pattern: '/admin/marketing/newsletter/list',
-    tokens: [{"old":"/admin/marketing/newsletter/list","type":0,"val":"admin","end":""},{"old":"/admin/marketing/newsletter/list","type":0,"val":"marketing","end":""},{"old":"/admin/marketing/newsletter/list","type":0,"val":"newsletter","end":""},{"old":"/admin/marketing/newsletter/list","type":0,"val":"list","end":""}],
-    types: placeholder as Registry['admin.newsletter_subscribers.list']['types'],
-  },
-  'admin.newsletter_subscribers.bulk.subscription.update': {
-    methods: ["PUT"],
-    pattern: '/admin/marketing/newsletter/bulk/subscription',
-    tokens: [{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"admin","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"marketing","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"newsletter","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"bulk","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"subscription","end":""}],
-    types: placeholder as Registry['admin.newsletter_subscribers.bulk.subscription.update']['types'],
-  },
   'admin.store_settings.home': {
     methods: ["GET","HEAD"],
     pattern: '/admin/settings',
@@ -1878,6 +1842,12 @@ const routes = {
     tokens: [{"old":"/admin/plugins/list","type":0,"val":"admin","end":""},{"old":"/admin/plugins/list","type":0,"val":"plugins","end":""},{"old":"/admin/plugins/list","type":0,"val":"list","end":""}],
     types: placeholder as Registry['admin.plugins.list']['types'],
   },
+  'admin.plugins.nav': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/plugins/nav',
+    tokens: [{"old":"/admin/plugins/nav","type":0,"val":"admin","end":""},{"old":"/admin/plugins/nav","type":0,"val":"plugins","end":""},{"old":"/admin/plugins/nav","type":0,"val":"nav","end":""}],
+    types: placeholder as Registry['admin.plugins.nav']['types'],
+  },
   'admin.plugins.install': {
     methods: ["POST"],
     pattern: '/admin/plugins/:key/install',
@@ -2394,6 +2364,24 @@ const routes = {
     tokens: [{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['admin.storefront_hero.delete']['types'],
   },
+  'admin.newsletter_subscribers.home': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/marketing/newsletter',
+    tokens: [{"old":"/admin/marketing/newsletter","type":0,"val":"admin","end":""},{"old":"/admin/marketing/newsletter","type":0,"val":"marketing","end":""},{"old":"/admin/marketing/newsletter","type":0,"val":"newsletter","end":""}],
+    types: placeholder as Registry['admin.newsletter_subscribers.home']['types'],
+  },
+  'admin.newsletter_subscribers.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/marketing/newsletter/list',
+    tokens: [{"old":"/admin/marketing/newsletter/list","type":0,"val":"admin","end":""},{"old":"/admin/marketing/newsletter/list","type":0,"val":"marketing","end":""},{"old":"/admin/marketing/newsletter/list","type":0,"val":"newsletter","end":""},{"old":"/admin/marketing/newsletter/list","type":0,"val":"list","end":""}],
+    types: placeholder as Registry['admin.newsletter_subscribers.list']['types'],
+  },
+  'admin.newsletter_subscribers.bulk.subscription.update': {
+    methods: ["PUT"],
+    pattern: '/admin/marketing/newsletter/bulk/subscription',
+    tokens: [{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"admin","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"marketing","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"newsletter","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"bulk","end":""},{"old":"/admin/marketing/newsletter/bulk/subscription","type":0,"val":"subscription","end":""}],
+    types: placeholder as Registry['admin.newsletter_subscribers.bulk.subscription.update']['types'],
+  },
   'storefront.sitemap.view': {
     methods: ["GET","HEAD"],
     pattern: '/sitemap.xml',
@@ -2435,6 +2423,18 @@ const routes = {
     pattern: '/store/hero-slides',
     tokens: [{"old":"/store/hero-slides","type":0,"val":"store","end":""},{"old":"/store/hero-slides","type":0,"val":"hero-slides","end":""}],
     types: placeholder as Registry['storefront.hero_slides.list']['types'],
+  },
+  'storefront.newsletter.store': {
+    methods: ["POST"],
+    pattern: '/newsletter',
+    tokens: [{"old":"/newsletter","type":0,"val":"newsletter","end":""}],
+    types: placeholder as Registry['storefront.newsletter.store']['types'],
+  },
+  'storefront.maintenance.newsletter.store': {
+    methods: ["POST"],
+    pattern: '/maintenance/newsletter',
+    tokens: [{"old":"/maintenance/newsletter","type":0,"val":"maintenance","end":""},{"old":"/maintenance/newsletter","type":0,"val":"newsletter","end":""}],
+    types: placeholder as Registry['storefront.maintenance.newsletter.store']['types'],
   },
   'storefront.theme_assets.show': {
     methods: ["GET","HEAD"],
@@ -2615,18 +2615,6 @@ const routes = {
     pattern: '/store/analytics/events',
     tokens: [{"old":"/store/analytics/events","type":0,"val":"store","end":""},{"old":"/store/analytics/events","type":0,"val":"analytics","end":""},{"old":"/store/analytics/events","type":0,"val":"events","end":""}],
     types: placeholder as Registry['storefront.analytics.events.store']['types'],
-  },
-  'storefront.newsletter.store': {
-    methods: ["POST"],
-    pattern: '/newsletter',
-    tokens: [{"old":"/newsletter","type":0,"val":"newsletter","end":""}],
-    types: placeholder as Registry['storefront.newsletter.store']['types'],
-  },
-  'storefront.maintenance.newsletter.store': {
-    methods: ["POST"],
-    pattern: '/maintenance/newsletter',
-    tokens: [{"old":"/maintenance/newsletter","type":0,"val":"maintenance","end":""},{"old":"/maintenance/newsletter","type":0,"val":"newsletter","end":""}],
-    types: placeholder as Registry['storefront.maintenance.newsletter.store']['types'],
   },
   'storefront.support.chat.view': {
     methods: ["GET","HEAD"],
@@ -3101,6 +3089,24 @@ const routes = {
     pattern: '/store/products/:slug/reviews',
     tokens: [{"old":"/store/products/:slug/reviews","type":0,"val":"store","end":""},{"old":"/store/products/:slug/reviews","type":0,"val":"products","end":""},{"old":"/store/products/:slug/reviews","type":1,"val":"slug","end":""},{"old":"/store/products/:slug/reviews","type":0,"val":"reviews","end":""}],
     types: placeholder as Registry['customers.product_reviews.store']['types'],
+  },
+  'event_stream': {
+    methods: ["GET","HEAD"],
+    pattern: '/__transmit/events',
+    tokens: [{"old":"/__transmit/events","type":0,"val":"__transmit","end":""},{"old":"/__transmit/events","type":0,"val":"events","end":""}],
+    types: placeholder as Registry['event_stream']['types'],
+  },
+  'subscribe': {
+    methods: ["POST"],
+    pattern: '/__transmit/subscribe',
+    tokens: [{"old":"/__transmit/subscribe","type":0,"val":"__transmit","end":""},{"old":"/__transmit/subscribe","type":0,"val":"subscribe","end":""}],
+    types: placeholder as Registry['subscribe']['types'],
+  },
+  'unsubscribe': {
+    methods: ["POST"],
+    pattern: '/__transmit/unsubscribe',
+    tokens: [{"old":"/__transmit/unsubscribe","type":0,"val":"__transmit","end":""},{"old":"/__transmit/unsubscribe","type":0,"val":"unsubscribe","end":""}],
+    types: placeholder as Registry['unsubscribe']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

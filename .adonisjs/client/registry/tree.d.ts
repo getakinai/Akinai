@@ -7,9 +7,6 @@ export interface ApiDefinition {
       serve: typeof routes['drive.fs.serve']
     }
   }
-  eventStream: typeof routes['event_stream']
-  subscribe: typeof routes['subscribe']
-  unsubscribe: typeof routes['unsubscribe']
   home: typeof routes['home']
   admin: {
     session: {
@@ -406,15 +403,6 @@ export interface ApiDefinition {
       archive: typeof routes['admin.discounts.archive']
       unarchive: typeof routes['admin.discounts.unarchive']
     }
-    newsletterSubscribers: {
-      home: typeof routes['admin.newsletter_subscribers.home']
-      list: typeof routes['admin.newsletter_subscribers.list']
-      bulk: {
-        subscription: {
-          update: typeof routes['admin.newsletter_subscribers.bulk.subscription.update']
-        }
-      }
-    }
     storeSettings: {
       home: typeof routes['admin.store_settings.home']
       view: typeof routes['admin.store_settings.view']
@@ -608,6 +596,7 @@ export interface ApiDefinition {
     plugins: {
       home: typeof routes['admin.plugins.home']
       list: typeof routes['admin.plugins.list']
+      nav: typeof routes['admin.plugins.nav']
       install: typeof routes['admin.plugins.install']
       uninstall: typeof routes['admin.plugins.uninstall']
     }
@@ -747,6 +736,15 @@ export interface ApiDefinition {
       }
       delete: typeof routes['admin.storefront_hero.delete']
     }
+    newsletterSubscribers: {
+      home: typeof routes['admin.newsletter_subscribers.home']
+      list: typeof routes['admin.newsletter_subscribers.list']
+      bulk: {
+        subscription: {
+          update: typeof routes['admin.newsletter_subscribers.bulk.subscription.update']
+        }
+      }
+    }
   }
   storefront: {
     sitemap: {
@@ -769,6 +767,14 @@ export interface ApiDefinition {
     }
     heroSlides: {
       list: typeof routes['storefront.hero_slides.list']
+    }
+    newsletter: {
+      store: typeof routes['storefront.newsletter.store']
+    }
+    maintenance: {
+      newsletter: {
+        store: typeof routes['storefront.maintenance.newsletter.store']
+      }
     }
     themeAssets: {
       show: typeof routes['storefront.theme_assets.show']
@@ -844,14 +850,6 @@ export interface ApiDefinition {
     analytics: {
       events: {
         store: typeof routes['storefront.analytics.events.store']
-      }
-    }
-    newsletter: {
-      store: typeof routes['storefront.newsletter.store']
-    }
-    maintenance: {
-      newsletter: {
-        store: typeof routes['storefront.maintenance.newsletter.store']
       }
     }
     support: {
@@ -1034,4 +1032,7 @@ export interface ApiDefinition {
       store: typeof routes['customers.product_reviews.store']
     }
   }
+  eventStream: typeof routes['event_stream']
+  subscribe: typeof routes['subscribe']
+  unsubscribe: typeof routes['unsubscribe']
 }

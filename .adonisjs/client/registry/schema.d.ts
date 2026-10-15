@@ -19,42 +19,6 @@ export interface Registry {
       errorResponse: unknown
     }
   }
-  'event_stream': {
-    methods: ["GET","HEAD"]
-    pattern: '/__transmit/events'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-      errorResponse: unknown
-    }
-  }
-  'subscribe': {
-    methods: ["POST"]
-    pattern: '/__transmit/subscribe'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-      errorResponse: unknown
-    }
-  }
-  'unsubscribe': {
-    methods: ["POST"]
-    pattern: '/__transmit/unsubscribe'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-      errorResponse: unknown
-    }
-  }
   'home': {
     methods: ["GET","HEAD"]
     pattern: '/'
@@ -2587,42 +2551,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_discounts_unarchive_controller').default['handle']>>>
     }
   }
-  'admin.newsletter_subscribers.home': {
-    methods: ["GET","HEAD"]
-    pattern: '/admin/marketing/newsletter'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_newsletter_subscribers_home_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_newsletter_subscribers_home_controller').default['handle']>>>
-    }
-  }
-  'admin.newsletter_subscribers.list': {
-    methods: ["GET","HEAD"]
-    pattern: '/admin/marketing/newsletter/list'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: ExtractQueryForGet<InferInput<(typeof import('#validators/admin_newsletter_subscribers_list_query_validator').adminNewsletterSubscribersListQueryValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_newsletter_subscribers_list_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_newsletter_subscribers_list_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'admin.newsletter_subscribers.bulk.subscription.update': {
-    methods: ["PUT"]
-    pattern: '/admin/marketing/newsletter/bulk/subscription'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/admin_newsletter_subscribers_bulk_subscription_validator').adminNewsletterSubscribersBulkSubscriptionValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/admin_newsletter_subscribers_bulk_subscription_validator').adminNewsletterSubscribersBulkSubscriptionValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_newsletter_subscribers_bulk_subscription_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_newsletter_subscribers_bulk_subscription_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
   'admin.store_settings.home': {
     methods: ["GET","HEAD"]
     pattern: '/admin/settings'
@@ -3751,6 +3679,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_list_controller').default['handle']>>>
     }
   }
+  'admin.plugins.nav': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/plugins/nav'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_nav_list_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_nav_list_controller').default['handle']>>>
+    }
+  }
   'admin.plugins.install': {
     methods: ["POST"]
     pattern: '/admin/plugins/:key/install'
@@ -4783,6 +4723,42 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'admin.newsletter_subscribers.home': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/marketing/newsletter'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.newsletter_subscribers.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/marketing/newsletter/list'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.newsletter_subscribers.bulk.subscription.update': {
+    methods: ["PUT"]
+    pattern: '/admin/marketing/newsletter/bulk/subscription'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'storefront.sitemap.view': {
     methods: ["GET","HEAD"]
     pattern: '/sitemap.xml'
@@ -4858,6 +4834,30 @@ export interface Registry {
   'storefront.hero_slides.list': {
     methods: ["GET","HEAD"]
     pattern: '/store/hero-slides'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'storefront.newsletter.store': {
+    methods: ["POST"]
+    pattern: '/newsletter'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'storefront.maintenance.newsletter.store': {
+    methods: ["POST"]
+    pattern: '/maintenance/newsletter'
     types: {
       body: {}
       paramsTuple: []
@@ -5225,30 +5225,6 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/storefront_analytics_event_store_validator').storefrontAnalyticsEventStoreValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_analytics_events_store_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_analytics_events_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'storefront.newsletter.store': {
-    methods: ["POST"]
-    pattern: '/newsletter'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/storefront_newsletter_store_validator').storefrontNewsletterStoreValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/storefront_newsletter_store_validator').storefrontNewsletterStoreValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_newsletter_store_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_newsletter_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'storefront.maintenance.newsletter.store': {
-    methods: ["POST"]
-    pattern: '/maintenance/newsletter'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/storefront_newsletter_store_validator').storefrontNewsletterStoreValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/storefront_newsletter_store_validator').storefrontNewsletterStoreValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_maintenance_newsletter_store_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_maintenance_newsletter_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'storefront.support.chat.view': {
@@ -6197,6 +6173,42 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/customers_product_review_store_validator').customersProductReviewStoreValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/customers/customers_product_reviews_store_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/customers/customers_product_reviews_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'event_stream': {
+    methods: ["GET","HEAD"]
+    pattern: '/__transmit/events'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'subscribe': {
+    methods: ["POST"]
+    pattern: '/__transmit/subscribe'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'unsubscribe': {
+    methods: ["POST"]
+    pattern: '/__transmit/unsubscribe'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
     }
   }
 }
