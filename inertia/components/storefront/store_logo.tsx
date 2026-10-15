@@ -10,6 +10,8 @@ type StoreLogoProps = {
   variant?: 'default' | 'large'
   loading?: boolean
   className?: string
+  /** When false, do not wrap in a home link (parent already links home). */
+  linkHome?: boolean
 }
 
 const variants = {
@@ -35,10 +37,21 @@ export default function StoreLogo({
   variant = 'default',
   loading = false,
   className,
+  linkHome = true,
 }: StoreLogoProps) {
   const styles = variants[variant]
   if (loading) return <Skeleton className={cn('shrink-0 rounded-lg', styles.skeleton)} />
-  if (!logoUrl) return <Logo size={size} />
+  if (!logoUrl) return <Logo size={size} linked={linkHome} />
+
+  if (!linkHome) {
+    return (
+      <img
+        src={logoUrl}
+        alt={storeName}
+        className={cn('w-auto object-contain', styles.image, className)}
+      />
+    )
+  }
 
   return (
     <Link route="home" aria-label={storeName} className={cn('inline-flex min-w-0', className)}>

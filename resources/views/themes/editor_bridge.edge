@@ -1,5 +1,5 @@
 <style nonce="{{ cspNonce }}">
-  [data-akinai-section-id] { outline: 2px solid transparent; outline-offset: -2px; cursor: pointer; }
+  [data-akinai-section-id] { outline: 2px solid transparent; outline-offset: -2px; }
   [data-akinai-section-id]:hover { outline-color: rgba(37, 99, 235, 0.55); }
   [data-akinai-section-id].akinai-section--selected { outline-color: rgb(37, 99, 235); }
 </style>
@@ -10,9 +10,15 @@
       if (window.parent === window) return
       window.parent.postMessage({ source: 'akinai-theme', type: type, sectionId: id }, window.location.origin)
     }
+    function isInteractive(target) {
+      return target.closest(
+        'a[href], button, input, select, textarea, summary, [data-akinai-island], .akinai-add-to-cart, .akinai-cart-button'
+      )
+    }
     document.addEventListener(
       'click',
       function (event) {
+        if (isInteractive(event.target)) return
         var node = event.target.closest('[data-akinai-section-id]')
         if (!node) return
         event.preventDefault()

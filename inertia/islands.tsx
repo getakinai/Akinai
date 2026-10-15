@@ -2,8 +2,8 @@ import './lib/csp_style_patch'
 import './css/app.css'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { createRoot } from 'react-dom/client'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { createRoot, type Root } from 'react-dom/client'
+import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { TuyauProvider } from '@adonisjs/inertia/react'
 import { CartProvider } from 'snappycart'
 import { client } from './client'
@@ -39,9 +39,22 @@ type MountedIsland = {
   fallbackHtml: string
 }
 
+type IslandsBoot = {
+  root: Root
+  queryClient: QueryClient
+  islands: MountedIsland[]
+}
+
+declare global {
+  interface Window {
+    __akinaiIslands?: IslandsBoot
+  }
+}
+
 function collectIslands(): MountedIsland[] {
   return [...document.querySelectorAll<HTMLElement>('[data-akinai-island]')].flatMap(
     (element, index) => {
+      if (element.dataset.akinaiMounted === 'true') return []
       const name = element.dataset.akinaiIsland as IslandName
       if (!(name in islandRegistry)) return []
       let props: Record<string, unknown> = {}
@@ -50,6 +63,7 @@ function collectIslands(): MountedIsland[] {
       } catch {}
       const fallbackHtml = element.innerHTML
       element.innerHTML = ''
+      element.dataset.akinaiMounted = 'true'
       return [{ key: `${name}-${index}`, name, element, props, fallbackHtml }]
     }
   )
@@ -85,9 +99,10 @@ function IslandsRoot({ islands }: { islands: MountedIsland[] }) {
     <CartDrawerContext.Provider value={drawer}>
       {islands.map(({ key, name, element, props, fallbackHtml }) => {
         const { Component } = islandRegistry[name]
-        const fallback: ReactNode = fallbackHtml ? (
-          <div className="contents" dangerouslySetInnerHTML={{ __html: fallbackHtml }} />
-        ) : null
+        const fallback: ReactNode =
+          name === 'plugin_slot' && fallbackHtml ? (
+            <div className="contents" dangerouslySetInnerHTML={{ __html: fallbackHtml }} />
+          ) : null
         return createPortal(<Component props={props} fallback={fallback} />, element, key)
       })}
       {usesCart && (
@@ -105,20 +120,40 @@ function IslandsRoot({ islands }: { islands: MountedIsland[] }) {
   )
 }
 
-const islands = collectIslands()
-const queryClient = createQueryClient()
-seedStorefrontQueries(queryClient, readIslandsData())
+function renderIslands(boot: IslandsBoot) {
+  boot.root.render(
+    <QueryClientProvider client={boot.queryClient}>
+      <TuyauProvider client={client}>
+        <CartProvider>
+          <IslandsRoot islands={boot.islands} />
+        </CartProvider>
+      </TuyauProvider>
+    </QueryClientProvider>
+  )
+}
 
-const container = document.createElement('div')
-container.id = 'akinai-islands'
-document.body.appendChild(container)
+function bootstrap() {
+  if (window.__akinaiIslands) return
 
-createRoot(container).render(
-  <QueryClientProvider client={queryClient}>
-    <TuyauProvider client={client}>
-      <CartProvider>
-        <IslandsRoot islands={islands} />
-      </CartProvider>
-    </TuyauProvider>
-  </QueryClientProvider>
-)
+  const islands = collectIslands()
+  const queryClient = createQueryClient()
+  seedStorefrontQueries(queryClient, readIslandsData())
+
+  const container = document.createElement('div')
+  container.id = 'akinai-islands'
+  document.body.appendChild(container)
+
+  const boot: IslandsBoot = {
+    root: createRoot(container),
+    queryClient,
+    islands,
+  }
+  window.__akinaiIslands = boot
+  renderIslands(boot)
+
+  if (import.meta.hot) {
+    import.meta.hot.accept(() => renderIslands(boot))
+  }
+}
+
+bootstrap()

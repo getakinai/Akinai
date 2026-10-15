@@ -96,6 +96,7 @@ function CheckoutShell({ children }: { children: ReactNode }) {
               storeName={brandName}
               size={28}
               loading={themeLoading}
+              linkHome={false}
             />
             {themeLoading || settingsLoading ? (
               <Skeleton className="h-4 w-28" />
