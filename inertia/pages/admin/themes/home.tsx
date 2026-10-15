@@ -324,6 +324,14 @@ export default function AdminThemesPage() {
               </FormButton>
             )}
             {previewLink(theme.id)}
+            {canEdit && (
+              <a
+                href={`/admin/themes/${encodeURIComponent(theme.id)}/editor`}
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+              >
+                <Paintbrush size={14} /> Customize
+              </a>
+            )}
             {!isLive && (
               <FormButton type="button" variant="secondary" size="sm" onClick={() => share(theme)}>
                 <Link2 size={14} /> Share preview

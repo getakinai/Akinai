@@ -199,4 +199,74 @@ export default class ThemeRepository {
   async delete(theme: Theme): Promise<void> {
     await theme.delete()
   }
+
+  async updateSettingsDraft(theme: Theme, data: ThemeSettingsData): Promise<ThemeSetting> {
+    const row = await ThemeSetting.findByOrFail('theme_id', theme.id)
+    row.draftData = data
+    await row.save()
+    return row
+  }
+
+  async updateTemplateDraft(
+    theme: Theme,
+    name: string,
+    data: ThemeTemplateData
+  ): Promise<ThemeTemplate> {
+    const row = await ThemeTemplate.query()
+      .where('theme_id', theme.id)
+      .where('name', name)
+      .firstOrFail()
+    row.draftData = data
+    await row.save()
+    return row
+  }
+
+  /** Copies every draft onto the published fields and clears drafts. */
+  async commitDrafts(theme: Theme): Promise<void> {
+    await db.transaction(async (trx) => {
+      const settings = await ThemeSetting.query({ client: trx })
+        .where('theme_id', theme.id)
+        .forUpdate()
+        .firstOrFail()
+      if (settings.draftData) {
+        settings.useTransaction(trx)
+        settings.data = settings.draftData
+        settings.draftData = null
+        await settings.save()
+      }
+      const templates = await ThemeTemplate.query({ client: trx })
+        .where('theme_id', theme.id)
+        .forUpdate()
+      for (const template of templates) {
+        if (!template.draftData) continue
+        template.useTransaction(trx)
+        template.data = template.draftData
+        template.draftData = null
+        await template.save()
+      }
+    })
+  }
+
+  async discardDrafts(theme: Theme): Promise<void> {
+    await db.transaction(async (trx) => {
+      const settings = await ThemeSetting.query({ client: trx })
+        .where('theme_id', theme.id)
+        .forUpdate()
+        .firstOrFail()
+      if (settings.draftData) {
+        settings.useTransaction(trx)
+        settings.draftData = null
+        await settings.save()
+      }
+      const templates = await ThemeTemplate.query({ client: trx })
+        .where('theme_id', theme.id)
+        .forUpdate()
+      for (const template of templates) {
+        if (!template.draftData) continue
+        template.useTransaction(trx)
+        template.draftData = null
+        await template.save()
+      }
+    })
+  }
 }

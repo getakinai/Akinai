@@ -293,9 +293,14 @@ declare module '@adonisjs/inertia/types' {
     'admin/taxes/_tax_rate_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/_tax_rate_dialog.tsx'))['default']>
     'admin/taxes/_types': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/_types.ts'))['default']>
     'admin/taxes/home': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/home.tsx'))['default']>
+    'admin/themes/_editor_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_hooks.ts'))['default']>
+    'admin/themes/_editor_types': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_types.ts'))['default']>
     'admin/themes/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_hooks.ts'))['default']>
     'admin/themes/_live_theme_notice': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_live_theme_notice.tsx'))['default']>
+    'admin/themes/_media_picker_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_media_picker_dialog.tsx'))['default']>
+    'admin/themes/_theme_setting_field': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_theme_setting_field.tsx'))['default']>
     'admin/themes/_types': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_types.ts'))['default']>
+    'admin/themes/editor': ExtractProps<(typeof import('../../inertia/pages/admin/themes/editor.tsx'))['default']>
     'admin/themes/home': ExtractProps<(typeof import('../../inertia/pages/admin/themes/home.tsx'))['default']>
     'admin/users/_activity_card': ExtractProps<(typeof import('../../inertia/pages/admin/users/_activity_card.tsx'))['default']>
     'admin/users/_format': ExtractProps<(typeof import('../../inertia/pages/admin/users/_format.ts'))['default']>

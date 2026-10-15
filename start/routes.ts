@@ -1372,6 +1372,29 @@ router
             router
               .delete('themes/:id/publish', [controllers.admin.AdminThemesUnpublish])
               .as('admin.themes.unpublish')
+            router
+              .get('themes/:id/editor', [controllers.admin.AdminThemesEditorHome])
+              .as('admin.themes.editor.home')
+            router
+              .get('themes/:id/editor/data', [controllers.admin.AdminThemesEditorData])
+              .as('admin.themes.editor.data')
+            router
+              .get('themes/:id/editor/exit', [controllers.admin.AdminThemesEditorExit])
+              .as('admin.themes.editor.exit')
+            router
+              .put('themes/:id/editor/settings', [controllers.admin.AdminThemesEditorDraftSettings])
+              .as('admin.themes.editor.settings')
+            router
+              .put('themes/:id/editor/templates/:name', [
+                controllers.admin.AdminThemesEditorDraftTemplate,
+              ])
+              .as('admin.themes.editor.template')
+            router
+              .post('themes/:id/editor/save', [controllers.admin.AdminThemesEditorSave])
+              .as('admin.themes.editor.save')
+            router
+              .post('themes/:id/editor/discard', [controllers.admin.AdminThemesEditorDiscard])
+              .as('admin.themes.editor.discard')
           })
           .use(middleware.can({ permission: 'themes.edit' }))
 

@@ -47,6 +47,7 @@ router.use([
   () => import('#middleware/maintenance_gate_middleware'),
   () => import('#middleware/uuid_route_param_middleware'),
   () => import('#middleware/initialize_bouncer_middleware'),
+  () => import('#middleware/theme_editor_frame_middleware'),
 ])
 
 /**

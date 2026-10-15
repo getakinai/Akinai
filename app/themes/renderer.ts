@@ -15,6 +15,7 @@ import type {
 import type Theme from '#models/theme'
 import ThemeRepository from '#repositories/theme_repository'
 import type { SeoMeta } from '#services/storefront_seo_service'
+import { hasPermission } from '#abilities/main'
 import ThemeSettingsResolver from '#theme_host/settings_resolver'
 import { ensureThemeExtracted } from '#theme_host/storage'
 import { imageUrl } from '#utils/image_url'
@@ -22,6 +23,13 @@ import { formatMoney } from '#utils/money'
 
 /** Session key of the theme a staff member (or share link) is previewing. */
 export const THEME_PREVIEW_SESSION_KEY = 'theme_preview'
+
+/** While set, the storefront renders this theme's drafts for the signed-in editor. */
+export const THEME_EDITOR_SESSION_KEY = 'theme_editor'
+
+export type ThemeEditorState = { themeId: string }
+
+const SECTION_ID = /^[A-Za-z0-9_-]{1,80}$/
 
 /** `builtin` previews the React storefront while an uploaded theme is live. */
 export type ThemePreviewState = { themeId: string | 'builtin'; staff: boolean }
@@ -98,38 +106,67 @@ export default class ThemeRenderer {
 
   async active(
     ctx: HttpContext
-  ): Promise<{ theme: Theme; preview: ThemePreviewState | null } | null> {
+  ): Promise<{ theme: Theme; preview: ThemePreviewState | null; editor: boolean } | null> {
+    const editor = ctx.session.get(THEME_EDITOR_SESSION_KEY) as ThemeEditorState | undefined
+    if (editor?.themeId) {
+      const user = ctx.auth.use('web').user
+      if (user && (await ctx.bouncer.allows(hasPermission, 'themes.edit'))) {
+        const theme = await this.themeRepository.find(editor.themeId)
+        if (theme) return { theme, preview: null, editor: true }
+      }
+      ctx.session.forget(THEME_EDITOR_SESSION_KEY)
+    }
+
     const preview = ctx.session.get(THEME_PREVIEW_SESSION_KEY) as ThemePreviewState | undefined
     if (preview) {
       if (preview.themeId === 'builtin') return null
       const theme = await this.themeRepository.find(preview.themeId)
-      if (theme) return { theme, preview }
+      if (theme) return { theme, preview, editor: false }
       ctx.session.forget(THEME_PREVIEW_SESSION_KEY)
     }
     const live = await this.themeRepository.live()
-    return live ? { theme: live, preview: null } : null
+    return live ? { theme: live, preview: null, editor: false } : null
   }
 
   async render(ctx: HttpContext, input: ThemePageInput): Promise<string | null> {
     const active = await this.active(ctx)
     if (!active) return null
-    const { theme, preview } = active
+    const { theme, preview, editor } = active
 
     const view = ctx.request.qs().view
     const suffix = typeof view === 'string' && /^[a-z0-9_-]{1,40}$/.test(view) ? view : null
-    const template =
+    const templateRow =
       (suffix && (await this.themeRepository.template(theme, `${input.template}.${suffix}`))) ||
       (await this.themeRepository.template(theme, input.template))
-    if (!template) return null
+    if (!templateRow) return null
+
+    const templateData = editor ? (templateRow.draftData ?? templateRow.data) : templateRow.data
+
+    const sectionId = ctx.request.input('section_id')
+    const sectionOnly =
+      editor && typeof sectionId === 'string' && SECTION_ID.test(sectionId) ? sectionId : null
 
     // Inertia links from checkout or account pages expect JSON; send them to a full page load.
-    if (ctx.request.header('x-inertia')) {
+    if (ctx.request.header('x-inertia') && !sectionOnly) {
       ctx.inertia.location(ctx.request.url(true))
       return ''
     }
 
     try {
-      return await this.renderTemplate(ctx, theme, template.name, template.data, input, preview)
+      const html = await this.renderTemplate(
+        ctx,
+        theme,
+        templateRow.name,
+        templateData,
+        input,
+        preview,
+        editor,
+        sectionOnly
+      )
+      if (sectionOnly) {
+        ctx.response.header('content-type', 'text/html; charset=utf-8')
+      }
+      return html
     } catch (error) {
       if (error instanceof lucidErrors.E_ROW_NOT_FOUND) throw error
       ctx.logger.error({ err: error, theme: theme.id }, 'Theme failed to render')
@@ -144,7 +181,9 @@ export default class ThemeRenderer {
     templateName: string,
     templateData: ThemeTemplateData,
     input: ThemePageInput,
-    preview: ThemePreviewState | null
+    preview: ThemePreviewState | null,
+    editor = false,
+    sectionOnly: string | null = null
   ): Promise<string> {
     const raw = await input.data()
     const data = (raw ? await ctx.serialize.withoutWrapping(raw) : {}) as Json
@@ -155,7 +194,9 @@ export default class ThemeRenderer {
       localeFor(theme.packageHash, dir),
       ctx.containerResolver.make(ThemeSettingsResolver),
     ])
-    const settingsData: ThemeSettingsData = settingsRow?.data ?? { current: {}, sections: {} }
+    const settingsData: ThemeSettingsData = editor
+      ? (settingsRow?.draftData ?? settingsRow?.data ?? { current: {}, sections: {} })
+      : (settingsRow?.data ?? { current: {}, sections: {} })
 
     const assetUrl = (path: string) =>
       `/themes/assets/${theme.packageHash}/assets/${String(path).replace(/^\/+/, '')}`
@@ -220,7 +261,7 @@ export default class ThemeRenderer {
       },
       request: { path: ctx.request.url(), url: ctx.request.url(true) },
       currentYear: new Date().getFullYear(),
-      designMode: false,
+      designMode: editor,
     }
 
     const renderSection = async (id: string, section: ThemeSectionData) => {
@@ -265,6 +306,12 @@ export default class ThemeRenderer {
       return `<div id="akinai-section-${escapeHtml(id)}" class="akinai-section akinai-section--${escapeHtml(section.type)}" data-akinai-section-id="${escapeHtml(id)}">${html}</div>`
     }
 
+    if (sectionOnly) {
+      const section = templateData.sections[sectionOnly]
+      if (!section) return ''
+      return renderSection(sectionOnly, section)
+    }
+
     const sectionsHtml = await Promise.all(
       templateData.order
         .filter((id) => templateData.sections[id])
@@ -281,7 +328,8 @@ export default class ThemeRenderer {
 
     const akinaiHead = await ctx.view.render('themes/head', {
       seo: input.seo,
-      robots: preview ? 'noindex, nofollow' : null,
+      robots: preview || editor ? 'noindex, nofollow' : null,
+      designMode: editor,
     })
 
     const page = await edge.render('layout/theme', {
@@ -304,7 +352,7 @@ export default class ThemeRenderer {
     const tail = `<script type="application/json" id="akinai-islands-data">${scriptJson(islandsData)}</script>`
     const bodyEnd = page.lastIndexOf('</body>')
     let html = bodyEnd === -1 ? page + tail : page.slice(0, bodyEnd) + tail + page.slice(bodyEnd)
-    if (preview) {
+    if (preview && !editor) {
       const bar = await ctx.view.render('themes/preview_bar', {
         themeName: theme.name,
         isStaff: preview.staff,

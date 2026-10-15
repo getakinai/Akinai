@@ -9,7 +9,7 @@ import Theme from '#models/theme'
 import ThemeSetting from '#models/theme_setting'
 import MarketService from '#services/market_service'
 import ThemeService from '#services/theme_service'
-import { THEME_PREVIEW_SESSION_KEY } from '#theme_host/renderer'
+import { THEME_EDITOR_SESSION_KEY, THEME_PREVIEW_SESSION_KEY } from '#theme_host/renderer'
 import { privateDriveDisk } from '#utils/drive_disk'
 import { createAdminUser } from '#tests/helpers/admin'
 
@@ -274,6 +274,24 @@ test.group('Storefront themes: rendering', (group) => {
 
 test.group('Storefront themes: preview', (group) => {
   setup(group)
+
+  test('storefront pages allow same-origin framing during theme customization', async ({
+    client,
+    assert,
+  }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+
+    const response = await client
+      .get('/')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({ [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } })
+
+    response.assertStatus(200)
+    assert.include(String(response.header('x-frame-options')), 'SAMEORIGIN')
+    assert.include(String(response.header('content-security-policy')), "frame-ancestors 'self'")
+  })
 
   test('staff preview an unpublished theme without affecting customers', async ({
     client,

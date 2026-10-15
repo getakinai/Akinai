@@ -1950,6 +1950,48 @@ const routes = {
     tokens: [{"old":"/admin/themes/:id/publish","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/publish","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/publish","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/publish","type":0,"val":"publish","end":""}],
     types: placeholder as Registry['admin.themes.unpublish']['types'],
   },
+  'admin.themes.editor.home': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/themes/:id/editor',
+    tokens: [{"old":"/admin/themes/:id/editor","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor","type":0,"val":"editor","end":""}],
+    types: placeholder as Registry['admin.themes.editor.home']['types'],
+  },
+  'admin.themes.editor.data': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/themes/:id/editor/data',
+    tokens: [{"old":"/admin/themes/:id/editor/data","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/data","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/data","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/data","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/data","type":0,"val":"data","end":""}],
+    types: placeholder as Registry['admin.themes.editor.data']['types'],
+  },
+  'admin.themes.editor.exit': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/themes/:id/editor/exit',
+    tokens: [{"old":"/admin/themes/:id/editor/exit","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/exit","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/exit","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/exit","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/exit","type":0,"val":"exit","end":""}],
+    types: placeholder as Registry['admin.themes.editor.exit']['types'],
+  },
+  'admin.themes.editor.settings': {
+    methods: ["PUT"],
+    pattern: '/admin/themes/:id/editor/settings',
+    tokens: [{"old":"/admin/themes/:id/editor/settings","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/settings","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/settings","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/settings","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/settings","type":0,"val":"settings","end":""}],
+    types: placeholder as Registry['admin.themes.editor.settings']['types'],
+  },
+  'admin.themes.editor.template': {
+    methods: ["PUT"],
+    pattern: '/admin/themes/:id/editor/templates/:name',
+    tokens: [{"old":"/admin/themes/:id/editor/templates/:name","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/templates/:name","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/templates/:name","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/templates/:name","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/templates/:name","type":0,"val":"templates","end":""},{"old":"/admin/themes/:id/editor/templates/:name","type":1,"val":"name","end":""}],
+    types: placeholder as Registry['admin.themes.editor.template']['types'],
+  },
+  'admin.themes.editor.save': {
+    methods: ["POST"],
+    pattern: '/admin/themes/:id/editor/save',
+    tokens: [{"old":"/admin/themes/:id/editor/save","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/save","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/save","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/save","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/save","type":0,"val":"save","end":""}],
+    types: placeholder as Registry['admin.themes.editor.save']['types'],
+  },
+  'admin.themes.editor.discard': {
+    methods: ["POST"],
+    pattern: '/admin/themes/:id/editor/discard',
+    tokens: [{"old":"/admin/themes/:id/editor/discard","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/discard","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/discard","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/discard","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/discard","type":0,"val":"discard","end":""}],
+    types: placeholder as Registry['admin.themes.editor.discard']['types'],
+  },
   'admin.themes.delete': {
     methods: ["DELETE"],
     pattern: '/admin/themes/:id',

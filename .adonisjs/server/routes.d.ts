@@ -328,6 +328,13 @@ export type ScannedRoutes = {
     'admin.themes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.unpublish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.home': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.data': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.exit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.settings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.template': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'name': ParamValue} }
+    'admin.themes.editor.save': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.discard': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
@@ -671,6 +678,9 @@ export type ScannedRoutes = {
     'admin.themes.list': { paramsTuple?: []; params?: {} }
     'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.home': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.data': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.exit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
     'admin.markets.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -937,6 +947,9 @@ export type ScannedRoutes = {
     'admin.themes.list': { paramsTuple?: []; params?: {} }
     'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.home': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.data': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.exit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
     'admin.markets.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1129,6 +1142,8 @@ export type ScannedRoutes = {
     'admin.themes.store': { paramsTuple?: []; params?: {} }
     'admin.themes.duplicate': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.save': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.discard': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.store': { paramsTuple?: []; params?: {} }
     'admin.markets.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1247,6 +1262,8 @@ export type ScannedRoutes = {
     'admin.storefront_promo_banners.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_features.update': { paramsTuple?: []; params?: {} }
     'admin.themes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.settings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.template': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'name': ParamValue} }
     'admin.markets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.bulk.archive.update': { paramsTuple?: []; params?: {} }
     'admin.taxes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

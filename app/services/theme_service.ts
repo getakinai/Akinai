@@ -5,7 +5,17 @@ import { inject } from '@adonisjs/core'
 import app from '@adonisjs/core/services/app'
 import BusinessRuleException from '#exceptions/business_rule_exception'
 import ThemePackageException from '#exceptions/theme_package_exception'
-import { MAX_THEME_PACKAGE_MB, type ThemeSource } from '#constants/themes'
+import Collection from '#models/collection'
+import Page from '#models/page'
+import Product from '#models/product'
+import {
+  MAX_THEME_PACKAGE_MB,
+  type ThemeSettingsData,
+  type ThemeSource,
+  type ThemeTemplateData,
+  type ThemeTemplateType,
+} from '#constants/themes'
+import { assertValidSettingsData, assertValidTemplateData } from '#theme_host/draft'
 import type Theme from '#models/theme'
 import ThemeRepository from '#repositories/theme_repository'
 import { packThemeFolder, readThemePackage, repackTheme } from '#theme_host/package'
@@ -134,6 +144,66 @@ export default class ThemeService {
         }
       }
     }
+  }
+
+  async editorPayload(id: string) {
+    const theme = await this.themeRepository.findOrFail(id)
+    const [settings, templates] = await Promise.all([
+      this.themeRepository.settings(theme),
+      this.themeRepository.templates(theme),
+    ])
+    const [product, collection, page] = await Promise.all([
+      Product.query().where('status', 'active').orderBy('created_at', 'asc').first(),
+      Collection.query().where('status', 'active').orderBy('created_at', 'asc').first(),
+      Page.query().where('status', 'active').orderBy('created_at', 'asc').first(),
+    ])
+    const previewPaths: Record<ThemeTemplateType, string> = {
+      index: '/',
+      product: product ? `/products/${product.slug}` : '/',
+      collection: collection ? `/collections/${collection.slug}` : '/',
+      page: page ? `/pages/${page.slug}` : '/',
+    }
+    return {
+      theme,
+      settingsSchema: theme.settingsSchema,
+      sectionSchemas: theme.sectionSchemas,
+      settings: {
+        published: settings?.data ?? { current: {}, sections: {} },
+        draft: settings?.draftData ?? null,
+      },
+      templates: templates.map((template) => ({
+        name: template.name,
+        published: template.data,
+        draft: template.draftData,
+      })),
+      previewPaths,
+    }
+  }
+
+  async updateDraftSettings(id: string, data: ThemeSettingsData) {
+    const theme = await this.themeRepository.findOrFail(id)
+    const parsed = assertValidSettingsData(data, theme.settingsSchema, theme.sectionSchemas)
+    return this.themeRepository.updateSettingsDraft(theme, parsed)
+  }
+
+  async updateDraftTemplate(id: string, name: string, data: ThemeTemplateData) {
+    const theme = await this.themeRepository.findOrFail(id)
+    const row = await this.themeRepository.template(theme, name)
+    if (!row) throw new BusinessRuleException(`This theme has no "${name}" template`)
+    const parsed = assertValidTemplateData(name, data, theme.sectionSchemas)
+    return this.themeRepository.updateTemplateDraft(theme, name, parsed)
+  }
+
+  async saveDraft(id: string) {
+    const theme = await this.themeRepository.findOrFail(id)
+    await this.themeRepository.commitDrafts(theme)
+    return theme
+  }
+
+  async discardDraft(id: string) {
+    const theme = await this.themeRepository.findOrFail(id)
+    await this.themeRepository.discardDrafts(theme)
+    return theme
   }
 
   protected async install(zip: Uint8Array, source: ThemeSource, uploadedById: string | null) {

@@ -622,6 +622,15 @@ export interface ApiDefinition {
       update: typeof routes['admin.themes.update']
       publish: typeof routes['admin.themes.publish']
       unpublish: typeof routes['admin.themes.unpublish']
+      editor: {
+        home: typeof routes['admin.themes.editor.home']
+        data: typeof routes['admin.themes.editor.data']
+        exit: typeof routes['admin.themes.editor.exit']
+        settings: typeof routes['admin.themes.editor.settings']
+        template: typeof routes['admin.themes.editor.template']
+        save: typeof routes['admin.themes.editor.save']
+        discard: typeof routes['admin.themes.editor.discard']
+      }
       delete: typeof routes['admin.themes.delete']
     }
     markets: {
