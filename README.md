@@ -88,7 +88,8 @@ inertia/
   layouts/        Admin and storefront layouts
   lib/            http(), form helpers, styles
   pages/          admin/, customers/, errors/, home.tsx
-  plugins/        Storefront plugins and the slots they render in (see docs/creating-a-plugin.md)
+  plugins/        PluginSlot, client registry (see docs/creating-a-plugin.md)
+plugins/          Self-contained plugins (hero_slideshow/, …); discovered at boot
 scripts/          setup.sh (used by yarn setup)
 start/            Routes, kernel (middleware), env validation
 tests/            unit/ and functional/ Japa suites

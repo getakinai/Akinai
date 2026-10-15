@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { column } from '@adonisjs/lucid/orm'
 import BaseAppModel from '#models/base/base_app_model'
-import { pluginManifest } from '#constants/plugins'
+import { pluginManifest } from '#plugin_host/registry'
 
 /**
  * Whether staff installed a bundled plugin (see `#constants/plugins`). A

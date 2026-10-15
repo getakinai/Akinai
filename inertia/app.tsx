@@ -11,12 +11,27 @@ import { APP_NAME } from './lib/brand'
 import { seedStorefrontQueries } from './pages/_hooks'
 
 const queryClient = createQueryClient()
+
+const pluginPages = import.meta.glob<{ default: ResolvedComponent }>(
+  '../plugins/*/client/pages/**/*.tsx'
+)
 const cspNonce =
   document.querySelector<HTMLMetaElement>('meta[property=csp-nonce]')?.nonce || undefined
 
 createInertiaApp({
   title: (title) => (title ? `${title} - ${APP_NAME}` : APP_NAME),
   resolve: async (name) => {
+    if (name.startsWith('plugins/')) {
+      const rest = name.slice('plugins/'.length)
+      const slash = rest.indexOf('/')
+      const key = slash === -1 ? rest : rest.slice(0, slash)
+      const pagePath = slash === -1 ? 'home' : rest.slice(slash + 1)
+      const page = await resolvePageComponent(
+        `../plugins/${key}/client/pages/${pagePath}.tsx`,
+        pluginPages
+      )
+      return page.default
+    }
     const page = await resolvePageComponent(
       `./pages/${name}.tsx`,
       import.meta.glob<{ default: ResolvedComponent }>('./pages/**/*.tsx')

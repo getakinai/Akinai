@@ -5,17 +5,16 @@ import PluginService from '#services/plugin_service'
 import StoreSettingService from '#services/store_setting_service'
 import StorefrontCatalogTokenService from '#services/storefront_catalog_token_service'
 import StorefrontCollectionService from '#services/storefront_collection_service'
-import StorefrontHeroSlideService from '#services/storefront_hero_slide_service'
 import StorefrontHomeContentService from '#services/storefront_home_content_service'
 import StorefrontHomeService from '#services/storefront_home_service'
 import StorefrontMarketService from '#services/storefront_market_service'
 import StorefrontMenuService from '#services/storefront_menu_service'
 import StorefrontProductService from '#services/storefront_product_service'
 import StorefrontThemeService from '#services/storefront_theme_service'
+import { findPlugin } from '#plugin_host/registry'
 import PluginTransformer from '#transformers/plugin_transformer'
 import StoreSettingTransformer from '#transformers/store_setting_transformer'
 import StorefrontCollectionTransformer from '#transformers/storefront_collection_transformer'
-import StorefrontHeroSlideTransformer from '#transformers/storefront_hero_slide_transformer'
 import StorefrontHomeContentTransformer from '#transformers/storefront_home_content_transformer'
 import StorefrontHomeTransformer from '#transformers/storefront_home_transformer'
 import StorefrontMarketTransformer from '#transformers/storefront_market_transformer'
@@ -25,19 +24,19 @@ import StorefrontProductCardTransformer from '#transformers/storefront_product_c
 import StorefrontProductTransformer from '#transformers/storefront_product_transformer'
 import StorefrontThemeTransformer from '#transformers/storefront_theme_transformer'
 import { orNullIfMissing } from '#utils/or_null_if_missing'
+import type { PluginSlot } from '#constants/plugins'
+
+type Json = string | number | boolean | null | Json[] | { [key: string]: Json }
+
+type PrefetchedPlugin = {
+  key: string
+  slots: PluginSlot[]
+  data?: Json
+}
 
 /** The order and filters the collection page opens with. */
 const DEFAULT_COLLECTION_LIST = { sort: 'featured', direction: 'asc' } as const
 
-/**
- * Data the server-rendered storefront pages (home, product, collection,
- * content page) need for their first paint, so crawlers get real headings
- * and links. Each entry is the same transformer output its JSON route
- * returns; the client seeds its query cache with it before rendering.
- *
- * Built only for full page loads. Inertia visits get `null` and the page
- * fetches through the JSON routes as usual.
- */
 @inject()
 export default class StorefrontPrefetchService {
   constructor(
@@ -47,7 +46,6 @@ export default class StorefrontPrefetchService {
     protected pageService: PageService,
     protected storefrontMarketService: StorefrontMarketService,
     protected storefrontHomeService: StorefrontHomeService,
-    protected storefrontHeroSlideService: StorefrontHeroSlideService,
     protected storefrontHomeContentService: StorefrontHomeContentService,
     protected storefrontProductService: StorefrontProductService,
     protected storefrontCollectionService: StorefrontCollectionService,
@@ -58,19 +56,15 @@ export default class StorefrontPrefetchService {
   async home(ctx: HttpContext) {
     if (this.isInertiaVisit(ctx)) return null
     const { market, layout, installedKeys } = await this.layout(ctx)
-    const [home, heroSlides, homeContent] = await Promise.all([
+    const [home, homeContent, plugins] = await Promise.all([
       this.storefrontHomeService.get(market),
-      installedKeys.includes('hero_slideshow')
-        ? this.storefrontHeroSlideService.listPublic()
-        : null,
       this.storefrontHomeContentService.get(),
+      this.prefetchHomePluginData(ctx, installedKeys),
     ])
     return {
       ...layout,
+      plugins,
       home: StorefrontHomeTransformer.transform(home),
-      heroSlides: heroSlides
-        ? StorefrontHeroSlideTransformer.transform(heroSlides).useVariant('toPublic')
-        : null,
       homeContent: StorefrontHomeContentTransformer.transform(homeContent).depth(2),
     }
   }
@@ -135,6 +129,29 @@ export default class StorefrontPrefetchService {
 
   protected isInertiaVisit(ctx: HttpContext) {
     return Boolean(ctx.request.header('x-inertia'))
+  }
+
+  protected async prefetchHomePluginData(
+    ctx: HttpContext,
+    installedKeys: string[]
+  ): Promise<PrefetchedPlugin[]> {
+    const catalog = await this.pluginService.catalog()
+    const installed = catalog.filter((plugin) => plugin.isInstalled)
+    return Promise.all(
+      installed.map(async (entry) => {
+        const plugin = findPlugin(entry.key)
+        const raw =
+          installedKeys.includes(entry.key) && plugin?.prefetch?.home
+            ? await plugin.prefetch.home(ctx)
+            : undefined
+        const data = raw !== undefined ? await ctx.serialize.withoutWrapping(raw) : undefined
+        return {
+          key: entry.key,
+          slots: entry.slots,
+          ...(data !== undefined ? { data: data as Json } : {}),
+        }
+      })
+    )
   }
 
   /** What the storefront header and footer show on every page. */

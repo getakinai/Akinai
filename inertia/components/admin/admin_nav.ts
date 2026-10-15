@@ -24,11 +24,10 @@ import {
 } from 'lucide-react'
 import { type LucideIcon } from 'lucide-react'
 import { type NavItem } from '~/components/nav_link'
+import { pluginRegistry } from '~/plugins/registry'
 
 export type AdminNavItem = NavItem & {
   permission?: string
-  /** Hidden while this plugin is uninstalled. */
-  plugin?: string
   /** Live count shown next to the label. */
   badge?: 'support_open'
 }
@@ -175,12 +174,6 @@ export const adminNav: AdminNavSectionGroup[] = [
         icon: Store,
         permission: 'storefront.view',
         children: [
-          {
-            label: 'Hero',
-            route: 'admin.storefront_hero.home',
-            permission: 'storefront.view',
-            plugin: 'hero_slideshow',
-          },
           { label: 'Menu', route: 'admin.storefront_menu.home', permission: 'storefront.view' },
           { label: 'Pages', route: 'admin.pages.home', permission: 'pages.view' },
           { label: 'Theme', route: 'admin.storefront_theme.home', permission: 'storefront.view' },
@@ -195,6 +188,35 @@ export const adminNav: AdminNavSectionGroup[] = [
     ],
   },
 ]
+
+function mergePluginNav(
+  groups: AdminNavSectionGroup[],
+  permissions: string[],
+  installedPlugins: string[] | null
+): AdminNavSectionGroup[] {
+  if (!installedPlugins) return groups
+
+  return groups.map((group) => ({
+    ...group,
+    sections: group.sections.map((section) => {
+      const pluginChildren: AdminNavItem[] = []
+      for (const key of installedPlugins) {
+        const entry = pluginRegistry[key]
+        if (!entry?.adminNav || entry.adminNav.parentRoute !== section.route) continue
+        for (const item of entry.adminNav.items) {
+          if (!item.permission || permissions.includes(item.permission)) {
+            pluginChildren.push(item)
+          }
+        }
+      }
+      if (pluginChildren.length === 0) return section
+      return {
+        ...section,
+        children: [...(section.children ?? []), ...pluginChildren],
+      }
+    }),
+  }))
+}
 
 /**
  * Settings pages, listed in the secondary sidebar that opens when the
@@ -247,11 +269,6 @@ function permitted(item: AdminNavItem, permissions: string[]) {
   return !item.permission || permissions.includes(item.permission)
 }
 
-/** `installedPlugins` is null while it loads; plugin links stay visible meanwhile. */
-function pluginInstalled(item: AdminNavItem, installedPlugins: string[] | null) {
-  return !item.plugin || !installedPlugins || installedPlugins.includes(item.plugin)
-}
-
 /**
  * The primary nav trimmed to what the given permissions and installed
  * plugins allow. A section the user can't open itself still shows when they
@@ -261,14 +278,11 @@ export function visibleAdminNav(
   permissions: string[],
   installedPlugins: string[] | null = null
 ): AdminNavSectionGroup[] {
-  return adminNav
+  return mergePluginNav(adminNav, permissions, installedPlugins)
     .map((group) => ({
       ...group,
       sections: group.sections.flatMap((section) => {
-        if (!pluginInstalled(section, installedPlugins)) return []
-        const children = (section.children ?? []).filter(
-          (child) => permitted(child, permissions) && pluginInstalled(child, installedPlugins)
-        )
+        const children = (section.children ?? []).filter((child) => permitted(child, permissions))
         if (permitted(section, permissions)) return [{ ...section, children }]
         const [first, ...rest] = children
         return first ? [{ ...section, route: first.route, children: rest }] : []

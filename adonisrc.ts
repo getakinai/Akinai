@@ -65,6 +65,7 @@ export default defineConfig({
     () => import('@adonisjs/inertia/inertia_provider'),
     () => import('@adonisjs/auth/auth_provider'),
     () => import('#providers/api_provider'),
+    () => import('#providers/plugin_provider'),
     () => import('@adonisjs/bouncer/bouncer_provider'),
     () => import('@foadonis/maintenance/maintenance_provider'),
     () => import('@foadonis/shopkeeper/shopkeeper_provider'),
@@ -110,12 +111,15 @@ export default defineConfig({
   tests: {
     suites: [
       {
-        files: ['tests/unit/**/*.spec.{ts,js}'],
+        files: ['tests/unit/**/*.spec.{ts,js}', 'plugins/*/tests/unit/**/*.spec.{ts,js}'],
         name: 'unit',
         timeout: 2000,
       },
       {
-        files: ['tests/functional/**/*.spec.{ts,js}'],
+        files: [
+          'tests/functional/**/*.spec.{ts,js}',
+          'plugins/*/tests/functional/**/*.spec.{ts,js}',
+        ],
         name: 'functional',
         timeout: 30000,
       },

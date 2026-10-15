@@ -83,7 +83,6 @@ import type StorefrontCollectionFiltersTransformer from '#transformers/storefron
 import type StorefrontCollectionOptionTransformer from '#transformers/storefront_collection_option_transformer'
 import type StorefrontCollectionTransformer from '#transformers/storefront_collection_transformer'
 import type StorefrontFeatureTransformer from '#transformers/storefront_feature_transformer'
-import type StorefrontHeroSlideTransformer from '#transformers/storefront_hero_slide_transformer'
 import type StorefrontHomeCollectionTransformer from '#transformers/storefront_home_collection_transformer'
 import type StorefrontHomeContentTransformer from '#transformers/storefront_home_content_transformer'
 import type StorefrontHomeTransformer from '#transformers/storefront_home_transformer'
@@ -417,10 +416,6 @@ export namespace Data {
   export type StorefrontFeature = InferData<StorefrontFeatureTransformer>
   export namespace StorefrontFeature {
     export type Variants = InferVariants<StorefrontFeatureTransformer>
-  }
-  export type StorefrontHeroSlide = InferData<StorefrontHeroSlideTransformer>
-  export namespace StorefrontHeroSlide {
-    export type Variants = InferVariants<StorefrontHeroSlideTransformer>
   }
   export type StorefrontHomeCollection = InferData<StorefrontHomeCollectionTransformer>
   export namespace StorefrontHomeCollection {

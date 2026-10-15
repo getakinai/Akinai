@@ -14,6 +14,7 @@ import { recaptchaHeaders, type RecaptchaAction } from '~/lib/recaptcha'
 import type { SortDirection, StorefrontCollectionSort } from '~/lib/storefront'
 import { checkoutKeys } from '~/pages/checkout/_hooks'
 import { EMPTY_FILTERS } from '~/pages/collections/_filters'
+import { pluginRegistry } from '~/plugins/registry'
 import {
   NewsletterResponseSchema,
   type NewsletterForm,
@@ -96,8 +97,13 @@ export function seedStorefrontQueries(queryClient: QueryClient, props: Record<st
   queryClient.setQueryData(storefrontKeys.policies, data.policies)
   queryClient.setQueryData(storefrontKeys.market, data.market)
   queryClient.setQueryData(storefrontKeys.plugins, data.plugins)
+  for (const plugin of data.plugins) {
+    const entry = pluginRegistry[plugin.key]
+    if (entry?.seedQueries && plugin.data !== undefined) {
+      entry.seedQueries(queryClient, plugin.data)
+    }
+  }
   if (data.home) queryClient.setQueryData(storefrontKeys.home, data.home)
-  if (data.heroSlides) queryClient.setQueryData(storefrontKeys.heroSlides, data.heroSlides)
   if (data.homeContent) queryClient.setQueryData(storefrontKeys.homeContent, data.homeContent)
   if (!slug) return
 

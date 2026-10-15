@@ -1734,18 +1734,6 @@ const routes = {
     tokens: [{"old":"/admin/storefront/menu/pages","type":0,"val":"admin","end":""},{"old":"/admin/storefront/menu/pages","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/menu/pages","type":0,"val":"menu","end":""},{"old":"/admin/storefront/menu/pages","type":0,"val":"pages","end":""}],
     types: placeholder as Registry['admin.storefront_menu.pages']['types'],
   },
-  'admin.storefront_hero.home': {
-    methods: ["GET","HEAD"],
-    pattern: '/admin/storefront/hero',
-    tokens: [{"old":"/admin/storefront/hero","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero","type":0,"val":"hero","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.home']['types'],
-  },
-  'admin.storefront_hero.list': {
-    methods: ["GET","HEAD"],
-    pattern: '/admin/storefront/hero-slides/list',
-    tokens: [{"old":"/admin/storefront/hero-slides/list","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/list","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/list","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/list","type":0,"val":"list","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.list']['types'],
-  },
   'admin.storefront_content.home': {
     methods: ["GET","HEAD"],
     pattern: '/admin/storefront/content',
@@ -1776,12 +1764,6 @@ const routes = {
     tokens: [{"old":"/admin/storefront/menu","type":0,"val":"admin","end":""},{"old":"/admin/storefront/menu","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/menu","type":0,"val":"menu","end":""}],
     types: placeholder as Registry['admin.storefront_menu.store']['types'],
   },
-  'admin.storefront_hero.store': {
-    methods: ["POST"],
-    pattern: '/admin/storefront/hero-slides',
-    tokens: [{"old":"/admin/storefront/hero-slides","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides","type":0,"val":"hero-slides","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.store']['types'],
-  },
   'admin.storefront_promo_banners.store': {
     methods: ["POST"],
     pattern: '/admin/storefront/promo-banners',
@@ -1811,18 +1793,6 @@ const routes = {
     pattern: '/admin/storefront/menu/:id',
     tokens: [{"old":"/admin/storefront/menu/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/menu/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/menu/:id","type":0,"val":"menu","end":""},{"old":"/admin/storefront/menu/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['admin.storefront_menu.update']['types'],
-  },
-  'admin.storefront_hero.reorder': {
-    methods: ["PUT"],
-    pattern: '/admin/storefront/hero-slides/reorder',
-    tokens: [{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"reorder","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.reorder']['types'],
-  },
-  'admin.storefront_hero.update': {
-    methods: ["PUT"],
-    pattern: '/admin/storefront/hero-slides/:id',
-    tokens: [{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id","type":1,"val":"id","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.update']['types'],
   },
   'admin.storefront_content.update': {
     methods: ["PUT"],
@@ -1872,18 +1842,6 @@ const routes = {
     tokens: [{"old":"/admin/storefront/theme/favicon","type":0,"val":"admin","end":""},{"old":"/admin/storefront/theme/favicon","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/theme/favicon","type":0,"val":"theme","end":""},{"old":"/admin/storefront/theme/favicon","type":0,"val":"favicon","end":""}],
     types: placeholder as Registry['admin.storefront_theme.favicon.delete']['types'],
   },
-  'admin.storefront_hero.image.store': {
-    methods: ["POST"],
-    pattern: '/admin/storefront/hero-slides/:id/image',
-    tokens: [{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":1,"val":"id","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"image","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.image.store']['types'],
-  },
-  'admin.storefront_hero.image.delete': {
-    methods: ["DELETE"],
-    pattern: '/admin/storefront/hero-slides/:id/image',
-    tokens: [{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":1,"val":"id","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"image","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.image.delete']['types'],
-  },
   'admin.storefront_promo_banners.image.store': {
     methods: ["POST"],
     pattern: '/admin/storefront/promo-banners/:id/image',
@@ -1901,12 +1859,6 @@ const routes = {
     pattern: '/admin/storefront/menu/:id',
     tokens: [{"old":"/admin/storefront/menu/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/menu/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/menu/:id","type":0,"val":"menu","end":""},{"old":"/admin/storefront/menu/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['admin.storefront_menu.delete']['types'],
-  },
-  'admin.storefront_hero.delete': {
-    methods: ["DELETE"],
-    pattern: '/admin/storefront/hero-slides/:id',
-    tokens: [{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id","type":1,"val":"id","end":""}],
-    types: placeholder as Registry['admin.storefront_hero.delete']['types'],
   },
   'admin.storefront_promo_banners.delete': {
     methods: ["DELETE"],
@@ -2286,6 +2238,54 @@ const routes = {
     tokens: [{"old":"/admin/roles/:id/permissions","type":0,"val":"admin","end":""},{"old":"/admin/roles/:id/permissions","type":0,"val":"roles","end":""},{"old":"/admin/roles/:id/permissions","type":1,"val":"id","end":""},{"old":"/admin/roles/:id/permissions","type":0,"val":"permissions","end":""}],
     types: placeholder as Registry['admin.roles.permissions.update']['types'],
   },
+  'admin.storefront_hero.home': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/storefront/hero',
+    tokens: [{"old":"/admin/storefront/hero","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero","type":0,"val":"hero","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.home']['types'],
+  },
+  'admin.storefront_hero.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/storefront/hero-slides/list',
+    tokens: [{"old":"/admin/storefront/hero-slides/list","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/list","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/list","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/list","type":0,"val":"list","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.list']['types'],
+  },
+  'admin.storefront_hero.store': {
+    methods: ["POST"],
+    pattern: '/admin/storefront/hero-slides',
+    tokens: [{"old":"/admin/storefront/hero-slides","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides","type":0,"val":"hero-slides","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.store']['types'],
+  },
+  'admin.storefront_hero.reorder': {
+    methods: ["PUT"],
+    pattern: '/admin/storefront/hero-slides/reorder',
+    tokens: [{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/reorder","type":0,"val":"reorder","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.reorder']['types'],
+  },
+  'admin.storefront_hero.update': {
+    methods: ["PUT"],
+    pattern: '/admin/storefront/hero-slides/:id',
+    tokens: [{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.update']['types'],
+  },
+  'admin.storefront_hero.image.store': {
+    methods: ["POST"],
+    pattern: '/admin/storefront/hero-slides/:id/image',
+    tokens: [{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":1,"val":"id","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"image","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.image.store']['types'],
+  },
+  'admin.storefront_hero.image.delete': {
+    methods: ["DELETE"],
+    pattern: '/admin/storefront/hero-slides/:id/image',
+    tokens: [{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":1,"val":"id","end":""},{"old":"/admin/storefront/hero-slides/:id/image","type":0,"val":"image","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.image.delete']['types'],
+  },
+  'admin.storefront_hero.delete': {
+    methods: ["DELETE"],
+    pattern: '/admin/storefront/hero-slides/:id',
+    tokens: [{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/hero-slides/:id","type":0,"val":"hero-slides","end":""},{"old":"/admin/storefront/hero-slides/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['admin.storefront_hero.delete']['types'],
+  },
   'storefront.sitemap.view': {
     methods: ["GET","HEAD"],
     pattern: '/sitemap.xml',
@@ -2316,17 +2316,17 @@ const routes = {
     tokens: [{"old":"/store/menu","type":0,"val":"store","end":""},{"old":"/store/menu","type":0,"val":"menu","end":""}],
     types: placeholder as Registry['storefront.menu.list']['types'],
   },
-  'storefront.hero_slides.list': {
-    methods: ["GET","HEAD"],
-    pattern: '/store/hero-slides',
-    tokens: [{"old":"/store/hero-slides","type":0,"val":"store","end":""},{"old":"/store/hero-slides","type":0,"val":"hero-slides","end":""}],
-    types: placeholder as Registry['storefront.hero_slides.list']['types'],
-  },
   'storefront.plugins.list': {
     methods: ["GET","HEAD"],
     pattern: '/store/plugins',
     tokens: [{"old":"/store/plugins","type":0,"val":"store","end":""},{"old":"/store/plugins","type":0,"val":"plugins","end":""}],
     types: placeholder as Registry['storefront.plugins.list']['types'],
+  },
+  'storefront.hero_slides.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/store/hero-slides',
+    tokens: [{"old":"/store/hero-slides","type":0,"val":"store","end":""},{"old":"/store/hero-slides","type":0,"val":"hero-slides","end":""}],
+    types: placeholder as Registry['storefront.hero_slides.list']['types'],
   },
   'storefront.home_content.view': {
     methods: ["GET","HEAD"],

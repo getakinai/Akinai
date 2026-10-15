@@ -1,10 +1,17 @@
-import HeroSlideshowPlugin from './hero_slideshow'
-import type { PluginEntry } from './types'
+import type { PluginClientEntry } from './types'
+
+const modules = import.meta.glob<{ default: PluginClientEntry }>(
+  '../../plugins/*/client/index.tsx',
+  { eager: true }
+)
 
 /**
- * Storefront components of the bundled plugins, keyed like `PLUGINS` in
- * `app/constants/plugins.ts`. Slots render entries in this order.
+ * Storefront components of bundled plugins, keyed by folder name. Must match
+ * each plugin manifest key in plugins/<key>/manifest.ts.
  */
-export const pluginRegistry: Record<string, PluginEntry> = {
-  hero_slideshow: { slot: 'home.hero', Component: HeroSlideshowPlugin },
-}
+export const pluginRegistry: Record<string, PluginClientEntry> = Object.fromEntries(
+  Object.entries(modules).map(([path, module]) => {
+    const key = path.split('/')[2]
+    return [key, module.default]
+  })
+)

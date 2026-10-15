@@ -12,5 +12,10 @@
     "rootDir": "./inertia",
     "composite": true
   },
-  "include": ["./inertia/**/*.ts", "./inertia/**/*.tsx"]
+  "include": [
+    "./inertia/**/*.ts",
+    "./inertia/**/*.tsx",
+    "./plugins/*/client/**/*.ts",
+    "./plugins/*/client/**/*.tsx"
+  ]
 }

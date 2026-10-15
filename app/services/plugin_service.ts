@@ -1,12 +1,17 @@
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
-import { PLUGINS, pluginManifest, type PluginKey, type PluginManifest } from '#constants/plugins'
+import type { PluginManifest } from '#constants/plugins'
+import BusinessRuleException from '#exceptions/business_rule_exception'
+import { pluginKeys, pluginManifest, registeredPlugins } from '#plugin_host/registry'
 import PluginInstallationRepository from '#repositories/plugin_installation_repository'
 
 export type PluginCatalogEntry = PluginManifest & {
   isInstalled: boolean
   installedAt: DateTime | null
 }
+
+export type PluginKey = string
+
 @inject()
 export default class PluginService {
   constructor(protected pluginInstallationRepository: PluginInstallationRepository) {}
@@ -15,12 +20,12 @@ export default class PluginService {
   async catalog(): Promise<PluginCatalogEntry[]> {
     const rows = await this.pluginInstallationRepository.all()
     const byKey = new Map(rows.map((row) => [row.key, row]))
-    return PLUGINS.map((plugin) => {
-      const row = byKey.get(plugin.key)
+    return registeredPlugins().map((plugin) => {
+      const row = byKey.get(plugin.manifest.key)
       return {
-        ...plugin,
-        slots: [...plugin.slots],
-        isInstalled: row ? row.isInstalled : plugin.defaultInstalled,
+        ...plugin.manifest,
+        slots: [...plugin.manifest.slots],
+        isInstalled: row ? row.isInstalled : plugin.manifest.defaultInstalled,
         installedAt: row?.installedAt ?? null,
       }
     })
@@ -38,12 +43,17 @@ export default class PluginService {
     return row ? row.isInstalled : manifest.defaultInstalled
   }
 
-  /** Data the plugin keeps (slides, settings) survives, so reinstalling restores it. */
-  async install(key: PluginKey) {
+  async install(key: string) {
+    if (!pluginKeys().includes(key)) {
+      throw new BusinessRuleException('Unknown plugin', 422)
+    }
     return this.pluginInstallationRepository.setInstalled(key, true)
   }
 
-  async uninstall(key: PluginKey) {
+  async uninstall(key: string) {
+    if (!pluginKeys().includes(key)) {
+      throw new BusinessRuleException('Unknown plugin', 422)
+    }
     return this.pluginInstallationRepository.setInstalled(key, false)
   }
 }

@@ -10,6 +10,7 @@
 */
 
 import { middleware } from '#start/kernel'
+import { registeredPlugins } from '#plugin_host/registry'
 import {
   accountPasswordThrottle,
   analyticsEventThrottle,
@@ -1213,14 +1214,6 @@ router
               .get('storefront/menu/pages', [controllers.admin.AdminStorefrontMenuPages])
               .as('admin.storefront_menu.pages')
             router
-              .get('storefront/hero', [controllers.admin.AdminStorefrontHeroHome])
-              .as('admin.storefront_hero.home')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
-            router
-              .get('storefront/hero-slides/list', [controllers.admin.AdminStorefrontHeroSlidesList])
-              .as('admin.storefront_hero.list')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
-            router
               .get('storefront/content', [controllers.admin.AdminStorefrontContentHome])
               .as('admin.storefront_content.home')
             router
@@ -1245,10 +1238,6 @@ router
               .post('storefront/menu', [controllers.admin.AdminStorefrontMenuStore])
               .as('admin.storefront_menu.store')
             router
-              .post('storefront/hero-slides', [controllers.admin.AdminStorefrontHeroSlidesStore])
-              .as('admin.storefront_hero.store')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
-            router
               .post('storefront/promo-banners', [
                 controllers.admin.AdminStorefrontPromoBannersStore,
               ])
@@ -1270,18 +1259,6 @@ router
             router
               .put('storefront/menu/:id', [controllers.admin.AdminStorefrontMenuUpdate])
               .as('admin.storefront_menu.update')
-            router
-              .put('storefront/hero-slides/reorder', [
-                controllers.admin.AdminStorefrontHeroSlidesReorder,
-              ])
-              .as('admin.storefront_hero.reorder')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
-            router
-              .put('storefront/hero-slides/:id', [
-                controllers.admin.AdminStorefrontHeroSlidesUpdate,
-              ])
-              .as('admin.storefront_hero.update')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .put('storefront/content', [controllers.admin.AdminStorefrontContentUpdate])
               .as('admin.storefront_content.update')
@@ -1316,18 +1293,6 @@ router
               .delete('storefront/theme/favicon', [controllers.admin.AdminStorefrontFaviconDelete])
               .as('admin.storefront_theme.favicon.delete')
             router
-              .post('storefront/hero-slides/:id/image', [
-                controllers.admin.AdminStorefrontHeroSlideImageStore,
-              ])
-              .as('admin.storefront_hero.image.store')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
-            router
-              .delete('storefront/hero-slides/:id/image', [
-                controllers.admin.AdminStorefrontHeroSlideImageDelete,
-              ])
-              .as('admin.storefront_hero.image.delete')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
-            router
               .post('storefront/promo-banners/:id/image', [
                 controllers.admin.AdminStorefrontPromoBannerImageStore,
               ])
@@ -1345,12 +1310,6 @@ router
             router
               .delete('storefront/menu/:id', [controllers.admin.AdminStorefrontMenuDelete])
               .as('admin.storefront_menu.delete')
-            router
-              .delete('storefront/hero-slides/:id', [
-                controllers.admin.AdminStorefrontHeroSlidesDelete,
-              ])
-              .as('admin.storefront_hero.delete')
-              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .delete('storefront/promo-banners/:id', [
                 controllers.admin.AdminStorefrontPromoBannersDelete,
@@ -1628,6 +1587,10 @@ router
           .put('roles/:id/permissions', [controllers.admin.AdminRolePermissionsUpdate])
           .as('admin.roles.permissions.update')
           .use(middleware.can({ permission: 'roles.edit' }))
+
+        for (const plugin of registeredPlugins()) {
+          plugin.routes?.admin?.(router, middleware)
+        }
       })
       .use([middleware.auth({ guards: ['web'] }), middleware.requireMfa(), middleware.auditActor()])
   })
@@ -1649,12 +1612,11 @@ router
 router.get('store/theme', [controllers.storefront.StorefrontThemeView]).as('storefront.theme.view')
 router.get('store/menu', [controllers.storefront.StorefrontMenuList]).as('storefront.menu.list')
 router
-  .get('store/hero-slides', [controllers.storefront.StorefrontHeroSlidesList])
-  .as('storefront.hero_slides.list')
-  .use(middleware.plugin({ key: 'hero_slideshow' }))
-router
   .get('store/plugins', [controllers.storefront.StorefrontPluginsList])
   .as('storefront.plugins.list')
+for (const plugin of registeredPlugins()) {
+  plugin.routes?.storefront?.(router, middleware)
+}
 router
   .get('store/home-content', [controllers.storefront.StorefrontHomeContentView])
   .as('storefront.home_content.view')

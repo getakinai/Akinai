@@ -3463,30 +3463,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_menu_pages_controller').default['handle']>>>
     }
   }
-  'admin.storefront_hero.home': {
-    methods: ["GET","HEAD"]
-    pattern: '/admin/storefront/hero'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_home_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_home_controller').default['handle']>>>
-    }
-  }
-  'admin.storefront_hero.list': {
-    methods: ["GET","HEAD"]
-    pattern: '/admin/storefront/hero-slides/list'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_list_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_list_controller').default['handle']>>>
-    }
-  }
   'admin.storefront_content.home': {
     methods: ["GET","HEAD"]
     pattern: '/admin/storefront/content'
@@ -3547,18 +3523,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_menu_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'admin.storefront_hero.store': {
-    methods: ["POST"]
-    pattern: '/admin/storefront/hero-slides'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/admin_storefront_hero_slide_store_validator').adminStorefrontHeroSlideStoreValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/admin_storefront_hero_slide_store_validator').adminStorefrontHeroSlideStoreValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_store_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
   'admin.storefront_promo_banners.store': {
     methods: ["POST"]
     pattern: '/admin/storefront/promo-banners'
@@ -3617,30 +3581,6 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/admin_storefront_menu_item_update_validator').adminStorefrontMenuItemUpdateValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_menu_update_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_menu_update_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'admin.storefront_hero.reorder': {
-    methods: ["PUT"]
-    pattern: '/admin/storefront/hero-slides/reorder'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/admin_storefront_hero_slide_reorder_validator').adminStorefrontHeroSlideReorderValidator)>>
-      paramsTuple: []
-      params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/admin_storefront_hero_slide_reorder_validator').adminStorefrontHeroSlideReorderValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_reorder_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_reorder_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'admin.storefront_hero.update': {
-    methods: ["PUT"]
-    pattern: '/admin/storefront/hero-slides/:id'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/admin_storefront_hero_slide_update_validator').adminStorefrontHeroSlideUpdateValidator)>>
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: ExtractQuery<InferInput<(typeof import('#validators/admin_storefront_hero_slide_update_validator').adminStorefrontHeroSlideUpdateValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_update_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_update_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'admin.storefront_content.update': {
@@ -3739,30 +3679,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_favicon_delete_controller').default['handle']>>>
     }
   }
-  'admin.storefront_hero.image.store': {
-    methods: ["POST"]
-    pattern: '/admin/storefront/hero-slides/:id/image'
-    types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/admin_storefront_hero_slide_image_store_validator').adminStorefrontHeroSlideImageStoreValidator)>>
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: ExtractQuery<InferInput<(typeof import('#validators/admin_storefront_hero_slide_image_store_validator').adminStorefrontHeroSlideImageStoreValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slide_image_store_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slide_image_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
-    }
-  }
-  'admin.storefront_hero.image.delete': {
-    methods: ["DELETE"]
-    pattern: '/admin/storefront/hero-slides/:id/image'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slide_image_delete_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slide_image_delete_controller').default['handle']>>>
-    }
-  }
   'admin.storefront_promo_banners.image.store': {
     methods: ["POST"]
     pattern: '/admin/storefront/promo-banners/:id/image'
@@ -3797,18 +3713,6 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_menu_delete_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_menu_delete_controller').default['handle']>>>
-    }
-  }
-  'admin.storefront_hero.delete': {
-    methods: ["DELETE"]
-    pattern: '/admin/storefront/hero-slides/:id'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_delete_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_hero_slides_delete_controller').default['handle']>>>
     }
   }
   'admin.storefront_promo_banners.delete': {
@@ -4567,6 +4471,102 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_role_permissions_update_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'admin.storefront_hero.home': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/storefront/hero'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/storefront/hero-slides/list'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.store': {
+    methods: ["POST"]
+    pattern: '/admin/storefront/hero-slides'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.reorder': {
+    methods: ["PUT"]
+    pattern: '/admin/storefront/hero-slides/reorder'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.update': {
+    methods: ["PUT"]
+    pattern: '/admin/storefront/hero-slides/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.image.store': {
+    methods: ["POST"]
+    pattern: '/admin/storefront/hero-slides/:id/image'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.image.delete': {
+    methods: ["DELETE"]
+    pattern: '/admin/storefront/hero-slides/:id/image'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin.storefront_hero.delete': {
+    methods: ["DELETE"]
+    pattern: '/admin/storefront/hero-slides/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'storefront.sitemap.view': {
     methods: ["GET","HEAD"]
     pattern: '/sitemap.xml'
@@ -4627,18 +4627,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_menu_list_controller').default['handle']>>>
     }
   }
-  'storefront.hero_slides.list': {
-    methods: ["GET","HEAD"]
-    pattern: '/store/hero-slides'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_hero_slides_list_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_hero_slides_list_controller').default['handle']>>>
-    }
-  }
   'storefront.plugins.list': {
     methods: ["GET","HEAD"]
     pattern: '/store/plugins'
@@ -4649,6 +4637,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_plugins_list_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_plugins_list_controller').default['handle']>>>
+    }
+  }
+  'storefront.hero_slides.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/store/hero-slides'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
     }
   }
   'storefront.home_content.view': {

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/lucid'
 import env from '#start/env'
+import { pluginMigrationPaths } from '#plugin_host/migration_paths'
 
 const caPath = env.get('DB_SSL_CA_PATH')
 
@@ -42,7 +43,7 @@ const dbConfig = defineConfig({
         /**
          * Paths containing migration files.
          */
-        paths: ['database/migrations'],
+        paths: ['database/migrations', ...pluginMigrationPaths()],
       },
 
       /**

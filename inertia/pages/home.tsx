@@ -21,7 +21,7 @@ import { collectionRailId } from '~/lib/collection_link'
 import type { MoneyFormat } from '~/lib/money'
 import { cn, storefront } from '~/lib/styles'
 import { PluginSlot } from '~/plugins'
-import { HeroSliderSkeleton } from '~/plugins/hero_slideshow/hero_slider'
+import { HeroSliderSkeleton } from '@plugins/hero_slideshow/client/hero_slider'
 import {
   useStoreMoney,
   useStorefrontHome,

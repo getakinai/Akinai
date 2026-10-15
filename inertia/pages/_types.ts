@@ -83,6 +83,7 @@ export const StorefrontHeroSlidesResponseSchema = z.object({
 export const StorefrontPluginSchema = z.object({
   key: z.string(),
   slots: z.array(z.string()),
+  data: z.unknown().optional(),
 })
 
 export type StorefrontPlugin = z.infer<typeof StorefrontPluginSchema>
@@ -316,7 +317,6 @@ export const StorefrontPrefetchSchema = z.object({
   market: StorefrontMarketSchema,
   plugins: z.array(StorefrontPluginSchema),
   home: StorefrontHomeSchema.optional(),
-  heroSlides: z.array(StorefrontHeroSlideSchema).nullable().optional(),
   homeContent: StorefrontHomeContentResponseSchema.shape.data.optional(),
   product: StorefrontProductSchema.nullable().optional(),
   collection: StorefrontCollectionSchema.nullable().optional(),

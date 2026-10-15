@@ -58,14 +58,10 @@ export const MENU_ITEM_TYPES = ['collection', 'page', 'url'] as const
 
 export type MenuItemType = (typeof MENU_ITEM_TYPES)[number]
 
-export const HERO_IMAGE_FOLDER = 'storefront/hero'
-
 /** No SVG: it can carry scripts when served inline from our origin. */
 export const HERO_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp']
 
 export const MAX_HERO_IMAGE_UPLOAD_SIZE_MB = 5
-
-export const MAX_HERO_SLIDES = 10
 
 export const PROMO_PLACEMENTS = ['home_middle', 'home_bottom'] as const
 

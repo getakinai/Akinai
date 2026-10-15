@@ -272,7 +272,6 @@ declare module '@adonisjs/inertia/types' {
     'admin/storefront/_content_texts_card': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_content_texts_card.tsx'))['default']>
     'admin/storefront/_featured_reviews_card': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_featured_reviews_card.tsx'))['default']>
     'admin/storefront/_features_card': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_features_card.tsx'))['default']>
-    'admin/storefront/_hero_slide_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_hero_slide_dialog.tsx'))['default']>
     'admin/storefront/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_hooks.ts'))['default']>
     'admin/storefront/_link_target_fields': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_link_target_fields.tsx'))['default']>
     'admin/storefront/_link': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_link.ts'))['default']>
@@ -283,7 +282,6 @@ declare module '@adonisjs/inertia/types' {
     'admin/storefront/_theme_preview': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_theme_preview.tsx'))['default']>
     'admin/storefront/_types': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_types.ts'))['default']>
     'admin/storefront/content': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/content.tsx'))['default']>
-    'admin/storefront/hero': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/hero.tsx'))['default']>
     'admin/storefront/menu': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/menu.tsx'))['default']>
     'admin/storefront/theme': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/theme.tsx'))['default']>
     'admin/support/tickets/_format': ExtractProps<(typeof import('../../inertia/pages/admin/support/tickets/_format.ts'))['default']>

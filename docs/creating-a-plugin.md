@@ -1,45 +1,73 @@
 # Creating a plugin
 
-Plugins are optional storefront features, such as the home hero slideshow, that staff turn on and off from **Plugins** in the back office (`/admin/plugins`). They ship with the app: a plugin is code in this repository, not a package downloaded at runtime.
+Plugins are optional storefront features, such as the home hero slideshow, that staff turn on and off from **Plugins** in the back office (`/admin/plugins`). They ship with the app: a plugin is a folder under `plugins/`, not a package downloaded at runtime.
+
+Drop a folder into `plugins/<key>/` and the app discovers it automatically (server routes, migrations, tests, storefront component, admin pages, sidebar links). You should not need to edit core files.
 
 A plugin fills one or more **slots**. A slot is a named placeholder in a storefront template, for example `home.hero`. When the plugin is installed it renders in that slot. When it is not, the template shows the slot's fallback, or nothing.
 
-Use the **Hero slideshow** plugin as the reference and open these files alongside this guide:
+Use the **Hero slideshow** plugin as the reference: `plugins/hero_slideshow/`.
 
-| Part | Reference file |
+| Part | Reference |
 |---|---|
-| Plugin list and slot names | `app/constants/plugins.ts` |
+| Folder layout | `plugins/hero_slideshow/` |
+| Server entry | `plugins/hero_slideshow/plugin.ts` |
+| Shared manifest | `plugins/hero_slideshow/manifest.ts` |
+| Slot names (core) | `app/constants/plugins.ts` (`PLUGIN_SLOTS`) |
+| Loader and registry | `app/plugins/loader.ts`, `app/plugins/registry.ts` |
 | Installed state | `app/services/plugin_service.ts`, table `plugin_installations` |
 | Route gating | `app/middleware/plugin_installed_middleware.ts` |
-| Storefront component | `inertia/plugins/hero_slideshow/` |
-| Client registry | `inertia/plugins/registry.ts` |
+| Client registry | `inertia/plugins/registry.ts` (`import.meta.glob` on `plugins/*/client/index.tsx`) |
 | Slot placeholder | `inertia/plugins/plugin_slot.tsx`, used in `inertia/pages/home.tsx` |
 | Marketplace page | `inertia/pages/admin/plugins/home.tsx` |
-| Tests | `tests/unit/plugin_service.spec.ts`, `tests/functional/admin/admin_plugins.spec.ts` |
+| Tests | `plugins/hero_slideshow/tests/`, `tests/unit/plugin_service.spec.ts`, `tests/functional/admin/admin_plugins.spec.ts` |
 
 The example below adds a made-up `trust_badges` plugin that shows payment and delivery badges below the first product rail on the home page.
+
+## Folder layout
+
+```
+plugins/trust_badges/
+  manifest.ts            key, name, description, category, slots, defaultInstalled, adminRoute
+  plugin.ts              definePlugin({ manifest, routes?, prefetch? })
+  server/                models, services, controllers, validators, routes.ts, …
+  migrations/            Lucid migrations for this plugin only
+  client/
+    index.tsx            default export: { slot, Component, seedQueries?, adminNav? }
+    …                      storefront UI and hooks
+    pages/admin/         Inertia admin pages (rendered as plugins/trust_badges/admin/…)
+  tests/
+    unit/
+    functional/
+```
+
+**Imports:** Plugin server code may import from core (`#services/*`, `#models/*`, shared validators). Core must not import a plugin except through the loader (`#plugin_host/registry`). Within a plugin, prefer relative imports under `server/` and `client/`.
+
+After adding migrations, run `node ace migration:run` (or `migration:fresh` in development). Lucid records migrations by path, so moving a migration between core and a plugin requires a fresh migrate in dev.
 
 ## How it fits together
 
 ```mermaid
 flowchart LR
-  Manifest["PLUGINS in app/constants/plugins.ts"] --> PluginService
-  InstallTable["plugin_installations table"] --> PluginService
-  PluginService --> Marketplace["Admin: /admin/plugins"]
-  PluginService --> StorePlugins["GET /store/plugins and prefetch"]
-  StorePlugins --> PluginSlot["PluginSlot in a template"]
-  ClientRegistry["inertia/plugins/registry.ts"] --> PluginSlot
+  Folder["plugins/*/plugin.ts"] --> Loader["app/plugins/loader.ts"]
+  Loader --> Registry["app/plugins/registry.ts"]
+  Registry --> Routes["start/routes.ts plugin route hooks"]
+  Registry --> PluginService
+  Registry --> DbConfig["config/database.ts plugin migrations"]
+  ClientGlob["import.meta.glob plugins/*/client/index.tsx"] --> PluginSlot
+  ClientGlob --> AppResolver["inertia/app.tsx plugin page names"]
+  ClientGlob --> AdminNav["admin_nav merges adminNav"]
 ```
 
 The server decides **whether** a plugin is installed. The client registry decides **what** it renders. A plugin only shows on the storefront when it is in both.
 
 ## 1. Pick a slot
 
-The available slots are listed in `PLUGIN_SLOTS` in `app/constants/plugins.ts`:
+Available slots are listed in `PLUGIN_SLOTS` in `app/constants/plugins.ts`:
 
 | Slot | Where it renders |
 |---|---|
-| `home.hero` | Top of the home page, in place of the default hero |
+| `home.hero` | Top of the home page |
 | `home.after_first_rail` | Home page, below the first product rail |
 | `home.footer` | Home page, below the bottom promo banners |
 | `checkout.payment` | Reserved for payment plugins; not placed in a template yet |
@@ -51,116 +79,110 @@ To add a new slot:
 3. Place it in the template:
 
 ```tsx
-<PluginSlot name="product.below_description" />
+<PluginSlot name="home.after_first_rail" />
 ```
 
-`PluginSlot` takes two optional props: `fallback` (shown when no installed plugin fills the slot) and `loading` (shown while the installed plugins load on client-side navigation).
+`PluginSlot` accepts optional `fallback` (when no installed plugin fills the slot) and `loading` (while installed plugins load on client navigation).
 
-## 2. Register the plugin on the server
+## 2. Manifest and server entry
 
-Add an entry to `PLUGINS` in `app/constants/plugins.ts`:
+Create `plugins/trust_badges/manifest.ts`:
 
 ```ts
-{
+import type { PluginManifest } from '#constants/plugins'
+
+const manifest = {
   key: 'trust_badges',
   name: 'Trust badges',
-  description: 'Payment and delivery badges below the first product rail on the home page.',
+  description: 'Payment and delivery badges below the first product rail.',
   category: 'storefront',
   slots: ['home.after_first_rail'],
   defaultInstalled: false,
   adminRoute: null,
+} satisfies PluginManifest
+
+export default manifest
+```
+
+The folder name must match `manifest.key`.
+
+Create `plugins/trust_badges/plugin.ts`:
+
+```ts
+import { definePlugin } from '#plugin_host/types'
+import manifest from './manifest.js'
+import { admin, storefront } from './server/routes.js'
+
+export default definePlugin({
+  manifest,
+  routes: { admin, storefront },
+})
+```
+
+Register routes in `server/routes.ts` the same way as core routes, using lazy controller imports and `middleware.plugin({ key: 'trust_badges' })` on every admin and storefront route that belongs to the plugin.
+
+Render plugin admin pages with `pluginPage('trust_badges', 'admin/hero')` from `#plugin_host/pages` (returns `plugins/trust_badges/admin/hero` for Inertia).
+
+| Manifest field | Meaning |
+|---|---|
+| `key` | Unique, snake_case, permanent (stored in the database) |
+| `category` | One of `PLUGIN_CATEGORIES` |
+| `slots` | Slots this plugin fills |
+| `defaultInstalled` | Installed until staff uninstall; use `false` for new plugins |
+| `adminRoute` | Route name for **Configure** in the marketplace, or `null` |
+
+To ship default-installed on existing stores, add a migration under `plugins/<key>/migrations/` that inserts into `plugin_installations` (see `plugins/hero_slideshow/migrations/*_seed_hero_slideshow_installation.ts`).
+
+## 3. Storefront component
+
+Create `plugins/trust_badges/client/index.tsx`:
+
+```tsx
+import type { PluginSlotProps } from '~/plugins/types'
+import TrustBadges from './trust_badges'
+
+export default {
+  slot: 'home.after_first_rail' as const,
+  Component: function TrustBadgesPlugin(_props: PluginSlotProps) {
+    return <TrustBadges />
+  },
+}
+```
+
+The client registry picks this up automatically; do not edit `inertia/plugins/registry.ts` by hand.
+
+If the plugin needs data on first paint, add `prefetch.home(ctx)` on the server entry and `seedQueries(queryClient, data)` on the client entry (see hero slideshow). Prefetched plugin payloads appear on `prefetch.plugins[].data` for the matching `key`.
+
+Optional sidebar links under **Storefront content** (or another section):
+
+```ts
+adminNav: {
+  parentRoute: 'admin.storefront_content.home',
+  items: [{ label: 'Trust badges', route: 'admin.trust_badges.home', permission: 'storefront.view' }],
 },
 ```
 
-| Field | Meaning |
-|---|---|
-| `key` | Unique, snake_case and permanent. It is stored in the database, so never rename it. |
-| `category` | One of `PLUGIN_CATEGORIES` (`storefront`, `payments`, `marketing`). Add a new one there if needed. |
-| `slots` | The slots the plugin fills. |
-| `defaultInstalled` | Whether the plugin counts as installed before staff ever touch it. Use `false` for new plugins so existing stores don't change on deploy. |
-| `adminRoute` | Name of the back-office page where staff configure the plugin, or `null` if it has no settings. The marketplace shows a **Configure** button that links there. |
+## 4. Admin pages
 
-That is all the server needs. The plugin now appears in the marketplace, and the install and uninstall endpoints accept its key.
+Put Inertia pages under `plugins/trust_badges/client/pages/admin/`. They resolve as `plugins/trust_badges/admin/<file>` without listing them in `adonisrc` `indexPages` (the glob in `inertia/app.tsx` handles it).
 
-## 3. Build the storefront component
+Shared storefront link helpers stay in core (`inertia/pages/admin/storefront/_link.ts`, etc.) and are imported with `~/pages/admin/storefront/...`.
 
-Create `inertia/plugins/trust_badges/index.tsx`. The component receives the slot's `fallback`:
+## 5. Tests
 
-```tsx
-import { ShieldCheck, Truck } from 'lucide-react'
-import { cn, storefront } from '~/lib/styles'
-import type { PluginSlotProps } from '../types'
+Add specs under `plugins/trust_badges/tests/unit/` and `plugins/trust_badges/tests/functional/`. They are included automatically via `adonisrc.ts` test suites.
 
-export default function TrustBadgesPlugin(_props: PluginSlotProps) {
-  return (
-    <section className={cn(storefront.section, 'flex flex-wrap justify-center gap-6')}>
-      <span className="inline-flex items-center gap-2 text-[14px]">
-        <ShieldCheck size={16} /> Secure checkout
-      </span>
-      <span className="inline-flex items-center gap-2 text-[14px]">
-        <Truck size={16} /> Delivered to your door
-      </span>
-    </section>
-  )
-}
-```
-
-If the plugin loads its own data, keep its hooks in the plugin folder (see `inertia/plugins/hero_slideshow/_hooks.ts`). Show a skeleton while loading, and render `fallback` when there is nothing to show, so the template still looks complete.
-
-## 4. Register the component on the client
-
-Add it to `inertia/plugins/registry.ts`, using the same key as the server:
-
-```ts
-import TrustBadgesPlugin from './trust_badges'
-
-export const pluginRegistry: Record<string, PluginEntry> = {
-  hero_slideshow: { slot: 'home.hero', Component: HeroSlideshowPlugin },
-  trust_badges: { slot: 'home.after_first_rail', Component: TrustBadgesPlugin },
-}
-```
-
-When several installed plugins fill the same slot, they render in registry order.
-
-## 5. Plugins with data or settings (optional)
-
-Most real plugins store something: the hero slideshow keeps its slides in `storefront_hero_slides`. For a plugin with its own data:
-
-1. Build the tables, models, services, controllers and admin page like any other feature. Follow [adding-a-feature.md](adding-a-feature.md).
-2. Guard **every** route that belongs to the plugin, both admin and storefront, so it returns 404 while the plugin is uninstalled:
-
-```ts
-router
-  .get('store/trust-badges', [controllers.storefront.StorefrontTrustBadgesList])
-  .as('storefront.trust_badges.list')
-  .use(middleware.plugin({ key: 'trust_badges' }))
-```
-
-3. Set `adminRoute` in the manifest to the admin page's route name.
-4. To link the admin page from the sidebar, add the entry in `inertia/components/admin/admin_nav.ts` with `plugin: 'trust_badges'`. The link is then hidden while the plugin is uninstalled.
-5. If the data is needed on the first server render, load it in `app/services/storefront_prefetch_service.ts` only when the plugin is installed (see how `home()` checks `installedKeys` for `hero_slideshow`).
-
-Small settings that don't justify their own table can go in the `settings` JSON column of `plugin_installations`.
-
-Uninstalling never deletes a plugin's data. Reinstalling brings everything back.
+For gated routes, assert 404 after uninstall (see `tests/functional/admin/admin_plugins.spec.ts`).
 
 ## 6. Install it
 
-1. Run `yarn dev` and sign in to the back office as a User with the `plugins.edit` permission. The admin role has it.
-2. Open **Plugins** in the sidebar (`/admin/plugins`).
-3. Click **Install** on the plugin's card. It shows on the storefront straight away.
-4. Click **Uninstall** to remove it from the storefront. Its routes return 404 and its sidebar links are hidden.
+1. Run `yarn dev` and sign in with `plugins.edit`.
+2. Open **Plugins** (`/admin/plugins`).
+3. **Install** / **Uninstall** and confirm the storefront slot updates.
 
-Staff need `plugins.view` to see the marketplace and `plugins.edit` to install or uninstall. Grant them to other roles under **Team & Permissions**.
+Uninstalling does not delete plugin data; reinstalling restores behavior.
 
-To ship a plugin already installed on existing stores, set `defaultInstalled: true`, or insert its row in a migration like `database/migrations/*_create_plugin_installations_table.ts` does for `hero_slideshow`.
-
-## 7. Tests
-
-- Add the plugin's own feature tests, like any other feature.
-- If it has gated routes, add a functional test that they return 404 after uninstalling. Copy the "route gating" group in `tests/functional/admin/admin_plugins.spec.ts`.
-
-## 8. Before opening a PR
+## 7. Before opening a PR
 
 ```bash
 yarn typecheck
@@ -168,4 +190,4 @@ yarn lint:check
 yarn test
 ```
 
-Then install and uninstall the plugin from `/admin/plugins` and check the storefront with each, at 320px, 390px and 720px wide.
+Install and uninstall from `/admin/plugins` and check the storefront at 320px, 390px, and 720px wide.

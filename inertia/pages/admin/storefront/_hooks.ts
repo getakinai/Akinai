@@ -7,8 +7,6 @@ import {
   AdminPageOptionsResponseSchema,
   AdminFeaturedReviewListResponseSchema,
   AdminStorefrontFeatureListResponseSchema,
-  AdminStorefrontHeroSlideListResponseSchema,
-  AdminStorefrontHeroSlideResponseSchema,
   AdminStorefrontMenuItemResponseSchema,
   AdminStorefrontMenuListResponseSchema,
   AdminStorefrontPromoBannerListResponseSchema,
@@ -20,8 +18,6 @@ import {
   type AdminStorefrontFeaturesForm,
   type AdminStorefrontPromoBanner,
   type AdminStorefrontPromoBannerForm,
-  type AdminStorefrontHeroSlide,
-  type AdminStorefrontHeroSlideForm,
   type AdminStorefrontTheme,
   type AdminStorefrontMenuItem,
   type AdminStorefrontMenuItemForm,
@@ -34,7 +30,6 @@ export const adminStorefrontKeys = {
   menu: ['admin', 'storefront', 'menu'] as const,
   collections: ['admin', 'storefront', 'menu', 'collections'] as const,
   pages: ['admin', 'storefront', 'menu', 'pages'] as const,
-  hero: ['admin', 'storefront', 'hero'] as const,
   promoBanners: ['admin', 'storefront', 'promo-banners'] as const,
   features: ['admin', 'storefront', 'features'] as const,
   featuredReviews: ['admin', 'storefront', 'featured-reviews'] as const,
@@ -276,168 +271,6 @@ export function useReorderAdminStorefrontMenu() {
     },
     onSettled: invalidate,
   })
-}
-
-export async function fetchAdminStorefrontHeroSlides() {
-  const { data } = await http('/admin/storefront/hero-slides/list', {
-    schema: AdminStorefrontHeroSlideListResponseSchema,
-  })
-  return data
-}
-
-export function useAdminStorefrontHeroSlides() {
-  return useQuery({ queryKey: adminStorefrontKeys.hero, queryFn: fetchAdminStorefrontHeroSlides })
-}
-
-function useInvalidateHero() {
-  const queryClient = useQueryClient()
-  return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: adminStorefrontKeys.hero, exact: true }),
-      queryClient.invalidateQueries({ queryKey: storefrontKeys.heroSlides }),
-    ])
-}
-
-export async function createAdminStorefrontHeroSlide(payload: AdminStorefrontHeroSlideForm) {
-  const { data } = await http('/admin/storefront/hero-slides', {
-    method: 'POST',
-    body: payload,
-    schema: AdminStorefrontHeroSlideResponseSchema,
-  })
-  return data
-}
-
-export function useCreateAdminStorefrontHeroSlide() {
-  const invalidate = useInvalidateHero()
-  return useMutation({ mutationFn: createAdminStorefrontHeroSlide, onSuccess: invalidate })
-}
-
-export async function updateAdminStorefrontHeroSlide({
-  id,
-  ...payload
-}: AdminStorefrontHeroSlideForm & { id: string }) {
-  const { data } = await http(`/admin/storefront/hero-slides/${id}`, {
-    method: 'PUT',
-    body: payload,
-    schema: AdminStorefrontHeroSlideResponseSchema,
-  })
-  return data
-}
-
-/**
- * Applies the change to the cached slides right away (used by the
- * visibility toggle) and rolls it back if the request fails.
- */
-export function useUpdateAdminStorefrontHeroSlide() {
-  const queryClient = useQueryClient()
-  const invalidate = useInvalidateHero()
-  const key = adminStorefrontKeys.hero
-
-  return useMutation({
-    mutationFn: updateAdminStorefrontHeroSlide,
-    onMutate: async ({ id, heading, isVisible }) => {
-      await queryClient.cancelQueries({ queryKey: key, exact: true })
-      const previous = queryClient.getQueryData<AdminStorefrontHeroSlide[]>(key)
-      if (previous) {
-        queryClient.setQueryData(
-          key,
-          previous.map((slide) => (slide.id === id ? { ...slide, heading, isVisible } : slide))
-        )
-      }
-      return { previous }
-    },
-    onError: (_error, _payload, context) => {
-      if (context?.previous) queryClient.setQueryData(key, context.previous)
-    },
-    onSettled: invalidate,
-  })
-}
-
-export async function deleteAdminStorefrontHeroSlide(id: string) {
-  await http(`/admin/storefront/hero-slides/${id}`, {
-    method: 'DELETE',
-    schema: EmptyResponseSchema,
-  })
-}
-
-export function useDeleteAdminStorefrontHeroSlide() {
-  const invalidate = useInvalidateHero()
-  return useMutation({ mutationFn: deleteAdminStorefrontHeroSlide, onSuccess: invalidate })
-}
-
-export async function reorderAdminStorefrontHeroSlides(ids: string[]) {
-  await http('/admin/storefront/hero-slides/reorder', {
-    method: 'PUT',
-    body: { ids },
-    schema: EmptyResponseSchema,
-  })
-}
-
-/**
- * Reorders the cached slides right away and rolls back if the request fails.
- */
-export function useReorderAdminStorefrontHeroSlides() {
-  const queryClient = useQueryClient()
-  const invalidate = useInvalidateHero()
-  const key = adminStorefrontKeys.hero
-
-  return useMutation({
-    mutationFn: reorderAdminStorefrontHeroSlides,
-    onMutate: async (ids) => {
-      await queryClient.cancelQueries({ queryKey: key, exact: true })
-      const previous = queryClient.getQueryData<AdminStorefrontHeroSlide[]>(key)
-      if (previous) {
-        const byId = new Map(previous.map((slide) => [slide.id, slide]))
-        queryClient.setQueryData(
-          key,
-          ids.flatMap((id, position) => {
-            const slide = byId.get(id)
-            return slide ? [{ ...slide, position }] : []
-          })
-        )
-      }
-      return { previous }
-    },
-    onError: (_error, _ids, context) => {
-      if (context?.previous) queryClient.setQueryData(key, context.previous)
-    },
-    onSettled: invalidate,
-  })
-}
-
-export async function uploadAdminStorefrontHeroSlideImage({
-  id,
-  file,
-}: {
-  id: string
-  file: File
-}) {
-  const body = new FormData()
-  body.append('image', file)
-  const { data } = await http(`/admin/storefront/hero-slides/${id}/image`, {
-    method: 'POST',
-    body,
-    schema: AdminStorefrontHeroSlideResponseSchema,
-  })
-  return data
-}
-
-export function useUploadAdminStorefrontHeroSlideImage() {
-  const invalidate = useInvalidateHero()
-  return useMutation({ mutationFn: uploadAdminStorefrontHeroSlideImage, onSuccess: invalidate })
-}
-
-export async function removeAdminStorefrontHeroSlideImage(id: string) {
-  const { data } = await http(`/admin/storefront/hero-slides/${id}/image`, {
-    method: 'DELETE',
-    schema: AdminStorefrontHeroSlideResponseSchema,
-  })
-  return data
-}
-
-export function useRemoveAdminStorefrontHeroSlideImage() {
-  const invalidate = useInvalidateHero()
-  return useMutation({ mutationFn: removeAdminStorefrontHeroSlideImage, onSuccess: invalidate })
 }
 
 export async function updateAdminStorefrontContent(payload: AdminStorefrontContentForm) {

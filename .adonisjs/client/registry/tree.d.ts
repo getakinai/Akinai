@@ -583,18 +583,6 @@ export interface ApiDefinition {
       update: typeof routes['admin.storefront_menu.update']
       delete: typeof routes['admin.storefront_menu.delete']
     }
-    storefrontHero: {
-      home: typeof routes['admin.storefront_hero.home']
-      list: typeof routes['admin.storefront_hero.list']
-      store: typeof routes['admin.storefront_hero.store']
-      reorder: typeof routes['admin.storefront_hero.reorder']
-      update: typeof routes['admin.storefront_hero.update']
-      image: {
-        store: typeof routes['admin.storefront_hero.image.store']
-        delete: typeof routes['admin.storefront_hero.image.delete']
-      }
-      delete: typeof routes['admin.storefront_hero.delete']
-    }
     storefrontContent: {
       home: typeof routes['admin.storefront_content.home']
       update: typeof routes['admin.storefront_content.update']
@@ -725,6 +713,18 @@ export interface ApiDefinition {
       update: typeof routes['admin.customer_segments.update']
       delete: typeof routes['admin.customer_segments.delete']
     }
+    storefrontHero: {
+      home: typeof routes['admin.storefront_hero.home']
+      list: typeof routes['admin.storefront_hero.list']
+      store: typeof routes['admin.storefront_hero.store']
+      reorder: typeof routes['admin.storefront_hero.reorder']
+      update: typeof routes['admin.storefront_hero.update']
+      image: {
+        store: typeof routes['admin.storefront_hero.image.store']
+        delete: typeof routes['admin.storefront_hero.image.delete']
+      }
+      delete: typeof routes['admin.storefront_hero.delete']
+    }
   }
   storefront: {
     sitemap: {
@@ -742,11 +742,11 @@ export interface ApiDefinition {
     menu: {
       list: typeof routes['storefront.menu.list']
     }
-    heroSlides: {
-      list: typeof routes['storefront.hero_slides.list']
-    }
     plugins: {
       list: typeof routes['storefront.plugins.list']
+    }
+    heroSlides: {
+      list: typeof routes['storefront.hero_slides.list']
     }
     homeContent: {
       view: typeof routes['storefront.home_content.view']
