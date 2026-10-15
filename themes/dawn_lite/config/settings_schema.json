@@ -1,0 +1,68 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Dawn Lite",
+    "theme_version": "1.0.0"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      { "type": "color", "id": "color_background", "label": "Background", "default": "#ffffff" },
+      { "type": "color", "id": "color_text", "label": "Text", "default": "#121212" },
+      { "type": "color", "id": "color_accent", "label": "Buttons", "default": "#121212" },
+      { "type": "color", "id": "color_accent_text", "label": "Button text", "default": "#ffffff" },
+      { "type": "color", "id": "color_muted", "label": "Muted surfaces", "default": "#f3f3f3" }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "select",
+        "id": "font_body",
+        "label": "Font",
+        "default": "sans",
+        "options": [
+          { "value": "sans", "label": "Sans serif" },
+          { "value": "serif", "label": "Serif" },
+          { "value": "mono", "label": "Monospace" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "font_scale",
+        "label": "Font size",
+        "min": 90,
+        "max": 120,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page width",
+        "min": 960,
+        "max": 1600,
+        "step": 40,
+        "unit": "px",
+        "default": 1200
+      },
+      {
+        "type": "range",
+        "id": "corner_radius",
+        "label": "Corner radius",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "default": 8
+      }
+    ]
+  }
+]

@@ -1,0 +1,25 @@
+<header class="site-header">
+  <div class="page-width site-header__inner">
+    <a class="site-header__brand" href="{{ route('home') }}">
+      @if(section.settings.logo)
+        <img src="{{ section.settings.logo.url }}" alt="{{ store.storeName }}" style="width: {{ section.settings.logo_width }}px" />
+      @else
+        <span>{{ store.storeName }}</span>
+      @end
+    </a>
+    @if(section.settings.show_menu && section.settings.menu.length)
+      <nav class="site-header__menu" aria-label="{{ t('header.menu') }}">
+        <ul>
+          @each(item in section.settings.menu)
+            <li><a href="{{ item.href }}">{{ item.label }}</a></li>
+          @end
+        </ul>
+      </nav>
+    @end
+    <div class="site-header__actions">
+      <a class="site-header__account" href="{{ route('customers.account.home') }}">{{ t('header.account') }}</a>
+      @let(cartProps = { label: t('header.cart') })
+      {{{ island('cart_button', cartProps, '<a class="akinai-cart-button" href="' + route('storefront.checkout.home') + '">' + t('header.cart') + '</a>') }}}
+    </div>
+  </div>
+</header>

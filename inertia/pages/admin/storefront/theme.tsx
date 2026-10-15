@@ -5,6 +5,7 @@ import { Skeleton } from '~/components/ui'
 import AdminLayout from '~/layouts/admin'
 import { buttonClasses, card } from '~/lib/styles'
 import { useCan } from '../_hooks'
+import LiveThemeNotice from '../themes/_live_theme_notice'
 import BrandingCard from './_branding_card'
 import { useAdminStorefrontTheme } from './_hooks'
 import ThemeForm from './_theme_form'
@@ -28,8 +29,8 @@ export default function StorefrontThemePage() {
 
   return (
     <Page
-      title="Storefront theme"
-      description="Set the logo, favicon and colors customers see on your online store."
+      title="Built-in theme"
+      description="Set the logo, favicon and colors of the built-in theme. Uploaded themes have their own settings."
       actions={
         <a
           href="/"
@@ -41,6 +42,8 @@ export default function StorefrontThemePage() {
         </a>
       }
     >
+      <LiveThemeNotice />
+
       {isLoading && (
         <div className={card.base}>
           <Skeleton className="h-5 w-40" />

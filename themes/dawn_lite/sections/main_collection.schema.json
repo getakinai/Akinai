@@ -1,0 +1,21 @@
+{
+  "name": "Collection products",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "enabled_on": { "templates": ["collection"] }
+}

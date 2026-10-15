@@ -56,7 +56,8 @@
     "#tests/*": "./tests/*.js",
     "#start/*": "./start/*.js",
     "#config/*": "./config/*.js",
-    "#plugin_host/*": "./app/plugins/*.js"
+    "#plugin_host/*": "./app/plugins/*.js",
+    "#theme_host/*": "./app/themes/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^8.5.2",
@@ -127,6 +128,7 @@
     "dompurify": "^3",
     "edge.js": "^6.5.1",
     "embla-carousel-react": "^8.6.0",
+    "fflate": "^0.8.3",
     "lucide-react": "^1.48.0",
     "luxon": "^3.7.2",
     "mailchecker": "^6.0.21",

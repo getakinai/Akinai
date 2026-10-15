@@ -37,6 +37,9 @@ type PrefetchedPlugin = {
 /** The order and filters the collection page opens with. */
 const DEFAULT_COLLECTION_LIST = { sort: 'featured', direction: 'asc' } as const
 
+/** `always` builds the payload on Inertia visits too (theme rendering). */
+type PrefetchOptions = { always?: boolean }
+
 @inject()
 export default class StorefrontPrefetchService {
   constructor(
@@ -53,8 +56,8 @@ export default class StorefrontPrefetchService {
     protected pluginService: PluginService
   ) {}
 
-  async home(ctx: HttpContext) {
-    if (this.isInertiaVisit(ctx)) return null
+  async home(ctx: HttpContext, options: PrefetchOptions = {}) {
+    if (this.skip(ctx, options)) return null
     const { market, layout, installedKeys } = await this.layout(ctx)
     const [home, homeContent, plugins] = await Promise.all([
       this.storefrontHomeService.get(market),
@@ -69,8 +72,8 @@ export default class StorefrontPrefetchService {
     }
   }
 
-  async product(ctx: HttpContext, slug: string) {
-    if (this.isInertiaVisit(ctx)) return null
+  async product(ctx: HttpContext, slug: string, options: PrefetchOptions = {}) {
+    if (this.skip(ctx, options)) return null
     const { market, layout } = await this.layout(ctx)
     const product = await orNullIfMissing(
       this.storefrontProductService.findBySlugOrFail(slug, market)
@@ -81,8 +84,8 @@ export default class StorefrontPrefetchService {
     }
   }
 
-  async collection(ctx: HttpContext, slug: string) {
-    if (this.isInertiaVisit(ctx)) return null
+  async collection(ctx: HttpContext, slug: string, options: PrefetchOptions = {}) {
+    if (this.skip(ctx, options)) return null
     const { market, layout } = await this.layout(ctx)
     const filters = this.storefrontCollectionService.toFilters({})
     const [collection, firstPage] = await Promise.all([
@@ -118,8 +121,8 @@ export default class StorefrontPrefetchService {
     }
   }
 
-  async page(ctx: HttpContext, slug: string) {
-    if (this.isInertiaVisit(ctx)) return null
+  async page(ctx: HttpContext, slug: string, options: PrefetchOptions = {}) {
+    if (this.skip(ctx, options)) return null
     const [{ layout }, page] = await Promise.all([
       this.layout(ctx),
       orNullIfMissing(this.pageService.findPublicBySlugOrFail(slug)),
@@ -127,8 +130,8 @@ export default class StorefrontPrefetchService {
     return { ...layout, page: page ? StorefrontPageTransformer.transform(page) : null }
   }
 
-  protected isInertiaVisit(ctx: HttpContext) {
-    return Boolean(ctx.request.header('x-inertia'))
+  protected skip(ctx: HttpContext, options: PrefetchOptions) {
+    return !options.always && Boolean(ctx.request.header('x-inertia'))
   }
 
   protected async prefetchHomePluginData(

@@ -1,0 +1,18 @@
+{
+  "name": "Plugin",
+  "settings": [
+    {
+      "type": "select",
+      "id": "slot",
+      "label": "Plugin slot",
+      "info": "Shows whichever installed plugin fills this slot, such as the hero slideshow.",
+      "default": "home.hero",
+      "options": [
+        { "value": "home.hero", "label": "Home hero" },
+        { "value": "home.after_first_rail", "label": "Home, after the first collection" },
+        { "value": "home.footer", "label": "Home footer" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Plugin" }]
+}

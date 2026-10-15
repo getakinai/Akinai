@@ -3,13 +3,15 @@ import type { HttpContext } from '@adonisjs/core/http'
 import SetupService from '#services/setup_service'
 import StorefrontPrefetchService from '#services/storefront_prefetch_service'
 import StorefrontSeoService from '#services/storefront_seo_service'
+import ThemeRenderer from '#theme_host/renderer'
 
 @inject()
 export default class StorefrontHomeController {
   constructor(
     protected storefrontSeoService: StorefrontSeoService,
     protected storefrontPrefetchService: StorefrontPrefetchService,
-    protected setupService: SetupService
+    protected setupService: SetupService,
+    protected themeRenderer: ThemeRenderer
   ) {}
 
   async handle(ctx: HttpContext) {
@@ -18,10 +20,15 @@ export default class StorefrontHomeController {
       return ctx.response.redirect().toRoute('admin.setup.create')
     }
 
-    const [seo, prefetch] = await Promise.all([
-      this.storefrontSeoService.forHome(),
-      this.storefrontPrefetchService.home(ctx),
-    ])
+    const seo = await this.storefrontSeoService.forHome()
+    const themed = await this.themeRenderer.render(ctx, {
+      template: 'index',
+      seo,
+      data: () => this.storefrontPrefetchService.home(ctx, { always: true }),
+    })
+    if (themed !== null) return themed
+
+    const prefetch = await this.storefrontPrefetchService.home(ctx)
     return ctx.inertia.render(
       'home',
       { prefetch: prefetch && (await ctx.serialize.withoutWrapping(prefetch)) },

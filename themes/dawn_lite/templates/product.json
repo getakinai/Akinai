@@ -1,0 +1,6 @@
+{
+  "sections": {
+    "main": { "type": "main_product", "settings": {} }
+  },
+  "order": ["main"]
+}

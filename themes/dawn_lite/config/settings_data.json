@@ -1,0 +1,27 @@
+{
+  "current": {
+    "color_background": "#ffffff",
+    "color_text": "#121212",
+    "color_accent": "#121212",
+    "color_accent_text": "#ffffff",
+    "color_muted": "#f3f3f3",
+    "font_body": "sans",
+    "font_scale": 100,
+    "page_width": 1200,
+    "corner_radius": 8
+  },
+  "sections": {
+    "announcement_bar": {
+      "type": "announcement_bar",
+      "settings": { "text": "Free delivery on orders over $100" }
+    },
+    "header": {
+      "type": "header",
+      "settings": { "logo_width": 120, "show_menu": true }
+    },
+    "footer": {
+      "type": "footer",
+      "settings": { "show_policies": true }
+    }
+  }
+}

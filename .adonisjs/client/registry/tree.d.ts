@@ -611,6 +611,19 @@ export interface ApiDefinition {
       install: typeof routes['admin.plugins.install']
       uninstall: typeof routes['admin.plugins.uninstall']
     }
+    themes: {
+      home: typeof routes['admin.themes.home']
+      list: typeof routes['admin.themes.list']
+      preview: typeof routes['admin.themes.preview']
+      download: typeof routes['admin.themes.download']
+      share: typeof routes['admin.themes.share']
+      store: typeof routes['admin.themes.store']
+      duplicate: typeof routes['admin.themes.duplicate']
+      update: typeof routes['admin.themes.update']
+      publish: typeof routes['admin.themes.publish']
+      unpublish: typeof routes['admin.themes.unpublish']
+      delete: typeof routes['admin.themes.delete']
+    }
     markets: {
       home: typeof routes['admin.markets.home']
       list: typeof routes['admin.markets.list']
@@ -747,6 +760,13 @@ export interface ApiDefinition {
     }
     heroSlides: {
       list: typeof routes['storefront.hero_slides.list']
+    }
+    themeAssets: {
+      show: typeof routes['storefront.theme_assets.show']
+    }
+    themePreview: {
+      exit: typeof routes['storefront.theme_preview.exit']
+      show: typeof routes['storefront.theme_preview.show']
     }
     homeContent: {
       view: typeof routes['storefront.home_content.view']

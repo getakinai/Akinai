@@ -1,0 +1,21 @@
+{
+  "general": {
+    "skip_to_content": "Skip to content"
+  },
+  "header": {
+    "menu": "Main menu",
+    "account": "Account",
+    "cart": "Cart"
+  },
+  "footer": {
+    "policies": "Policies"
+  },
+  "collections": {
+    "view_all": "View all",
+    "empty": "No products in this collection yet."
+  },
+  "products": {
+    "add_to_cart": "Add to cart",
+    "sold_out": "Sold out"
+  }
+}

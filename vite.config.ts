@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     adonisjs({
-      entryPoints: ['inertia/app.tsx', 'inertia/maintenance.tsx'],
+      entryPoints: ['inertia/app.tsx', 'inertia/maintenance.tsx', 'inertia/islands.tsx'],
       serverEntryPoints: ['inertia/ssr.tsx'],
       reload: ['resources/views/**/*.edge'],
     }),

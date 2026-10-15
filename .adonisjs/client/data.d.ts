@@ -102,6 +102,7 @@ import type SupportAssigneeTransformer from '#transformers/support_assignee_tran
 import type SupportChatReplyTransformer from '#transformers/support_chat_reply_transformer'
 import type SupportTicketTransformer from '#transformers/support_ticket_transformer'
 import type TaxRateTransformer from '#transformers/tax_rate_transformer'
+import type ThemeTransformer from '#transformers/theme_transformer'
 import type UploadedImageTransformer from '#transformers/uploaded_image_transformer'
 import type UserMfaTransformer from '#transformers/user_mfa_transformer'
 import type UserTransformer from '#transformers/user_transformer'
@@ -492,6 +493,10 @@ export namespace Data {
   export type TaxRate = InferData<TaxRateTransformer>
   export namespace TaxRate {
     export type Variants = InferVariants<TaxRateTransformer>
+  }
+  export type Theme = InferData<ThemeTransformer>
+  export namespace Theme {
+    export type Variants = InferVariants<ThemeTransformer>
   }
   export type UploadedImage = InferData<UploadedImageTransformer>
   export namespace UploadedImage {

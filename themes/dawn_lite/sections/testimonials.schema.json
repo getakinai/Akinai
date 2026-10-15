@@ -1,0 +1,28 @@
+{
+  "name": "Testimonials",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What customers say" }
+  ],
+  "blocks": [
+    {
+      "type": "quote",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "Lovely products and fast delivery."
+        },
+        { "type": "text", "id": "author", "label": "Name", "default": "A happy customer" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [{ "type": "quote" }, { "type": "quote" }, { "type": "quote" }]
+    }
+  ]
+}

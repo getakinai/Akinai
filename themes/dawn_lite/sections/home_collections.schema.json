@@ -1,0 +1,29 @@
+{
+  "name": "Home collections",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows the collections chosen for the home page in Collections."
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Collections to show",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "enabled_on": { "templates": ["index"] },
+  "presets": [{ "name": "Home collections" }]
+}

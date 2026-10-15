@@ -3775,6 +3775,138 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_uninstall_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'admin.themes.home': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/themes'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_home_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_home_controller').default['handle']>>>
+    }
+  }
+  'admin.themes.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/themes/list'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_list_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_list_controller').default['handle']>>>
+    }
+  }
+  'admin.themes.preview': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/themes/:id/preview'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/admin_theme_validators').adminThemePreviewValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_preview_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_preview_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.download': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/themes/:id/download'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_download_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_download_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.share': {
+    methods: ["POST"]
+    pattern: '/admin/themes/:id/share'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_share_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_share_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.store': {
+    methods: ["POST"]
+    pattern: '/admin/themes'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeStoreValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeStoreValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_store_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.duplicate': {
+    methods: ["POST"]
+    pattern: '/admin/themes/:id/duplicate'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_duplicate_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_duplicate_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.update': {
+    methods: ["PUT"]
+    pattern: '/admin/themes/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeRenameValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeRenameValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_update_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_update_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.publish': {
+    methods: ["POST"]
+    pattern: '/admin/themes/:id/publish'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_publish_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_publish_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.unpublish': {
+    methods: ["DELETE"]
+    pattern: '/admin/themes/:id/publish'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_unpublish_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_unpublish_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.delete': {
+    methods: ["DELETE"]
+    pattern: '/admin/themes/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_delete_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_delete_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'admin.markets.home': {
     methods: ["GET","HEAD"]
     pattern: '/admin/markets'
@@ -4649,6 +4781,42 @@ export interface Registry {
       query: {}
       response: unknown
       errorResponse: unknown
+    }
+  }
+  'storefront.theme_assets.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/themes/assets/:hash/*'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { hash: ParamValue; '*': ParamValue[] }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/theme_assets_show_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/theme_assets_show_controller').default['handle']>>>
+    }
+  }
+  'storefront.theme_preview.exit': {
+    methods: ["GET","HEAD"]
+    pattern: '/themes/preview/exit'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/theme_preview_exit_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/theme_preview_exit_controller').default['handle']>>>
+    }
+  }
+  'storefront.theme_preview.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/themes/preview/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/theme_preview_show_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/theme_preview_show_controller').default['handle']>>>
     }
   }
   'storefront.home_content.view': {

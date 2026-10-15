@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "main": { "type": "main_page", "settings": {} },
+    "help": {
+      "type": "rich_text",
+      "settings": { "alignment": "center" },
+      "blocks": {
+        "heading": { "type": "heading", "settings": { "heading": "Need a hand?" } },
+        "text": {
+          "type": "text",
+          "settings": { "text": "<p>We usually reply within one business day.</p>" }
+        }
+      },
+      "block_order": ["heading", "text"]
+    }
+  },
+  "order": ["main", "help"]
+}

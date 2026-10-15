@@ -1,0 +1,17 @@
+@if(home && home.collections)
+  @each(rail in home.collections.slice(0, section.settings.limit))
+    <section class="page-width section">
+      <div class="section__header">
+        <h2>{{ rail.title }}</h2>
+        <a href="{{ route('storefront.collections.show', { slug: rail.slug }) }}">{{ t('collections.view_all') }}</a>
+      </div>
+      <ul class="product-grid" style="--columns: {{ section.settings.columns }}">
+        @each(product in rail.products)
+          <li>
+            @include('snippets/product_card')
+          </li>
+        @end
+      </ul>
+    </section>
+  @end
+@end

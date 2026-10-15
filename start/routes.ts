@@ -1340,6 +1340,48 @@ router
 
         router
           .group(() => {
+            router.get('themes', [controllers.admin.AdminThemesHome]).as('admin.themes.home')
+            router.get('themes/list', [controllers.admin.AdminThemesList]).as('admin.themes.list')
+            router
+              .get('themes/:id/preview', [controllers.admin.AdminThemesPreview])
+              .as('admin.themes.preview')
+            router
+              .get('themes/:id/download', [controllers.admin.AdminThemesDownload])
+              .as('admin.themes.download')
+            router
+              .post('themes/:id/share', [controllers.admin.AdminThemesShare])
+              .as('admin.themes.share')
+          })
+          .use(middleware.can({ permission: 'themes.view' }))
+
+        router
+          .group(() => {
+            router.post('themes', [controllers.admin.AdminThemesStore]).as('admin.themes.store')
+          })
+          .use(middleware.can({ permission: 'themes.upload' }))
+
+        router
+          .group(() => {
+            router
+              .post('themes/:id/duplicate', [controllers.admin.AdminThemesDuplicate])
+              .as('admin.themes.duplicate')
+            router.put('themes/:id', [controllers.admin.AdminThemesUpdate]).as('admin.themes.update')
+            router
+              .post('themes/:id/publish', [controllers.admin.AdminThemesPublish])
+              .as('admin.themes.publish')
+            router
+              .delete('themes/:id/publish', [controllers.admin.AdminThemesUnpublish])
+              .as('admin.themes.unpublish')
+          })
+          .use(middleware.can({ permission: 'themes.edit' }))
+
+        router
+          .delete('themes/:id', [controllers.admin.AdminThemesDelete])
+          .as('admin.themes.delete')
+          .use(middleware.can({ permission: 'themes.archive' }))
+
+        router
+          .group(() => {
             router.get('markets', [controllers.admin.AdminMarketsHome]).as('admin.markets.home')
             router
               .get('markets/list', [controllers.admin.AdminMarketsList])
@@ -1617,6 +1659,15 @@ router
 for (const plugin of registeredPlugins()) {
   plugin.routes?.storefront?.(router, middleware)
 }
+router
+  .get('themes/assets/:hash/*', [controllers.storefront.ThemeAssetsShow])
+  .as('storefront.theme_assets.show')
+router
+  .get('themes/preview/exit', [controllers.storefront.ThemePreviewExit])
+  .as('storefront.theme_preview.exit')
+router
+  .get('themes/preview/:id', [controllers.storefront.ThemePreviewShow])
+  .as('storefront.theme_preview.show')
 router
   .get('store/home-content', [controllers.storefront.StorefrontHomeContentView])
   .as('storefront.home_content.view')

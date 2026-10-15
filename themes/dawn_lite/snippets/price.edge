@@ -1,0 +1,6 @@
+<p class="price">
+  {{ money(product.price) }}
+  @if(product.compareAtPrice && product.compareAtPrice > product.price)
+    <s class="price__compare">{{ money(product.compareAtPrice) }}</s>
+  @end
+</p>

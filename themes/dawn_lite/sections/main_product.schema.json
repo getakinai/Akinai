@@ -1,0 +1,8 @@
+{
+  "name": "Product information",
+  "settings": [
+    { "type": "checkbox", "id": "show_vendor", "label": "Show brand", "default": true },
+    { "type": "checkbox", "id": "show_all_images", "label": "Show every image", "default": true }
+  ],
+  "enabled_on": { "templates": ["product"] }
+}

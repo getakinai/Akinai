@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{{ akinaiHead }}}
+    <link rel="stylesheet" href="{{ assetUrl('base.css') }}" />
+  </head>
+  <body
+    class="font-{{ settings.font_body }}"
+    style="--color-bg: {{ settings.color_background }}; --color-text: {{ settings.color_text }}; --color-accent: {{ settings.color_accent }}; --color-accent-text: {{ settings.color_accent_text }}; --color-muted: {{ settings.color_muted }}; --page-width: {{ settings.page_width }}px; --radius: {{ settings.corner_radius }}px; --font-scale: {{ settings.font_scale / 100 }};"
+  >
+    <a class="skip-link" href="#main">{{ t('general.skip_to_content') }}</a>
+    {{{ await renderSection('announcement_bar') }}}
+    {{{ await renderSection('header') }}}
+    <main id="main">
+      {{{ contentForLayout }}}
+    </main>
+    {{{ await renderSection('footer') }}}
+  </body>
+</html>

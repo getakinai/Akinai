@@ -1,0 +1,26 @@
+{
+  "name": "Image with text",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Image position",
+      "default": "image-first",
+      "options": [
+        { "value": "image-first", "label": "Image first" },
+        { "value": "text-first", "label": "Text first" }
+      ]
+    },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Image with text" },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Pair text with an image to focus on a product, collection or story.</p>"
+    },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop now" },
+    { "type": "url", "id": "button_link", "label": "Button link" }
+  ],
+  "presets": [{ "name": "Image with text" }]
+}

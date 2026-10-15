@@ -12,7 +12,9 @@ export class HttpError extends Error {
     message: string,
     public status: number,
     public fieldErrors: FieldErrors = {},
-    public code?: string
+    public code?: string,
+    /** Every message of an `{ errors: [{ message }, …] }` payload. */
+    public messages: string[] = [message]
   ) {
     super(message)
   }
@@ -96,10 +98,9 @@ function httpErrorFrom(status: number, payload: unknown): HttpError {
   }
 
   const errorsMessage = errorsMessageSchema.safeParse(payload)
-  return new HttpError(
-    errorsMessage.success ? errorsMessage.data.errors[0].message : 'Something went wrong',
-    status
-  )
+  if (!errorsMessage.success) return new HttpError('Something went wrong', status)
+  const messages = errorsMessage.data.errors.map((error) => error.message)
+  return new HttpError(messages[0], status, {}, undefined, messages)
 }
 
 /**

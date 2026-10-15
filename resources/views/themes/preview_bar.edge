@@ -1,0 +1,12 @@
+<style nonce="{{ cspNonce }}">
+  .akinai-preview-bar { position: sticky; top: 0; z-index: 2147483000; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; padding: 10px 16px; background: #0a0a0b; color: #fff; font: 500 13px/1.4 system-ui, sans-serif; box-shadow: 0 4px 16px rgba(0, 0, 0, .2); }
+  .akinai-preview-bar a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+  .akinai-preview-bar strong { font-weight: 600; }
+</style>
+<div class="akinai-preview-bar" role="region" aria-label="Theme preview">
+  <span>Previewing <strong>{{ themeName }}</strong>. Shoppers still see the live theme.</span>
+  @if(isStaff)
+    <a href="/admin/themes">Back to themes</a>
+  @end
+  <a href="/themes/preview/exit">Exit preview</a>
+</div>

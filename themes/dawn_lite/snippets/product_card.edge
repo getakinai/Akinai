@@ -1,0 +1,19 @@
+<a class="card" href="{{ route('storefront.products.show', { slug: product.slug }) }}">
+  <div class="card__media">
+    @if(product.imageUrl)
+      <img src="{{ product.imageUrl }}" alt="{{ product.title }}" loading="lazy" />
+    @else
+      <div class="placeholder" aria-hidden="true"></div>
+    @end
+    @if(product.label)
+      <span class="card__badge">{{ product.label }}</span>
+    @end
+  </div>
+  <div class="card__info">
+    @if(product.vendor)
+      <p class="card__vendor">{{ product.vendor }}</p>
+    @end
+    <h3 class="card__title">{{ product.title }}</h3>
+    @include('snippets/price')
+  </div>
+</a>

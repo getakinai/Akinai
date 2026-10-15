@@ -1,0 +1,11 @@
+@if(section.settings.text)
+  <div class="announcement">
+    <div class="page-width">
+      @if(section.settings.link)
+        <a href="{{ section.settings.link }}">{{ section.settings.text }}</a>
+      @else
+        <p>{{ section.settings.text }}</p>
+      @end
+    </div>
+  </div>
+@end

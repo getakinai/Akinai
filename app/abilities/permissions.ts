@@ -214,6 +214,13 @@ export const PERMISSION_SECTIONS = [
         actions: ['view', 'edit'],
       },
       {
+        key: 'themes',
+        label: 'Themes',
+        description:
+          'Upload storefront themes, preview them, and choose the live theme. Themes run code on the server, so only grant this to trusted staff',
+        actions: ['view', 'edit', 'upload', 'archive'],
+      },
+      {
         key: 'pages',
         label: 'Pages',
         description:

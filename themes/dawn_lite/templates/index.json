@@ -1,0 +1,57 @@
+{
+  "sections": {
+    "banner": {
+      "type": "image_banner",
+      "settings": { "height": "large", "alignment": "center", "overlay": 40 },
+      "blocks": {
+        "heading": { "type": "heading", "settings": { "heading": "Made to be used every day" } },
+        "text": {
+          "type": "text",
+          "settings": { "text": "<p>Discover our latest collection.</p>" }
+        },
+        "button": { "type": "button", "settings": { "label": "Shop now" } }
+      },
+      "block_order": ["heading", "text", "button"]
+    },
+    "plugin_hero": {
+      "type": "plugin_slot",
+      "settings": { "slot": "home.hero" }
+    },
+    "collections": {
+      "type": "home_collections",
+      "settings": { "limit": 3, "columns": 4 }
+    },
+    "story": {
+      "type": "image_with_text",
+      "settings": {
+        "heading": "Our story",
+        "text": "<p>We started with a simple idea: well-made things that last.</p>",
+        "button_label": "Read more"
+      }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "settings": { "heading": "What customers say" },
+      "blocks": {
+        "quote_1": {
+          "type": "quote",
+          "settings": { "quote": "Beautiful quality and super fast shipping.", "author": "Mia" }
+        },
+        "quote_2": {
+          "type": "quote",
+          "settings": { "quote": "My new favourite store.", "author": "Liam" }
+        },
+        "quote_3": {
+          "type": "quote",
+          "settings": { "quote": "Great service from start to finish.", "author": "Ava" }
+        }
+      },
+      "block_order": ["quote_1", "quote_2", "quote_3"]
+    },
+    "plugin_footer": {
+      "type": "plugin_slot",
+      "settings": { "slot": "home.footer" }
+    }
+  },
+  "order": ["banner", "plugin_hero", "collections", "story", "testimonials", "plugin_footer"]
+}

@@ -1,0 +1,13 @@
+<section class="page-width section rich-text rich-text--{{ section.settings.alignment }}">
+  @each(block in section.blocks)
+    <div {{{ block.attrs }}}>
+      @if(block.type === 'heading')
+        <h2>{{ block.settings.heading }}</h2>
+      @elseif(block.type === 'text')
+        <div class="rte">{{{ block.settings.text }}}</div>
+      @elseif(block.type === 'button' && block.settings.label)
+        <a class="button button--secondary" href="{{ block.settings.link || '#' }}">{{ block.settings.label }}</a>
+      @end
+    </div>
+  @end
+</section>

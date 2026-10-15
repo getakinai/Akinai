@@ -176,7 +176,12 @@ export const adminNav: AdminNavSectionGroup[] = [
         children: [
           { label: 'Menu', route: 'admin.storefront_menu.home', permission: 'storefront.view' },
           { label: 'Pages', route: 'admin.pages.home', permission: 'pages.view' },
-          { label: 'Theme', route: 'admin.storefront_theme.home', permission: 'storefront.view' },
+          { label: 'Themes', route: 'admin.themes.home', permission: 'themes.view' },
+          {
+            label: 'Built-in theme',
+            route: 'admin.storefront_theme.home',
+            permission: 'storefront.view',
+          },
         ],
       },
       {

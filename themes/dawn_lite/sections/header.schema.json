@@ -1,0 +1,23 @@
+{
+  "name": "Header",
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "Logo" },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width",
+      "min": 60,
+      "max": 240,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    { "type": "checkbox", "id": "show_menu", "label": "Show the store menu", "default": true },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "info": "Edit the menu in Online Store > Menu."
+    }
+  ]
+}

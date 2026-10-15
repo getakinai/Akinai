@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from '@adonisjs/inertia/react'
 import { Minus, Plus, Printer, ShoppingBasket, Trash2, X } from 'lucide-react'
 import { useCart } from 'snappycart'
+import { urlFor } from '~/client'
 import { cn, storefront } from '~/lib/styles'
 import CartPrintSheet, { PRINT_CART_CLASS } from './cart_print_sheet'
 import ImagePlaceholder from './image_placeholder'
@@ -15,6 +16,8 @@ type CartDrawerProps = {
   /** Branding for the printed cart. */
   storeName: string
   logoUrl?: string | null
+  /** Plain links instead of Inertia visits, for pages outside the Inertia app (themes). */
+  fullPageLinks?: boolean
 }
 
 export default function CartDrawer({
@@ -24,6 +27,7 @@ export default function CartDrawer({
   priceNote,
   storeName,
   logoUrl,
+  fullPageLinks = false,
 }: CartDrawerProps) {
   const { items, increment, decrement, removeItem, clear, subtotal, totalItems } = useCart()
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -207,13 +211,22 @@ export default function CartDrawer({
                   </p>
                 )}
               </div>
-              <Link
-                route="storefront.checkout.home"
-                className={cn(storefront.primaryButton, 'w-full')}
-                onClick={onClose}
-              >
-                Checkout
-              </Link>
+              {fullPageLinks ? (
+                <a
+                  href={urlFor('storefront.checkout.home')}
+                  className={cn(storefront.primaryButton, 'w-full')}
+                >
+                  Checkout
+                </a>
+              ) : (
+                <Link
+                  route="storefront.checkout.home"
+                  className={cn(storefront.primaryButton, 'w-full')}
+                  onClick={onClose}
+                >
+                  Checkout
+                </Link>
+              )}
               <button
                 type="button"
                 className="self-center text-[13px] font-medium text-sf-muted underline-offset-2 hover:text-sf-text hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"

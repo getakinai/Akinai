@@ -1,0 +1,31 @@
+<section class="page-width section product">
+  <div class="product__media">
+    @if(product.images.length)
+      @each(image in product.images.slice(0, section.settings.show_all_images ? 12 : 1))
+        <img src="{{ image }}" alt="{{ product.title }}" />
+      @end
+    @else
+      <div class="placeholder" aria-hidden="true"></div>
+    @end
+  </div>
+  <div class="product__info">
+    @if(section.settings.show_vendor && product.vendor)
+      <p class="product__vendor">{{ product.vendor }}</p>
+    @end
+    <h1>{{ product.title }}</h1>
+    @let(variant = product.variants[0])
+    @if(variant)
+      <p class="price">
+        {{ money(variant.price) }}
+        @if(variant.compareAtPrice)
+          <s class="price__compare">{{ money(variant.compareAtPrice) }}</s>
+        @end
+      </p>
+      @let(cartProps = { variantId: variant.id, price: variant.price, title: product.title, imageUrl: product.images[0], slug: product.slug, vendor: product.vendor, productId: product.id, label: t('products.add_to_cart'), soldOutLabel: t('products.sold_out'), class: 'button button--full' })
+      {{{ island('add_to_cart', cartProps) }}}
+    @end
+    @if(product.description)
+      <div class="rte product__description">{{{ product.description }}}</div>
+    @end
+  </div>
+</section>

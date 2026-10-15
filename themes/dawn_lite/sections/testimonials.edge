@@ -1,0 +1,15 @@
+@if(section.blocks.length)
+  <section class="page-width section">
+    @if(section.settings.heading)
+      <h2 class="section__title">{{ section.settings.heading }}</h2>
+    @end
+    <ul class="testimonials">
+      @each(block in section.blocks)
+        <li class="testimonial" {{{ block.attrs }}}>
+          <blockquote>“{{ block.settings.quote }}”</blockquote>
+          <p class="testimonial__author">{{ block.settings.author }}</p>
+        </li>
+      @end
+    </ul>
+  </section>
+@end

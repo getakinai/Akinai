@@ -1,0 +1,16 @@
+@let(collection = section.settings.collection)
+@if(collection)
+  <section class="page-width section">
+    <div class="section__header">
+      <h2>{{ section.settings.heading || collection.title }}</h2>
+      <a href="{{ route('storefront.collections.show', { slug: collection.slug }) }}">{{ t('collections.view_all') }}</a>
+    </div>
+    <ul class="product-grid" style="--columns: {{ section.settings.columns }}">
+      @each(product in collection.products.slice(0, section.settings.products_to_show))
+        <li>
+          @include('snippets/product_card')
+        </li>
+      @end
+    </ul>
+  </section>
+@end

@@ -1,0 +1,22 @@
+<footer class="site-footer">
+  <div class="page-width site-footer__inner">
+    <div class="site-footer__about">
+      <p class="site-footer__brand">{{ store.storeName }}</p>
+      @if(section.settings.text)
+        <div class="rte">{{{ section.settings.text }}}</div>
+      @end
+    </div>
+    @if(section.settings.show_policies && policies && policies.length)
+      <nav aria-label="{{ t('footer.policies') }}">
+        <ul class="site-footer__links">
+          @each(policy in policies)
+            <li><a href="{{ policy.href }}">{{ policy.title }}</a></li>
+          @end
+        </ul>
+      </nav>
+    @end
+  </div>
+  <div class="page-width site-footer__bottom">
+    <p>© {{ currentYear }} {{ store.storeName }}. {{ section.settings.copyright }}</p>
+  </div>
+</footer>

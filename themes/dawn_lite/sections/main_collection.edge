@@ -1,0 +1,18 @@
+<section class="page-width section">
+  <h1>{{ collection.title }}</h1>
+  @if(section.settings.show_description && collection.description)
+    <div class="rte collection__description">{{{ collection.description }}}</div>
+  @end
+  @let(products = collectionProducts ? collectionProducts.data : [])
+  @if(products.length)
+    <ul class="product-grid" style="--columns: {{ section.settings.columns }}">
+      @each(product in products)
+        <li>
+          @include('snippets/product_card')
+        </li>
+      @end
+    </ul>
+  @else
+    <p>{{ t('collections.empty') }}</p>
+  @end
+</section>

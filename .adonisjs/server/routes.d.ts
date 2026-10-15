@@ -318,6 +318,17 @@ export type ScannedRoutes = {
     'admin.plugins.list': { paramsTuple?: []; params?: {} }
     'admin.plugins.install': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
     'admin.plugins.uninstall': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
+    'admin.themes.home': { paramsTuple?: []; params?: {} }
+    'admin.themes.list': { paramsTuple?: []; params?: {} }
+    'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.share': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.store': { paramsTuple?: []; params?: {} }
+    'admin.themes.duplicate': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.unpublish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
     'admin.markets.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -391,6 +402,9 @@ export type ScannedRoutes = {
     'storefront.menu.list': { paramsTuple?: []; params?: {} }
     'storefront.plugins.list': { paramsTuple?: []; params?: {} }
     'storefront.hero_slides.list': { paramsTuple?: []; params?: {} }
+    'storefront.theme_assets.show': { paramsTuple: [ParamValue,...ParamValue[]]; params: {'hash': ParamValue,'*': ParamValue[]} }
+    'storefront.theme_preview.exit': { paramsTuple?: []; params?: {} }
+    'storefront.theme_preview.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'storefront.home_content.view': { paramsTuple?: []; params?: {} }
     'storefront.home.view': { paramsTuple?: []; params?: {} }
     'storefront.collections.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -653,6 +667,10 @@ export type ScannedRoutes = {
     'admin.storefront_featured_reviews.list': { paramsTuple?: []; params?: {} }
     'admin.plugins.home': { paramsTuple?: []; params?: {} }
     'admin.plugins.list': { paramsTuple?: []; params?: {} }
+    'admin.themes.home': { paramsTuple?: []; params?: {} }
+    'admin.themes.list': { paramsTuple?: []; params?: {} }
+    'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
     'admin.markets.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -684,6 +702,9 @@ export type ScannedRoutes = {
     'storefront.menu.list': { paramsTuple?: []; params?: {} }
     'storefront.plugins.list': { paramsTuple?: []; params?: {} }
     'storefront.hero_slides.list': { paramsTuple?: []; params?: {} }
+    'storefront.theme_assets.show': { paramsTuple: [ParamValue,...ParamValue[]]; params: {'hash': ParamValue,'*': ParamValue[]} }
+    'storefront.theme_preview.exit': { paramsTuple?: []; params?: {} }
+    'storefront.theme_preview.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'storefront.home_content.view': { paramsTuple?: []; params?: {} }
     'storefront.home.view': { paramsTuple?: []; params?: {} }
     'storefront.collections.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -912,6 +933,10 @@ export type ScannedRoutes = {
     'admin.storefront_featured_reviews.list': { paramsTuple?: []; params?: {} }
     'admin.plugins.home': { paramsTuple?: []; params?: {} }
     'admin.plugins.list': { paramsTuple?: []; params?: {} }
+    'admin.themes.home': { paramsTuple?: []; params?: {} }
+    'admin.themes.list': { paramsTuple?: []; params?: {} }
+    'admin.themes.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
     'admin.markets.view': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -943,6 +968,9 @@ export type ScannedRoutes = {
     'storefront.menu.list': { paramsTuple?: []; params?: {} }
     'storefront.plugins.list': { paramsTuple?: []; params?: {} }
     'storefront.hero_slides.list': { paramsTuple?: []; params?: {} }
+    'storefront.theme_assets.show': { paramsTuple: [ParamValue,...ParamValue[]]; params: {'hash': ParamValue,'*': ParamValue[]} }
+    'storefront.theme_preview.exit': { paramsTuple?: []; params?: {} }
+    'storefront.theme_preview.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'storefront.home_content.view': { paramsTuple?: []; params?: {} }
     'storefront.home.view': { paramsTuple?: []; params?: {} }
     'storefront.collections.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -1097,6 +1125,10 @@ export type ScannedRoutes = {
     'admin.storefront_theme.favicon.store': { paramsTuple?: []; params?: {} }
     'admin.storefront_promo_banners.image.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.plugins.install': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
+    'admin.themes.share': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.store': { paramsTuple?: []; params?: {} }
+    'admin.themes.duplicate': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.publish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.store': { paramsTuple?: []; params?: {} }
     'admin.markets.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1214,6 +1246,7 @@ export type ScannedRoutes = {
     'admin.storefront_promo_banners.reorder': { paramsTuple?: []; params?: {} }
     'admin.storefront_promo_banners.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_features.update': { paramsTuple?: []; params?: {} }
+    'admin.themes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.bulk.archive.update': { paramsTuple?: []; params?: {} }
     'admin.taxes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1252,6 +1285,8 @@ export type ScannedRoutes = {
     'admin.storefront_menu.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_promo_banners.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.plugins.uninstall': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
+    'admin.themes.unpublish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.shipping.rates.delete': { paramsTuple: [ParamValue,ParamValue]; params: {'zoneId': ParamValue,'id': ParamValue} }
     'admin.customer_segments.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.customers.addresses.delete': { paramsTuple: [ParamValue,ParamValue]; params: {'customerId': ParamValue,'id': ParamValue} }

@@ -1,0 +1,19 @@
+<section class="banner banner--{{ section.settings.height }} banner--{{ section.settings.alignment }}">
+  @if(section.settings.image)
+    <img class="banner__media" src="{{ section.settings.image.url }}" alt="" />
+  @end
+  <div class="banner__overlay" style="opacity: {{ section.settings.overlay / 100 }}"></div>
+  <div class="page-width banner__content">
+    @each(block in section.blocks)
+      <div {{{ block.attrs }}}>
+        @if(block.type === 'heading')
+          <h1 class="banner__heading">{{ block.settings.heading }}</h1>
+        @elseif(block.type === 'text')
+          <div class="banner__text rte">{{{ block.settings.text }}}</div>
+        @elseif(block.type === 'button' && block.settings.label)
+          <a class="button" href="{{ block.settings.link || '#' }}">{{ block.settings.label }}</a>
+        @end
+      </div>
+    @end
+  </div>
+</section>

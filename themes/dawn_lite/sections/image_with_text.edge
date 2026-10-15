@@ -1,0 +1,16 @@
+<section class="page-width section image-with-text image-with-text--{{ section.settings.layout }}">
+  <div class="image-with-text__media">
+    @if(section.settings.image)
+      <img src="{{ section.settings.image.url }}" alt="{{ section.settings.heading }}" loading="lazy" />
+    @else
+      <div class="placeholder" aria-hidden="true"></div>
+    @end
+  </div>
+  <div class="image-with-text__content">
+    <h2>{{ section.settings.heading }}</h2>
+    <div class="rte">{{{ section.settings.text }}}</div>
+    @if(section.settings.button_label)
+      <a class="button" href="{{ section.settings.button_link || '#' }}">{{ section.settings.button_label }}</a>
+    @end
+  </div>
+</section>
