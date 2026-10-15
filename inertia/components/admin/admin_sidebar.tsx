@@ -8,6 +8,7 @@ import { cn, iconButton } from '~/lib/styles'
 import { APP_NAME } from '~/lib/brand'
 import { useStorefrontTheme } from '~/pages/_hooks'
 import { useAdminMe } from '~/pages/admin/_hooks'
+import { useInstalledPluginKeys } from '~/pages/admin/plugins/_hooks'
 import { useAdminSupportOpenCount } from '~/pages/admin/support/tickets/_hooks'
 import {
   type AdminNavItem,
@@ -76,7 +77,8 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   const { data: user } = useAdminMe()
   const permissions = user?.permissions ?? []
   const supportOpen = useAdminSupportOpenCount(permissions.includes('support_tickets.view'))
-  const groups = visibleAdminNav(permissions)
+  const installedPlugins = useInstalledPluginKeys()
+  const groups = visibleAdminNav(permissions, installedPlugins)
   const settingsGroups = visibleAdminSettingsNav(permissions)
   const settingsItems = settingsGroups.flatMap((group) => group.items)
   const activeItem = findActiveNavItem(url, flattenAdminNav(groups, settingsGroups))
@@ -184,7 +186,6 @@ function PrimaryNav({
           {group.sections.map((section) => {
             const { label, route, icon: Icon, badge, children = [] } = section
             const active = isSectionActive(section, activeItem)
-            const expanded = active || section.alwaysOpen
             return (
               <div key={label} className="flex flex-col gap-0.5">
                 <NavLink
@@ -196,7 +197,7 @@ function PrimaryNav({
                   <span className="min-w-0 flex-1 truncate">{label}</span>
                   {badge && <CountBadge count={counts[badge]} />}
                 </NavLink>
-                {expanded &&
+                {active &&
                   children.map((child) => (
                     <NavLink
                       key={child.label}

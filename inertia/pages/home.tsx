@@ -8,8 +8,6 @@ import {
   CardSliderSkeleton,
   FeatureTiles,
   FeatureTilesSkeleton,
-  HeroSlider,
-  HeroSliderSkeleton,
   ImagePlaceholder,
   PromoBanner,
   PromoBannerSkeleton,
@@ -22,9 +20,10 @@ import { Skeleton } from '~/components/ui'
 import { collectionRailId } from '~/lib/collection_link'
 import type { MoneyFormat } from '~/lib/money'
 import { cn, storefront } from '~/lib/styles'
+import { PluginSlot } from '~/plugins'
+import { HeroSliderSkeleton } from '~/plugins/hero_slideshow/hero_slider'
 import {
   useStoreMoney,
-  useStorefrontHeroSlides,
   useStorefrontHome,
   useStorefrontHomeContent,
   useStorefrontTheme,
@@ -181,7 +180,6 @@ function RailSkeleton() {
 export default function Home(_props: StorefrontPrefetchProps) {
   const { data: home, isLoading, isError, refetch } = useStorefrontHome()
   const { data: theme } = useStorefrontTheme()
-  const { data: heroSlides, isLoading: heroLoading } = useStorefrontHeroSlides()
   const { data: content, isLoading: contentLoading } = useStorefrontHomeContent()
   const money = useStoreMoney()
   const features = content && content.features.length > 0 ? content.features : DEFAULT_FEATURES
@@ -193,13 +191,11 @@ export default function Home(_props: StorefrontPrefetchProps) {
     <>
       <Head title={theme?.footerTagline ?? ''} />
       <div className={storefront.container}>
-        {heroLoading ? (
-          <HeroSliderSkeleton />
-        ) : heroSlides && heroSlides.length > 0 ? (
-          <HeroSlider slides={heroSlides} />
-        ) : (
-          <StaticHero href={firstHref} />
-        )}
+        <PluginSlot
+          name="home.hero"
+          fallback={<StaticHero href={firstHref} />}
+          loading={<HeroSliderSkeleton />}
+        />
 
         {isLoading && <RailSkeleton />}
 
@@ -226,6 +222,8 @@ export default function Home(_props: StorefrontPrefetchProps) {
         )}
 
         {first && <ProductRail collection={first} money={money} />}
+
+        <PluginSlot name="home.after_first_rail" />
 
         {contentLoading ? (
           <PromoBannersSkeleton className={storefront.section} />
@@ -276,6 +274,8 @@ export default function Home(_props: StorefrontPrefetchProps) {
         )}
 
         {content && <PromoBanners banners={content.bottomBanners} className={storefront.section} />}
+
+        <PluginSlot name="home.footer" />
       </div>
     </>
   )

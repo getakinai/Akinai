@@ -3823,6 +3823,54 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_storefront_promo_banners_delete_controller').default['handle']>>>
     }
   }
+  'admin.plugins.home': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/plugins'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_home_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_home_controller').default['handle']>>>
+    }
+  }
+  'admin.plugins.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/plugins/list'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_list_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_list_controller').default['handle']>>>
+    }
+  }
+  'admin.plugins.install': {
+    methods: ["POST"]
+    pattern: '/admin/plugins/:key/install'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_plugins_install_validator').adminPluginsInstallValidator)>>
+      paramsTuple: [ParamValue]
+      params: { key: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_plugins_install_validator').adminPluginsInstallValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_install_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_install_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.plugins.uninstall': {
+    methods: ["DELETE"]
+    pattern: '/admin/plugins/:key/install'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_plugins_install_validator').adminPluginsInstallValidator)>>
+      paramsTuple: [ParamValue]
+      params: { key: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_plugins_install_validator').adminPluginsInstallValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_uninstall_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_plugins_uninstall_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'admin.markets.home': {
     methods: ["GET","HEAD"]
     pattern: '/admin/markets'
@@ -4589,6 +4637,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_hero_slides_list_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_hero_slides_list_controller').default['handle']>>>
+    }
+  }
+  'storefront.plugins.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/store/plugins'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_plugins_list_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/storefront/storefront_plugins_list_controller').default['handle']>>>
     }
   }
   'storefront.home_content.view': {

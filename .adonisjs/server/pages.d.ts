@@ -200,6 +200,9 @@ declare module '@adonisjs/inertia/types' {
     'admin/payments/_stripe_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_stripe_dialog.tsx'))['default']>
     'admin/payments/_types': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_types.ts'))['default']>
     'admin/payments/home': ExtractProps<(typeof import('../../inertia/pages/admin/payments/home.tsx'))['default']>
+    'admin/plugins/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/_hooks.ts'))['default']>
+    'admin/plugins/_types': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/_types.ts'))['default']>
+    'admin/plugins/home': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/home.tsx'))['default']>
     'admin/product_labels/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/product_labels/_hooks.ts'))['default']>
     'admin/product_labels/_product_label_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/product_labels/_product_label_dialog.tsx'))['default']>
     'admin/product_labels/_types': ExtractProps<(typeof import('../../inertia/pages/admin/product_labels/_types.ts'))['default']>

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ArrowRight, ChevronLeft, ChevronRight, Leaf } from 'lucide-react'
 import { cn, storefront } from '~/lib/styles'
-import ImagePlaceholder from './image_placeholder'
-import LoadingImage from './loading_image'
+import ImagePlaceholder from '~/components/storefront/image_placeholder'
+import LoadingImage from '~/components/storefront/loading_image'
 
 export type HeroSlide = {
   id: string

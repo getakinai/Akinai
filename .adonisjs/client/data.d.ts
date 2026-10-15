@@ -58,6 +58,7 @@ import type PaymentMarketTransformer from '#transformers/payment_market_transfor
 import type PaymentMethodListTransformer from '#transformers/payment_method_list_transformer'
 import type PlaceAddressTransformer from '#transformers/place_address_transformer'
 import type PlaceSuggestionTransformer from '#transformers/place_suggestion_transformer'
+import type PluginTransformer from '#transformers/plugin_transformer'
 import type PoliSetupTransformer from '#transformers/poli_setup_transformer'
 import type PricingMarketTransformer from '#transformers/pricing_market_transformer'
 import type ProductFacetsTransformer from '#transformers/product_facets_transformer'
@@ -316,6 +317,10 @@ export namespace Data {
   export type PlaceSuggestion = InferData<PlaceSuggestionTransformer>
   export namespace PlaceSuggestion {
     export type Variants = InferVariants<PlaceSuggestionTransformer>
+  }
+  export type Plugin = InferData<PluginTransformer>
+  export namespace Plugin {
+    export type Variants = InferVariants<PluginTransformer>
   }
   export type PoliSetup = InferData<PoliSetupTransformer>
   export namespace PoliSetup {

@@ -64,4 +64,5 @@ export const middleware = router.named({
   customerProfileComplete: () => import('#middleware/customer_profile_complete_middleware'),
   recaptcha: () => import('#middleware/recaptcha_middleware'),
   catalogToken: () => import('#middleware/catalog_token_middleware'),
+  plugin: () => import('#middleware/plugin_installed_middleware'),
 })

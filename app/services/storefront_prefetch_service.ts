@@ -1,6 +1,7 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import PageService from '#services/page_service'
+import PluginService from '#services/plugin_service'
 import StoreSettingService from '#services/store_setting_service'
 import StorefrontCatalogTokenService from '#services/storefront_catalog_token_service'
 import StorefrontCollectionService from '#services/storefront_collection_service'
@@ -11,6 +12,7 @@ import StorefrontMarketService from '#services/storefront_market_service'
 import StorefrontMenuService from '#services/storefront_menu_service'
 import StorefrontProductService from '#services/storefront_product_service'
 import StorefrontThemeService from '#services/storefront_theme_service'
+import PluginTransformer from '#transformers/plugin_transformer'
 import StoreSettingTransformer from '#transformers/store_setting_transformer'
 import StorefrontCollectionTransformer from '#transformers/storefront_collection_transformer'
 import StorefrontHeroSlideTransformer from '#transformers/storefront_hero_slide_transformer'
@@ -49,21 +51,26 @@ export default class StorefrontPrefetchService {
     protected storefrontHomeContentService: StorefrontHomeContentService,
     protected storefrontProductService: StorefrontProductService,
     protected storefrontCollectionService: StorefrontCollectionService,
-    protected catalogTokenService: StorefrontCatalogTokenService
+    protected catalogTokenService: StorefrontCatalogTokenService,
+    protected pluginService: PluginService
   ) {}
 
   async home(ctx: HttpContext) {
     if (this.isInertiaVisit(ctx)) return null
-    const { market, layout } = await this.layout(ctx)
+    const { market, layout, installedKeys } = await this.layout(ctx)
     const [home, heroSlides, homeContent] = await Promise.all([
       this.storefrontHomeService.get(market),
-      this.storefrontHeroSlideService.listPublic(),
+      installedKeys.includes('hero_slideshow')
+        ? this.storefrontHeroSlideService.listPublic()
+        : null,
       this.storefrontHomeContentService.get(),
     ])
     return {
       ...layout,
       home: StorefrontHomeTransformer.transform(home),
-      heroSlides: StorefrontHeroSlideTransformer.transform(heroSlides).useVariant('toPublic'),
+      heroSlides: heroSlides
+        ? StorefrontHeroSlideTransformer.transform(heroSlides).useVariant('toPublic')
+        : null,
       homeContent: StorefrontHomeContentTransformer.transform(homeContent).depth(2),
     }
   }
@@ -132,16 +139,20 @@ export default class StorefrontPrefetchService {
 
   /** What the storefront header and footer show on every page. */
   protected async layout(ctx: HttpContext) {
-    const [settings, theme, menu, policies, marketState] = await Promise.all([
+    const [settings, theme, menu, policies, marketState, catalog] = await Promise.all([
       this.storeSettingService.get(),
       this.storefrontThemeService.get(),
       this.storefrontMenuService.listPublic(),
       this.pageService.policies(),
       this.storefrontMarketService.state(ctx),
+      this.pluginService.catalog(),
     ])
+    const installed = catalog.filter((plugin) => plugin.isInstalled)
     return {
       market: marketState.current,
+      installedKeys: installed.map((plugin) => plugin.key),
       layout: {
+        plugins: PluginTransformer.transform(installed).useVariant('toPublic'),
         settings: StoreSettingTransformer.transform(settings).useVariant('toPublic'),
         theme: StorefrontThemeTransformer.transform(theme).useVariant('toPublic'),
         menu: StorefrontMenuItemTransformer.transform(menu).useVariant('toPublic'),

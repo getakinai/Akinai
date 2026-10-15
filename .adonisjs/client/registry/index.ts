@@ -1914,6 +1914,30 @@ const routes = {
     tokens: [{"old":"/admin/storefront/promo-banners/:id","type":0,"val":"admin","end":""},{"old":"/admin/storefront/promo-banners/:id","type":0,"val":"storefront","end":""},{"old":"/admin/storefront/promo-banners/:id","type":0,"val":"promo-banners","end":""},{"old":"/admin/storefront/promo-banners/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['admin.storefront_promo_banners.delete']['types'],
   },
+  'admin.plugins.home': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/plugins',
+    tokens: [{"old":"/admin/plugins","type":0,"val":"admin","end":""},{"old":"/admin/plugins","type":0,"val":"plugins","end":""}],
+    types: placeholder as Registry['admin.plugins.home']['types'],
+  },
+  'admin.plugins.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/plugins/list',
+    tokens: [{"old":"/admin/plugins/list","type":0,"val":"admin","end":""},{"old":"/admin/plugins/list","type":0,"val":"plugins","end":""},{"old":"/admin/plugins/list","type":0,"val":"list","end":""}],
+    types: placeholder as Registry['admin.plugins.list']['types'],
+  },
+  'admin.plugins.install': {
+    methods: ["POST"],
+    pattern: '/admin/plugins/:key/install',
+    tokens: [{"old":"/admin/plugins/:key/install","type":0,"val":"admin","end":""},{"old":"/admin/plugins/:key/install","type":0,"val":"plugins","end":""},{"old":"/admin/plugins/:key/install","type":1,"val":"key","end":""},{"old":"/admin/plugins/:key/install","type":0,"val":"install","end":""}],
+    types: placeholder as Registry['admin.plugins.install']['types'],
+  },
+  'admin.plugins.uninstall': {
+    methods: ["DELETE"],
+    pattern: '/admin/plugins/:key/install',
+    tokens: [{"old":"/admin/plugins/:key/install","type":0,"val":"admin","end":""},{"old":"/admin/plugins/:key/install","type":0,"val":"plugins","end":""},{"old":"/admin/plugins/:key/install","type":1,"val":"key","end":""},{"old":"/admin/plugins/:key/install","type":0,"val":"install","end":""}],
+    types: placeholder as Registry['admin.plugins.uninstall']['types'],
+  },
   'admin.markets.home': {
     methods: ["GET","HEAD"],
     pattern: '/admin/markets',
@@ -2297,6 +2321,12 @@ const routes = {
     pattern: '/store/hero-slides',
     tokens: [{"old":"/store/hero-slides","type":0,"val":"store","end":""},{"old":"/store/hero-slides","type":0,"val":"hero-slides","end":""}],
     types: placeholder as Registry['storefront.hero_slides.list']['types'],
+  },
+  'storefront.plugins.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/store/plugins',
+    tokens: [{"old":"/store/plugins","type":0,"val":"store","end":""},{"old":"/store/plugins","type":0,"val":"plugins","end":""}],
+    types: placeholder as Registry['storefront.plugins.list']['types'],
   },
   'storefront.home_content.view': {
     methods: ["GET","HEAD"],

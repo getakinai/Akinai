@@ -1215,9 +1215,11 @@ router
             router
               .get('storefront/hero', [controllers.admin.AdminStorefrontHeroHome])
               .as('admin.storefront_hero.home')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .get('storefront/hero-slides/list', [controllers.admin.AdminStorefrontHeroSlidesList])
               .as('admin.storefront_hero.list')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .get('storefront/content', [controllers.admin.AdminStorefrontContentHome])
               .as('admin.storefront_content.home')
@@ -1245,6 +1247,7 @@ router
             router
               .post('storefront/hero-slides', [controllers.admin.AdminStorefrontHeroSlidesStore])
               .as('admin.storefront_hero.store')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .post('storefront/promo-banners', [
                 controllers.admin.AdminStorefrontPromoBannersStore,
@@ -1272,11 +1275,13 @@ router
                 controllers.admin.AdminStorefrontHeroSlidesReorder,
               ])
               .as('admin.storefront_hero.reorder')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .put('storefront/hero-slides/:id', [
                 controllers.admin.AdminStorefrontHeroSlidesUpdate,
               ])
               .as('admin.storefront_hero.update')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .put('storefront/content', [controllers.admin.AdminStorefrontContentUpdate])
               .as('admin.storefront_content.update')
@@ -1315,11 +1320,13 @@ router
                 controllers.admin.AdminStorefrontHeroSlideImageStore,
               ])
               .as('admin.storefront_hero.image.store')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .delete('storefront/hero-slides/:id/image', [
                 controllers.admin.AdminStorefrontHeroSlideImageDelete,
               ])
               .as('admin.storefront_hero.image.delete')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .post('storefront/promo-banners/:id/image', [
                 controllers.admin.AdminStorefrontPromoBannerImageStore,
@@ -1343,6 +1350,7 @@ router
                 controllers.admin.AdminStorefrontHeroSlidesDelete,
               ])
               .as('admin.storefront_hero.delete')
+              .use(middleware.plugin({ key: 'hero_slideshow' }))
             router
               .delete('storefront/promo-banners/:id', [
                 controllers.admin.AdminStorefrontPromoBannersDelete,
@@ -1350,6 +1358,26 @@ router
               .as('admin.storefront_promo_banners.delete')
           })
           .use(middleware.can({ permission: 'storefront.archive' }))
+
+        router
+          .group(() => {
+            router.get('plugins', [controllers.admin.AdminPluginsHome]).as('admin.plugins.home')
+            router
+              .get('plugins/list', [controllers.admin.AdminPluginsList])
+              .as('admin.plugins.list')
+          })
+          .use(middleware.can({ permission: 'plugins.view' }))
+
+        router
+          .group(() => {
+            router
+              .post('plugins/:key/install', [controllers.admin.AdminPluginsInstall])
+              .as('admin.plugins.install')
+            router
+              .delete('plugins/:key/install', [controllers.admin.AdminPluginsUninstall])
+              .as('admin.plugins.uninstall')
+          })
+          .use(middleware.can({ permission: 'plugins.edit' }))
 
         router
           .group(() => {
@@ -1623,6 +1651,10 @@ router.get('store/menu', [controllers.storefront.StorefrontMenuList]).as('storef
 router
   .get('store/hero-slides', [controllers.storefront.StorefrontHeroSlidesList])
   .as('storefront.hero_slides.list')
+  .use(middleware.plugin({ key: 'hero_slideshow' }))
+router
+  .get('store/plugins', [controllers.storefront.StorefrontPluginsList])
+  .as('storefront.plugins.list')
 router
   .get('store/home-content', [controllers.storefront.StorefrontHomeContentView])
   .as('storefront.home_content.view')

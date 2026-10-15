@@ -79,6 +79,18 @@ export const StorefrontHeroSlidesResponseSchema = z.object({
   data: z.array(StorefrontHeroSlideSchema),
 })
 
+/** An installed plugin and the template slots it fills. */
+export const StorefrontPluginSchema = z.object({
+  key: z.string(),
+  slots: z.array(z.string()),
+})
+
+export type StorefrontPlugin = z.infer<typeof StorefrontPluginSchema>
+
+export const StorefrontPluginsResponseSchema = z.object({
+  data: z.array(StorefrontPluginSchema),
+})
+
 export const StorefrontPromoBannerSchema = z.object({
   id: z.string(),
   eyebrow: z.string().nullable(),
@@ -302,8 +314,9 @@ export const StorefrontPrefetchSchema = z.object({
   menu: z.array(StorefrontMenuItemSchema),
   policies: z.array(StorefrontPolicySchema),
   market: StorefrontMarketSchema,
+  plugins: z.array(StorefrontPluginSchema),
   home: StorefrontHomeSchema.optional(),
-  heroSlides: z.array(StorefrontHeroSlideSchema).optional(),
+  heroSlides: z.array(StorefrontHeroSlideSchema).nullable().optional(),
   homeContent: StorefrontHomeContentResponseSchema.shape.data.optional(),
   product: StorefrontProductSchema.nullable().optional(),
   collection: StorefrontCollectionSchema.nullable().optional(),

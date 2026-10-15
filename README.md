@@ -23,7 +23,8 @@ Work through these in order. It takes about an hour.
 2. **Understand the shape**: read [docs/architecture.md](docs/architecture.md). It covers the request flow, the two account types, permissions and the frontend data flow.
 3. **Learn the rules**: read [CONTRIBUTING.md](CONTRIBUTING.md) for conventions, naming, commit format and the PR checklist.
 4. **Trace one feature**: follow **Locations** from `start/routes.ts` (search `admin.locations`) through its controllers, service, repository and `inertia/pages/admin/locations/`. It is the smallest complete CRUD feature.
-5. **Build something**: use [docs/adding-a-feature.md](docs/adding-a-feature.md) as a checklist for your first change, and check it against [docs/security.md](docs/security.md).
+5. **Build something**: use [docs/adding-a-feature.md](docs/adding-a-feature.md) as a checklist for your first change, and check it against [docs/security.md](docs/security.md). 
+6. **PLUGINS**: To add an optional storefront feature that staff can install from **Plugins**, follow [docs/creating-a-plugin.md](docs/creating-a-plugin.md).
 
 ## Technology
 
@@ -87,6 +88,7 @@ inertia/
   layouts/        Admin and storefront layouts
   lib/            http(), form helpers, styles
   pages/          admin/, customers/, errors/, home.tsx
+  plugins/        Storefront plugins and the slots they render in (see docs/creating-a-plugin.md)
 scripts/          setup.sh (used by yarn setup)
 start/            Routes, kernel (middleware), env validation
 tests/            unit/ and functional/ Japa suites

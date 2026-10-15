@@ -23,7 +23,6 @@ import {
   StorefrontCollectionFiltersResponseSchema,
   StorefrontCollectionProductsResponseSchema,
   StorefrontCollectionResponseSchema,
-  StorefrontHeroSlidesResponseSchema,
   StorefrontHomeContentResponseSchema,
   StorefrontHomeResponseSchema,
   StorefrontMarketResponseSchema,
@@ -31,6 +30,7 @@ import {
   type StorefrontMarketUpdate,
   StorefrontMenuResponseSchema,
   StorefrontPageResponseSchema,
+  StorefrontPluginsResponseSchema,
   StorefrontPoliciesResponseSchema,
   StorefrontPrefetchSchema,
   StorefrontProductResponseSchema,
@@ -51,6 +51,7 @@ export const storefrontKeys = {
   theme: ['store', 'storefront', 'theme'] as const,
   menu: ['store', 'storefront', 'menu'] as const,
   home: ['store', 'storefront', 'home'] as const,
+  plugins: ['store', 'storefront', 'plugins'] as const,
   heroSlides: ['store', 'storefront', 'hero-slides'] as const,
   homeContent: ['store', 'storefront', 'home-content'] as const,
   search: (q: string) => ['store', 'storefront', 'search', q] as const,
@@ -94,6 +95,7 @@ export function seedStorefrontQueries(queryClient: QueryClient, props: Record<st
   queryClient.setQueryData(storefrontKeys.menu, data.menu)
   queryClient.setQueryData(storefrontKeys.policies, data.policies)
   queryClient.setQueryData(storefrontKeys.market, data.market)
+  queryClient.setQueryData(storefrontKeys.plugins, data.plugins)
   if (data.home) queryClient.setQueryData(storefrontKeys.home, data.home)
   if (data.heroSlides) queryClient.setQueryData(storefrontKeys.heroSlides, data.heroSlides)
   if (data.homeContent) queryClient.setQueryData(storefrontKeys.homeContent, data.homeContent)
@@ -310,17 +312,16 @@ export function useStorefrontHome() {
   })
 }
 
-export async function fetchStorefrontHeroSlides() {
-  const { data } = await http('/store/hero-slides', {
-    schema: StorefrontHeroSlidesResponseSchema,
-  })
+export async function fetchStorefrontPlugins() {
+  const { data } = await http('/store/plugins', { schema: StorefrontPluginsResponseSchema })
   return data
 }
 
-export function useStorefrontHeroSlides() {
+/** Plugins staff installed, which decide what each template slot renders. */
+export function useStorefrontPlugins() {
   return useQuery({
-    queryKey: storefrontKeys.heroSlides,
-    queryFn: fetchStorefrontHeroSlides,
+    queryKey: storefrontKeys.plugins,
+    queryFn: fetchStorefrontPlugins,
     staleTime: 5 * 60 * 1000,
   })
 }

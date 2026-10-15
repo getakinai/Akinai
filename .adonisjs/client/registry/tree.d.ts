@@ -617,6 +617,12 @@ export interface ApiDefinition {
     storefrontFeaturedReviews: {
       list: typeof routes['admin.storefront_featured_reviews.list']
     }
+    plugins: {
+      home: typeof routes['admin.plugins.home']
+      list: typeof routes['admin.plugins.list']
+      install: typeof routes['admin.plugins.install']
+      uninstall: typeof routes['admin.plugins.uninstall']
+    }
     markets: {
       home: typeof routes['admin.markets.home']
       list: typeof routes['admin.markets.list']
@@ -738,6 +744,9 @@ export interface ApiDefinition {
     }
     heroSlides: {
       list: typeof routes['storefront.hero_slides.list']
+    }
+    plugins: {
+      list: typeof routes['storefront.plugins.list']
     }
     homeContent: {
       view: typeof routes['storefront.home_content.view']

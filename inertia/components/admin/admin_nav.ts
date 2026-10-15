@@ -12,6 +12,7 @@ import {
   Newspaper,
   Package,
   Percent,
+  Puzzle,
   Receipt,
   ShieldCheck,
   ShoppingBag,
@@ -26,19 +27,19 @@ import { type NavItem } from '~/components/nav_link'
 
 export type AdminNavItem = NavItem & {
   permission?: string
+  /** Hidden while this plugin is uninstalled. */
+  plugin?: string
   /** Live count shown next to the label. */
   badge?: 'support_open'
 }
 
 /**
  * A top-level entry in the primary sidebar. It links to its own route, and
- * its `children` only show (indented) while the section is active, unless
- * `alwaysOpen` is set.
+ * its `children` only show (indented) while the section is active.
  */
 export type AdminNavSection = AdminNavItem & {
   icon: LucideIcon
   children?: AdminNavItem[]
-  alwaysOpen?: boolean
 }
 
 export type AdminNavSectionGroup = {
@@ -70,7 +71,6 @@ export const adminNav: AdminNavSectionGroup[] = [
         route: 'admin.orders.home',
         icon: ShoppingBag,
         permission: 'orders.view',
-        alwaysOpen: true,
         children: [
           { label: 'Drafts', route: 'admin.orders.drafts.home', permission: 'orders.view' },
           { label: 'Returns', route: 'admin.returns.home', permission: 'orders.view' },
@@ -81,7 +81,6 @@ export const adminNav: AdminNavSectionGroup[] = [
         route: 'admin.products.home',
         icon: Package,
         permission: 'products.view',
-        alwaysOpen: true,
         children: [
           {
             label: 'Collections',
@@ -176,11 +175,22 @@ export const adminNav: AdminNavSectionGroup[] = [
         icon: Store,
         permission: 'storefront.view',
         children: [
-          { label: 'Hero', route: 'admin.storefront_hero.home', permission: 'storefront.view' },
+          {
+            label: 'Hero',
+            route: 'admin.storefront_hero.home',
+            permission: 'storefront.view',
+            plugin: 'hero_slideshow',
+          },
           { label: 'Menu', route: 'admin.storefront_menu.home', permission: 'storefront.view' },
           { label: 'Pages', route: 'admin.pages.home', permission: 'pages.view' },
           { label: 'Theme', route: 'admin.storefront_theme.home', permission: 'storefront.view' },
         ],
+      },
+      {
+        label: 'Plugins',
+        route: 'admin.plugins.home',
+        icon: Puzzle,
+        permission: 'plugins.view',
       },
     ],
   },
@@ -237,17 +247,28 @@ function permitted(item: AdminNavItem, permissions: string[]) {
   return !item.permission || permissions.includes(item.permission)
 }
 
+/** `installedPlugins` is null while it loads; plugin links stay visible meanwhile. */
+function pluginInstalled(item: AdminNavItem, installedPlugins: string[] | null) {
+  return !item.plugin || !installedPlugins || installedPlugins.includes(item.plugin)
+}
+
 /**
- * The primary nav trimmed to what the given permissions allow. A section the
- * user can't open itself still shows when they can open one of its children,
- * and then links to the first such child.
+ * The primary nav trimmed to what the given permissions and installed
+ * plugins allow. A section the user can't open itself still shows when they
+ * can open one of its children, and then links to the first such child.
  */
-export function visibleAdminNav(permissions: string[]): AdminNavSectionGroup[] {
+export function visibleAdminNav(
+  permissions: string[],
+  installedPlugins: string[] | null = null
+): AdminNavSectionGroup[] {
   return adminNav
     .map((group) => ({
       ...group,
       sections: group.sections.flatMap((section) => {
-        const children = (section.children ?? []).filter((child) => permitted(child, permissions))
+        if (!pluginInstalled(section, installedPlugins)) return []
+        const children = (section.children ?? []).filter(
+          (child) => permitted(child, permissions) && pluginInstalled(child, installedPlugins)
+        )
         if (permitted(section, permissions)) return [{ ...section, children }]
         const [first, ...rest] = children
         return first ? [{ ...section, route: first.route, children: rest }] : []

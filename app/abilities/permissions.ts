@@ -208,6 +208,12 @@ export const PERMISSION_SECTIONS = [
         actions: ['view', 'create', 'edit', 'archive', 'upload'],
       },
       {
+        key: 'plugins',
+        label: 'Plugins',
+        description: 'Install and uninstall storefront plugins such as the home hero slideshow',
+        actions: ['view', 'edit'],
+      },
+      {
         key: 'pages',
         label: 'Pages',
         description:
