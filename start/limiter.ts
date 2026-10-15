@@ -272,37 +272,6 @@ export const webhookThrottle = limiter.define('webhook', (ctx) => {
 })
 
 /**
- * Newsletter signups from the storefront footer, per IP. Each one writes a
- * customer profile.
- */
-export const newsletterThrottle = limiter.define('newsletter', (ctx) => {
-  return limiter
-    .allowRequests(5)
-    .every('1 minute')
-    .blockFor('15 mins')
-    .usingKey(`ip_${ctx.request.ip()}`)
-    .limitExceeded((error) => {
-      error.setMessage(tooManyAttemptsMessage(error.response.availableIn))
-    })
-})
-
-/**
- * Newsletter signups per email, so one address can't be resubscribed in a
- * loop from many IPs. Requests without an email are left to the validator.
- */
-export const newsletterEmailThrottle = limiter.define('newsletter_email', (ctx) => {
-  const email = String(ctx.request.input('email', '')).trim().toLowerCase().slice(0, 254)
-  if (!email) return null
-  return limiter
-    .allowRequests(3)
-    .every('1 hour')
-    .usingKey(`email_${email}`)
-    .limitExceeded((error) => {
-      error.setMessage(tooManyAttemptsMessage(error.response.availableIn))
-    })
-})
-
-/**
  * Placing an order, per IP.
  */
 export const checkoutThrottle = limiter.define('checkout', (ctx) => {

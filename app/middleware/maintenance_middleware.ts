@@ -13,9 +13,10 @@ const EXCLUDED_PATH_PREFIXES = ['/admin']
 /**
  * Crawler files stay reachable too, so search engines keep the crawl rules
  * (including the AI crawler blocks) while the storefront is down. The
- * maintenance page's own newsletter form posts to `/maintenance/newsletter`.
+ * maintenance page reads `/store/plugins` to mount installed plugins' forms,
+ * and the newsletter plugin's form posts to `/maintenance/newsletter`.
  */
-const EXCLUDED_PATHS = ['/robots.txt', '/sitemap.xml', '/maintenance/newsletter']
+const EXCLUDED_PATHS = ['/robots.txt', '/sitemap.xml', '/store/plugins', '/maintenance/newsletter']
 
 export function isExcludedFromMaintenance(path: string) {
   return (

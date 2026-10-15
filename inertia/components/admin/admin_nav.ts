@@ -9,7 +9,6 @@ import {
   Inbox,
   LifeBuoy,
   Mail,
-  Newspaper,
   Package,
   Percent,
   Puzzle,
@@ -23,7 +22,8 @@ import {
   Warehouse,
 } from 'lucide-react'
 import { type LucideIcon } from 'lucide-react'
-import { type NavItem } from '~/components/nav_link'
+import { type NavItem, type NavRoute } from '~/components/nav_link'
+import type { AdminNavPlugin } from '~/pages/admin/plugins/_types'
 import { pluginRegistry } from '~/plugins/registry'
 
 export type AdminNavItem = NavItem & {
@@ -132,12 +132,6 @@ export const adminNav: AdminNavSectionGroup[] = [
         icon: Percent,
         permission: 'discounts.view',
       },
-      {
-        label: 'Newsletter',
-        route: 'admin.newsletter_subscribers.home',
-        icon: Newspaper,
-        permission: 'newsletter_subscribers.view',
-      },
     ],
   },
   {
@@ -194,22 +188,46 @@ export const adminNav: AdminNavSectionGroup[] = [
   },
 ]
 
+/** Nav groups that installed plugins of a category join automatically. */
+const CATEGORY_NAV_GROUPS: Record<string, string> = {
+  marketing: 'Marketing',
+}
+
+/** Sidebar sections for installed plugins whose category joins `groupLabel`. */
+function categorySections(groupLabel: string, plugins: AdminNavPlugin[]): AdminNavSection[] {
+  return plugins.flatMap((plugin) => {
+    if (!plugin.adminRoute || CATEGORY_NAV_GROUPS[plugin.category] !== groupLabel) return []
+    return [
+      {
+        label: plugin.name,
+        route: plugin.adminRoute as NavRoute,
+        icon: pluginRegistry[plugin.key]?.navIcon ?? Puzzle,
+        permission: plugin.adminPermission ?? undefined,
+      },
+    ]
+  })
+}
+
+/** `permissions` null keeps every plugin item, e.g. for page titles. */
 function mergePluginNav(
   groups: AdminNavSectionGroup[],
-  permissions: string[],
-  installedPlugins: string[] | null
+  permissions: string[] | null,
+  installedPlugins: AdminNavPlugin[] | null
 ): AdminNavSectionGroup[] {
   if (!installedPlugins) return groups
 
   return groups.map((group) => ({
     ...group,
-    sections: group.sections.map((section) => {
+    sections: [
+      ...group.sections,
+      ...(group.label ? categorySections(group.label, installedPlugins) : []),
+    ].map((section) => {
       const pluginChildren: AdminNavItem[] = []
-      for (const key of installedPlugins) {
+      for (const { key } of installedPlugins) {
         const entry = pluginRegistry[key]
         if (!entry?.adminNav || entry.adminNav.parentRoute !== section.route) continue
         for (const item of entry.adminNav.items) {
-          if (!item.permission || permissions.includes(item.permission)) {
+          if (!permissions || !item.permission || permissions.includes(item.permission)) {
             pluginChildren.push(item)
           }
         }
@@ -221,6 +239,13 @@ function mergePluginNav(
       }
     }),
   }))
+}
+
+/** The primary nav with installed plugins' entries, unfiltered by permission. */
+export function adminNavWithPlugins(
+  installedPlugins: AdminNavPlugin[] | null
+): AdminNavSectionGroup[] {
+  return mergePluginNav(adminNav, null, installedPlugins)
 }
 
 /**
@@ -281,7 +306,7 @@ function permitted(item: AdminNavItem, permissions: string[]) {
  */
 export function visibleAdminNav(
   permissions: string[],
-  installedPlugins: string[] | null = null
+  installedPlugins: AdminNavPlugin[] | null = null
 ): AdminNavSectionGroup[] {
   return mergePluginNav(adminNav, permissions, installedPlugins)
     .map((group) => ({

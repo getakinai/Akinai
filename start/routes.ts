@@ -25,8 +25,6 @@ import {
   impersonationThrottle,
   loginThrottle,
   marketThrottle,
-  newsletterEmailThrottle,
-  newsletterThrottle,
   orderDocumentThrottle,
   orderNoteReplyThrottle,
   otpThrottle,
@@ -903,24 +901,6 @@ router
         router
           .group(() => {
             router
-              .get('marketing/newsletter', [controllers.admin.AdminNewsletterSubscribersHome])
-              .as('admin.newsletter_subscribers.home')
-            router
-              .get('marketing/newsletter/list', [controllers.admin.AdminNewsletterSubscribersList])
-              .as('admin.newsletter_subscribers.list')
-          })
-          .use(middleware.can({ permission: 'newsletter_subscribers.view' }))
-
-        router
-          .put('marketing/newsletter/bulk/subscription', [
-            controllers.admin.AdminNewsletterSubscribersBulkSubscription,
-          ])
-          .as('admin.newsletter_subscribers.bulk.subscription.update')
-          .use(middleware.can({ permission: 'newsletter_subscribers.edit' }))
-
-        router
-          .group(() => {
-            router
               .get('settings', [controllers.admin.AdminStoreSettingsHome])
               .as('admin.store_settings.home')
             router
@@ -1332,6 +1312,8 @@ router
               .as('admin.plugins.list')
           })
           .use(middleware.can({ permission: 'plugins.view' }))
+
+        router.get('plugins/nav', [controllers.admin.AdminPluginsNavList]).as('admin.plugins.nav')
 
         router
           .group(() => {
@@ -1815,22 +1797,6 @@ router
   .post('store/analytics/events', [controllers.storefront.StorefrontAnalyticsEventsStore])
   .as('storefront.analytics.events.store')
   .use(analyticsEventThrottle)
-router
-  .post('newsletter', [controllers.storefront.StorefrontNewsletterStore])
-  .as('storefront.newsletter.store')
-  .use([
-    newsletterThrottle,
-    newsletterEmailThrottle,
-    middleware.recaptcha({ action: 'customer_newsletter' }),
-  ])
-router
-  .post('maintenance/newsletter', [controllers.storefront.StorefrontMaintenanceNewsletterStore])
-  .as('storefront.maintenance.newsletter.store')
-  .use([
-    newsletterThrottle,
-    newsletterEmailThrottle,
-    middleware.recaptcha({ action: 'maintenance_newsletter' }),
-  ])
 router
   .get('store/support/chat', [controllers.storefront.StorefrontSupportChatAsk])
   .as('storefront.support.chat.view')

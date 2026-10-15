@@ -1,4 +1,4 @@
-import type NewsletterSubscriber from '#models/newsletter_subscriber'
+import type NewsletterSubscriber from '../models/newsletter_subscriber.js'
 import { BaseTransformer } from '@adonisjs/core/transformers'
 
 export default class NewsletterSubscriberTransformer extends BaseTransformer<NewsletterSubscriber> {

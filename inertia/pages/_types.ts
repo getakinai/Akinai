@@ -364,13 +364,3 @@ export const StoredCartSchema = z.array(
 )
 
 export type StoredCart = z.infer<typeof StoredCartSchema>
-
-export const NewsletterFormSchema = z.object({
-  email: z.email('Enter a valid email address').trim().max(254),
-})
-
-export type NewsletterForm = z.infer<typeof NewsletterFormSchema>
-
-export const NewsletterResponseSchema = z.object({
-  data: z.object({ subscribed: z.boolean() }),
-})

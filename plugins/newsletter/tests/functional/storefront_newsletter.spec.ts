@@ -6,10 +6,10 @@ import limiter from '@adonisjs/limiter/services/main'
 import testUtils from '@adonisjs/core/services/test_utils'
 import Customer from '#models/customer'
 import CustomerAccount from '#models/customer_account'
-import NewsletterSubscriber from '#models/newsletter_subscriber'
 import RecaptchaService from '#services/recaptcha_service'
 import type { RecaptchaAction } from '#utils/verify_recaptcha'
 import { createCustomerAccount } from '#tests/helpers/customers'
+import NewsletterSubscriber from '../../server/models/newsletter_subscriber.js'
 
 let sequence = 0
 
@@ -91,14 +91,9 @@ test.group('Storefront newsletter', (group) => {
     assert.lengthOf(await Customer.query().where('email', customer.email), 1)
   })
 
-  test('an already opted-in customer keeps their original consent', async ({
-    client,
-    assert,
-  }) => {
+  test('an already opted-in customer keeps their original consent', async ({ client, assert }) => {
     const { customer } = await createCustomerAccount()
-    await customer
-      .merge({ acceptsMarketing: true, marketingConsentSource: 'signup' })
-      .save()
+    await customer.merge({ acceptsMarketing: true, marketingConsentSource: 'signup' }).save()
 
     const response = await subscribe(client, { email: customer.email })
 
@@ -230,10 +225,7 @@ test.group('Storefront newsletter: reCAPTCHA', (group) => {
     response.assertStatus(400)
   })
 
-  test('a passing check subscribes, using the newsletter action', async ({
-    client,
-    assert,
-  }) => {
+  test('a passing check subscribes, using the newsletter action', async ({ client, assert }) => {
     const fake = new FakeRecaptcha(true)
     app.container.swap(RecaptchaService, () => fake)
     const email = uniqueEmail()

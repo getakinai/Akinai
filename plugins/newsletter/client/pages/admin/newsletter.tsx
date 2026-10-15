@@ -13,7 +13,7 @@ import { useBulkSelection } from '~/hooks/use_bulk_selection'
 import { useListQueryState } from '~/hooks/use_list_query_state'
 import AdminLayout from '~/layouts/admin'
 import { card, dataTable, listToolbarSearch } from '~/lib/styles'
-import { useCan } from '../../_hooks'
+import { useCan } from '~/pages/admin/_hooks'
 import {
   useAdminNewsletterSubscribersInfinite,
   useBulkSetAdminNewsletterSubscribed,

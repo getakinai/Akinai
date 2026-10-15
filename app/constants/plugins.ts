@@ -7,6 +7,7 @@ export const PLUGIN_SLOTS = [
   'home.after_first_rail',
   'home.footer',
   'checkout.payment',
+  'layout.footer',
 ] as const
 
 export type PluginSlot = (typeof PLUGIN_SLOTS)[number]
@@ -33,6 +34,8 @@ export type PluginManifest = {
   defaultInstalled: boolean
   /** Back-office page where staff configure the plugin. */
   adminRoute: string | null
+  /** Permission needed to open `adminRoute`; hides its sidebar entry from other staff. */
+  adminPermission?: string
 }
 
 /** Re-exported from the plugin loader after boot. */

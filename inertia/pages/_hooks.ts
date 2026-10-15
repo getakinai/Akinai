@@ -10,14 +10,11 @@ import { catalogHttp } from '~/lib/catalog_http'
 import { http, HttpError, redirectResponseSchema } from '~/lib/http'
 import { FALLBACK_MONEY, type MoneyFormat } from '~/lib/money'
 import { toQueryString } from '~/lib/query_string'
-import { recaptchaHeaders, type RecaptchaAction } from '~/lib/recaptcha'
 import type { SortDirection, StorefrontCollectionSort } from '~/lib/storefront'
 import { checkoutKeys } from '~/pages/checkout/_hooks'
 import { EMPTY_FILTERS } from '~/pages/collections/_filters'
 import { pluginRegistry } from '~/plugins/registry'
 import {
-  NewsletterResponseSchema,
-  type NewsletterForm,
   StoreSettingsResponseSchema,
   StorefrontCartPricesResponseSchema,
   type CollectionFilters,
@@ -223,37 +220,6 @@ export async function updateStoreMarket(input: StorefrontMarketUpdate) {
     schema: StorefrontMarketResponseSchema,
   })
   return data
-}
-
-/**
- * Each newsletter form posts to its own route with its own bot-check action.
- * The maintenance route stays reachable while the store is down.
- */
-const NEWSLETTER_ENDPOINTS = {
-  footer: { url: '/newsletter', action: 'customer_newsletter' },
-  maintenance: { url: '/maintenance/newsletter', action: 'maintenance_newsletter' },
-} as const satisfies Record<string, { url: string; action: RecaptchaAction }>
-
-export type NewsletterSource = keyof typeof NEWSLETTER_ENDPOINTS
-
-export async function subscribeNewsletter(
-  payload: NewsletterForm,
-  source: NewsletterSource = 'footer'
-) {
-  const { url, action } = NEWSLETTER_ENDPOINTS[source]
-  return http(url, {
-    method: 'POST',
-    body: payload,
-    headers: await recaptchaHeaders(action),
-    schema: NewsletterResponseSchema,
-  })
-}
-
-/** Newsletter signup from the storefront footer or the maintenance page. */
-export function useSubscribeNewsletter(source: NewsletterSource = 'footer') {
-  return useMutation({
-    mutationFn: (payload: NewsletterForm) => subscribeNewsletter(payload, source),
-  })
 }
 
 /**

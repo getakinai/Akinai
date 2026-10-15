@@ -3,7 +3,8 @@ import { Link } from '@adonisjs/inertia/react'
 import { ChevronRight, Menu } from 'lucide-react'
 import { findActiveNavItem } from '~/components/nav_link'
 import { cn, iconButton } from '~/lib/styles'
-import { adminSettingsNav, flattenAdminNav } from './admin_nav'
+import { useAdminNavPlugins } from '~/pages/admin/plugins/_hooks'
+import { adminNavWithPlugins, adminSettingsNav, flattenAdminNav } from './admin_nav'
 import AdminUserMenu from './admin_user_menu'
 import NotificationsBell from './notifications_bell'
 
@@ -14,7 +15,8 @@ type AdminTopbarProps = {
 
 export default function AdminTopbar({ sidebarOpen, onMenuClick }: AdminTopbarProps) {
   const { url } = usePage()
-  const current = findActiveNavItem(url, flattenAdminNav())
+  const installedPlugins = useAdminNavPlugins()
+  const current = findActiveNavItem(url, flattenAdminNav(adminNavWithPlugins(installedPlugins)))
   const inSettings = !!current && adminSettingsNav.some((group) => group.items.includes(current))
 
   return (

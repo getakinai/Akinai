@@ -7,8 +7,8 @@ import { type FieldErrors } from '~/lib/http'
 import { MARKETING_CONSENT_HINT } from '~/lib/marketing'
 import { isRecaptchaConfigured, loadRecaptcha } from '~/lib/recaptcha'
 import { cn } from '~/lib/styles'
-import { type NewsletterSource, useSubscribeNewsletter } from '~/pages/_hooks'
-import { NewsletterFormSchema } from '~/pages/_types'
+import { type NewsletterSource, useSubscribeNewsletter } from './_hooks'
+import { NewsletterFormSchema } from './_types'
 
 type NewsletterFormProps = {
   variant?: NewsletterSource

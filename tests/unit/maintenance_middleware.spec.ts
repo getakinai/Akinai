@@ -21,6 +21,11 @@ test.group('isExcludedFromMaintenance', () => {
     assert.isFalse(isExcludedFromMaintenance('/maintenance/newsletter/extra'))
   })
 
+  test('excludes the installed plugins list the maintenance page reads', ({ assert }) => {
+    assert.isTrue(isExcludedFromMaintenance('/store/plugins'))
+    assert.isFalse(isExcludedFromMaintenance('/store/plugins/extra'))
+  })
+
   test('does not exclude storefront paths', ({ assert }) => {
     assert.isFalse(isExcludedFromMaintenance('/'))
     assert.isFalse(isExcludedFromMaintenance('/store/settings'))

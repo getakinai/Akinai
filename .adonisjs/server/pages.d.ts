@@ -137,9 +137,6 @@ declare module '@adonisjs/inertia/types' {
     'admin/locations/_location_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/locations/_location_dialog.tsx'))['default']>
     'admin/locations/_types': ExtractProps<(typeof import('../../inertia/pages/admin/locations/_types.ts'))['default']>
     'admin/locations/home': ExtractProps<(typeof import('../../inertia/pages/admin/locations/home.tsx'))['default']>
-    'admin/marketing/newsletter/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/marketing/newsletter/_hooks.ts'))['default']>
-    'admin/marketing/newsletter/_types': ExtractProps<(typeof import('../../inertia/pages/admin/marketing/newsletter/_types.ts'))['default']>
-    'admin/marketing/newsletter/home': ExtractProps<(typeof import('../../inertia/pages/admin/marketing/newsletter/home.tsx'))['default']>
     'admin/markets/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/markets/_hooks.ts'))['default']>
     'admin/markets/_market_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/markets/_market_dialog.tsx'))['default']>
     'admin/markets/_types': ExtractProps<(typeof import('../../inertia/pages/admin/markets/_types.ts'))['default']>

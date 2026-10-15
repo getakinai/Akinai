@@ -1,7 +1,7 @@
 import type { DateTime } from 'luxon'
 import { column } from '@adonisjs/lucid/orm'
 import BaseAppModel from '#models/base/base_app_model'
-import type { NewsletterSource } from '#constants/newsletter'
+import type { NewsletterSource } from '../constants.js'
 
 /**
  * Email signed up through a storefront newsletter form. Kept apart from

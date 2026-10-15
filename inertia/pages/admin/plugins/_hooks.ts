@@ -1,12 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '~/lib/http'
-import { storefrontKeys, useStorefrontPlugins } from '~/pages/_hooks'
+import { storefrontKeys } from '~/pages/_hooks'
 import { adminPaymentKeys } from '../payments/_hooks'
 import { EmptyResponseSchema } from '../storefront/_types'
-import { AdminPluginListResponseSchema } from './_types'
+import {
+  AdminNavPluginListResponseSchema,
+  AdminPluginListResponseSchema,
+  type AdminNavPlugin,
+} from './_types'
 
 export const adminPluginKeys = {
   all: ['admin', 'plugins'] as const,
+  nav: ['admin', 'plugins', 'nav'] as const,
 }
 
 export async function fetchAdminPlugins() {
@@ -44,8 +49,16 @@ export function useSetAdminPluginInstalled() {
   })
 }
 
-/** Keys of installed plugins, for hiding back-office links of uninstalled ones. */
-export function useInstalledPluginKeys(): string[] | null {
-  const { data } = useStorefrontPlugins()
-  return data ? data.map((plugin) => plugin.key) : null
+export async function fetchAdminNavPlugins() {
+  const { data } = await http('/admin/plugins/nav', { schema: AdminNavPluginListResponseSchema })
+  return data
+}
+
+/**
+ * Installed plugins for the admin sidebar: their back-office links and the
+ * marketing entries they add. Null while loading.
+ */
+export function useAdminNavPlugins(): AdminNavPlugin[] | null {
+  const { data } = useQuery({ queryKey: adminPluginKeys.nav, queryFn: fetchAdminNavPlugins })
+  return data ?? null
 }

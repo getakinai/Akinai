@@ -1,9 +1,9 @@
 import { inject } from '@adonisjs/core'
-import NewsletterSubscriber from '#models/newsletter_subscriber'
-import type { NewsletterSource } from '#constants/newsletter'
+import NewsletterSubscriber from '../models/newsletter_subscriber.js'
+import type { NewsletterSource } from '../constants.js'
 import NewsletterSubscriberRepository, {
   type PaginateNewsletterSubscribersData,
-} from '#repositories/newsletter_subscriber_repository'
+} from '../repositories/newsletter_subscriber_repository.js'
 import CustomerRepository from '#repositories/customer_repository'
 import AuditLogService from '#services/audit_log_service'
 import { bulkResult, type BulkResult } from '#transformers/bulk_result_transformer'

@@ -8,7 +8,7 @@ import { cn, iconButton } from '~/lib/styles'
 import { APP_NAME } from '~/lib/brand'
 import { useStorefrontTheme } from '~/pages/_hooks'
 import { useAdminMe } from '~/pages/admin/_hooks'
-import { useInstalledPluginKeys } from '~/pages/admin/plugins/_hooks'
+import { useAdminNavPlugins } from '~/pages/admin/plugins/_hooks'
 import { useAdminSupportOpenCount } from '~/pages/admin/support/tickets/_hooks'
 import {
   type AdminNavItem,
@@ -77,7 +77,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   const { data: user } = useAdminMe()
   const permissions = user?.permissions ?? []
   const supportOpen = useAdminSupportOpenCount(permissions.includes('support_tickets.view'))
-  const installedPlugins = useInstalledPluginKeys()
+  const installedPlugins = useAdminNavPlugins()
   const groups = visibleAdminNav(permissions, installedPlugins)
   const settingsGroups = visibleAdminSettingsNav(permissions)
   const settingsItems = settingsGroups.flatMap((group) => group.items)

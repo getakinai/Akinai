@@ -1,8 +1,8 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import NewsletterSubscriberService from '#services/newsletter_subscriber_service'
+import NewsletterSubscriberService from '../services/newsletter_subscriber_service.js'
 import BulkResultTransformer from '#transformers/bulk_result_transformer'
-import { adminNewsletterSubscribersBulkSubscriptionValidator } from '#validators/admin_newsletter_subscribers_bulk_subscription_validator'
+import { adminNewsletterSubscribersBulkSubscriptionValidator } from '../validators/admin_newsletter_subscribers_bulk_subscription_validator.js'
 
 @inject()
 export default class AdminNewsletterSubscribersBulkSubscriptionController {

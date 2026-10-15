@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import { NEWSLETTER_SOURCES } from '#constants/newsletter'
+import { NEWSLETTER_SOURCES } from '../constants.js'
 import { listQuerySchema } from '#validators/helpers/list_query'
 
 export const ADMIN_NEWSLETTER_SUBSCRIBERS_SORT_KEYS = ['email', 'subscribedAt'] as const

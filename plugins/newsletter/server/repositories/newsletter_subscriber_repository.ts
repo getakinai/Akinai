@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import NewsletterSubscriber from '#models/newsletter_subscriber'
-import type { NewsletterSource } from '#constants/newsletter'
+import NewsletterSubscriber from '../models/newsletter_subscriber.js'
+import type { NewsletterSource } from '../constants.js'
 import { bulkUpdate } from '#repositories/helpers/bulk_update'
 import { containsPattern } from '#repositories/helpers/like'
 

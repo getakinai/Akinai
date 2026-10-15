@@ -8,19 +8,19 @@ A plugin fills one or more **slots**. A slot is a named placeholder in a storefr
 
 Use the **Hero slideshow** plugin as the reference: `plugins/hero_slideshow/`.
 
-| Part | Reference |
-|---|---|
-| Folder layout | `plugins/hero_slideshow/` |
-| Server entry | `plugins/hero_slideshow/plugin.ts` |
-| Shared manifest | `plugins/hero_slideshow/manifest.ts` |
-| Slot names (core) | `app/constants/plugins.ts` (`PLUGIN_SLOTS`) |
-| Loader and registry | `app/plugins/loader.ts`, `app/plugins/registry.ts` |
-| Installed state | `app/services/plugin_service.ts`, table `plugin_installations` |
-| Route gating | `app/middleware/plugin_installed_middleware.ts` |
-| Client registry | `inertia/plugins/registry.ts` (`import.meta.glob` on `plugins/*/client/index.tsx`) |
-| Slot placeholder | `inertia/plugins/plugin_slot.tsx`, used in `inertia/pages/home.tsx` |
-| Marketplace page | `inertia/pages/admin/plugins/home.tsx` |
-| Tests | `plugins/hero_slideshow/tests/`, `tests/unit/plugin_service.spec.ts`, `tests/functional/admin/admin_plugins.spec.ts` |
+| Part                | Reference                                                                                                            |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Folder layout       | `plugins/hero_slideshow/`                                                                                            |
+| Server entry        | `plugins/hero_slideshow/plugin.ts`                                                                                   |
+| Shared manifest     | `plugins/hero_slideshow/manifest.ts`                                                                                 |
+| Slot names (core)   | `app/constants/plugins.ts` (`PLUGIN_SLOTS`)                                                                          |
+| Loader and registry | `app/plugins/loader.ts`, `app/plugins/registry.ts`                                                                   |
+| Installed state     | `app/services/plugin_service.ts`, table `plugin_installations`                                                       |
+| Route gating        | `app/middleware/plugin_installed_middleware.ts`                                                                      |
+| Client registry     | `inertia/plugins/registry.ts` (`import.meta.glob` on `plugins/*/client/index.tsx`)                                   |
+| Slot placeholder    | `inertia/plugins/plugin_slot.tsx`, used in `inertia/pages/home.tsx`                                                  |
+| Marketplace page    | `inertia/pages/admin/plugins/home.tsx`                                                                               |
+| Tests               | `plugins/hero_slideshow/tests/`, `tests/unit/plugin_service.spec.ts`, `tests/functional/admin/admin_plugins.spec.ts` |
 
 The example below adds a made-up `trust_badges` plugin that shows payment and delivery badges below the first product rail on the home page.
 
@@ -67,12 +67,13 @@ The server decides **whether** a plugin is installed. The client registry decide
 
 Available slots are listed in `PLUGIN_SLOTS` in `app/constants/plugins.ts`:
 
-| Slot | Where it renders |
-|---|---|
-| `home.hero` | Top of the home page |
-| `home.after_first_rail` | Home page, below the first product rail |
-| `home.footer` | Home page, below the bottom promo banners |
-| `checkout.payment` | Reserved for payment plugins; not placed in a template yet |
+| Slot                    | Where it renders                                           |
+| ----------------------- | ---------------------------------------------------------- |
+| `home.hero`             | Top of the home page                                       |
+| `home.after_first_rail` | Home page, below the first product rail                    |
+| `home.footer`           | Home page, below the bottom promo banners                  |
+| `layout.footer`         | Every storefront page, at the top of the site footer       |
+| `checkout.payment`      | Reserved for payment plugins; not placed in a template yet |
 
 To add a new slot:
 
@@ -125,13 +126,14 @@ Register routes in `server/routes.ts` the same way as core routes, using lazy co
 
 Render plugin admin pages with `pluginPage('trust_badges', 'admin/hero')` from `#plugin_host/pages` (returns `plugins/trust_badges/admin/hero` for Inertia).
 
-| Manifest field | Meaning |
-|---|---|
-| `key` | Unique, snake_case, permanent (stored in the database) |
-| `category` | One of `PLUGIN_CATEGORIES` |
-| `slots` | Slots this plugin fills |
-| `defaultInstalled` | Installed until staff uninstall; use `false` for new plugins |
-| `adminRoute` | Route name for **Configure** in the marketplace, or `null` |
+| Manifest field     | Meaning                                                         |
+| ------------------ | --------------------------------------------------------------- |
+| `key`              | Unique, snake_case, permanent (stored in the database)          |
+| `category`         | One of `PLUGIN_CATEGORIES`                                      |
+| `slots`            | Slots this plugin fills                                         |
+| `defaultInstalled` | Installed until staff uninstall; use `false` for new plugins    |
+| `adminRoute`       | Route name for **Configure** in the marketplace, or `null`      |
+| `adminPermission`  | Optional permission staff need to see the plugin's sidebar link |
 
 To ship default-installed on existing stores, add a migration under `plugins/<key>/migrations/` that inserts into `plugin_installations` (see `plugins/hero_slideshow/migrations/*_seed_hero_slideshow_installation.ts`).
 
@@ -165,6 +167,10 @@ async mediaUsages(key) {
   return rows.map((row) => ({ type: 'trust_badge', label: `Trust badge: ${row.label}` }))
 },
 ```
+
+Installed `marketing` plugins with an `adminRoute` get a link in the **Marketing** sidebar group automatically, named after the plugin and hidden from staff without `adminPermission`. Set `navIcon` (a Lucide icon) on the client entry to replace the default puzzle icon. The sidebar reads installed plugins from `GET /admin/plugins/nav`.
+
+If the plugin should also appear on the maintenance page, add `client/maintenance.tsx` with a default-exported component. The maintenance page mounts it while the plugin is installed (see `plugins/newsletter/client/maintenance.tsx`). Its routes must be listed in `EXCLUDED_PATHS` in `app/middleware/maintenance_middleware.ts` to work while the store is down.
 
 Optional sidebar links under **Storefront content** (or another section):
 
@@ -209,6 +215,12 @@ Bank transfer, Stripe and POLi ship as `payments` plugins (`plugins/bank_transfe
 - While a payment plugin is uninstalled, its method is left out of `/admin/payments` and checkout, and its admin setup routes return 404.
 - Webhooks and return pages stay open, so payments already in progress still settle after an uninstall.
 - Removing a payment plugin's folder also removes the method, because it no longer counts as installed.
+
+## Newsletter plugin
+
+The storefront newsletter signup ships as the `newsletter` plugin (`plugins/newsletter`, category `marketing`). It fills the `layout.footer` slot, adds the maintenance page form, and links **Newsletter** in the Marketing sidebar. While uninstalled, the footer band and maintenance form disappear and its storefront and admin routes return 404.
+
+Its `newsletter_subscribers` migration stays in core (`database/migrations`). Moving it would change the path Lucid records and re-run it on existing databases. Customer marketing consent, the `newsletter_subscribers.*` permissions and the reCAPTCHA actions also stay in core.
 
 ## 7. Before opening a PR
 

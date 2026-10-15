@@ -24,4 +24,12 @@ export default class PluginTransformer extends BaseTransformer<PluginCatalogEntr
   toPublic() {
     return this.pick(this.resource, ['key', 'slots'])
   }
+
+  /** What the admin sidebar needs to link to an installed plugin. */
+  toNav() {
+    return {
+      ...this.pick(this.resource, ['key', 'name', 'category', 'adminRoute']),
+      adminPermission: this.resource.adminPermission ?? null,
+    }
+  }
 }

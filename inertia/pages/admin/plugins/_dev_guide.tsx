@@ -1,7 +1,13 @@
 import type { ReactNode } from 'react'
 import { CATEGORIES } from './_categories'
 
-const SLOTS = ['home.hero', 'home.after_first_rail', 'home.footer', 'checkout.payment']
+const SLOTS = [
+  'home.hero',
+  'home.after_first_rail',
+  'home.footer',
+  'layout.footer',
+  'checkout.payment',
+]
 
 const LAYOUT = `plugins/trust_badges/
   manifest.ts        key, name, category, slots
@@ -120,6 +126,11 @@ export default function PluginDevGuide() {
         <p>
           A new category has to be added to <Code>PLUGIN_CATEGORIES</Code> in{' '}
           <Code>app/constants/plugins.ts</Code> first.
+        </p>
+        <p>
+          Installed <Code>marketing</Code> plugins with an <Code>adminRoute</Code> are linked in the
+          Marketing sidebar automatically. <Code>adminPermission</Code> hides the link from staff
+          without it, and <Code>navIcon</Code> on the client entry sets its icon.
         </p>
       </Step>
 

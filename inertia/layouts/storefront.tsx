@@ -24,13 +24,13 @@ import {
   ImpersonationBanner,
   MaintenanceBanner,
   MarketSwitcher,
-  NewsletterForm,
   SearchResults,
   StoreLogo,
   type MarketSwitcherOption,
   type SearchResultItem,
 } from '~/components/storefront'
 import { SearchInput, Skeleton } from '~/components/ui'
+import PluginSlot from '~/plugins/plugin_slot'
 import { CartDrawerContext } from '~/hooks/use_cart_drawer'
 import { useCartMarketSync, useCartPersistence } from '~/hooks/use_cart_persistence'
 import { trackEvent, usePageViewTracking } from '~/lib/analytics'
@@ -507,11 +507,7 @@ function StorefrontShell({ children }: { children: ReactNode }) {
         <main className="flex-1 pb-16">{children}</main>
 
         <footer className="bg-sf-primary text-sf-primary-fg">
-          <div className="border-b border-sf-primary-fg/15">
-            <div className={cn(storefront.container, 'py-8')}>
-              <NewsletterForm />
-            </div>
-          </div>
+          <PluginSlot name="layout.footer" />
           <div
             className={cn(
               storefront.container,
