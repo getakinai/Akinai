@@ -1,0 +1,26 @@
+---
+description: Put extra instructions and help text in info tooltips, not as visible text under fields and sections
+alwaysApply: true
+---
+
+# Help text goes in tooltips (hard rule)
+
+Forms and sections show only what the user must act on: labels, inputs, values and errors. Extra instructions (what a field means, examples, "leave blank to…", "enter 0 for…") go in an info tooltip next to the label or section title, so screens stay clean.
+
+## How
+
+- Fields: pass `tooltip` to the form component. `FormInput`, `FormSelectWithSearch` and `FormSwitch` already support it; add the same `tooltip?: ReactNode` prop (rendered with `InfoTooltip` beside the label, in a `relative` row) to any other form component that needs one.
+- Section titles and custom headings: render `<InfoTooltip label="About …">…</InfoTooltip>` from `~/components/ui` next to the title, inside a `relative` wrapper.
+- Keep tooltip text short (one or two sentences) and in plain language.
+
+## Keep visible (not in a tooltip)
+
+- Validation errors.
+- Status or state the user needs to see without hovering, e.g. "Only offered in New Zealand", "3 of 100 markets", empty states, warnings that block or change an action.
+- Placeholders in inputs (e.g. "No minimum").
+- Required legal or consent text (e.g. `<RecaptchaNotice />`, terms notices).
+
+## Hard bans
+
+- New `hint=` paragraphs or `text-muted` help lines under fields or section titles for instructions that fit in a tooltip.
+- Tooltips as the only place for errors, warnings or information needed to complete the task.

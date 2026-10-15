@@ -1,0 +1,73 @@
+---
+description: Hard rule — customers may only read or change records they own. Guard every customer `:id` route with the `customerOwns` middleware and scope queries by the session customer.
+globs: app/controllers/customers/**/*.ts,app/controllers/storefront/**/*.ts,app/middleware/**/*.ts,app/repositories/**/*.ts,app/validators/customers_*.ts,start/routes.ts
+alwaysApply: true
+---
+
+# Customer resource ownership (hard rule)
+
+A signed-in Customer may only view, update or delete records that belong to them. Ownership is always decided on the server from the **session customer**, never from anything the browser sends.
+
+## 1. Middleware on every customer `:id` route
+
+Every route under the `customer` guard that takes an `:id` of a customer-owned record must use the `customerOwns` named middleware (`app/middleware/customer_owns_middleware.ts`), after `auth({ guards: ['customer'] })`:
+
+```typescript
+router
+  .put('account/addresses/:id', [controllers.customers.CustomersAccountAddressesUpdate])
+  .as('customers.account.addresses.update')
+  .use(middleware.customerOwns({ resource: 'address' }))
+```
+
+- Applies to Inertia shells (`show`, `edit`) **and** JSON routes (`view`, `update`, `delete`).
+- It responds **404, not 403**, so other customers' ids are not revealed.
+- New owned resource? Add it to `OWNED_RESOURCES` in `app/repositories/customer_ownership_repository.ts` (table + extra scope, e.g. orders exclude `draft`), then use `customerOwns({ resource: '<name>' })`.
+
+Current coverage: `order` (`/account/orders/:id`, `/account/orders/view/:id`), `address` (`PUT`/`DELETE /account/addresses/:id`).
+
+## 2. Scope the query too (defense in depth)
+
+The middleware is the gate; the controller/service/repository must **still** load the record scoped by the session customer, so a missing middleware never leaks data:
+
+```typescript
+// ✅ GOOD
+const customer = await this.customerService.profileFor(ctx.auth.use('customer').getUserOrFail())
+const address = await this.customerAddressService.findForCustomerOrFail(customer.id, ctx.params.id)
+
+// ❌ BAD — unscoped lookup by id
+const address = await CustomerAddress.findOrFail(ctx.params.id)
+```
+
+Repository methods for customer-facing reads/writes take `customerId` and filter `where('customer_id', customerId)` (e.g. `findForCustomerOrFail`, `paginateForCustomer`).
+
+## 3. Never trust an owner id from the client
+
+- The customer is always `ctx.auth.use('customer')` → `CustomerService.profileFor(account)`.
+- Customer validators (`app/validators/customers_*`, `checkout_*`) must **not** accept `customerId`, `customer_id`, `accountId` or similar owner fields. Strip them by leaving them out of the schema.
+- Lists (`/account/*/list`) are filtered by the session customer; never accept a `customerId` query param on storefront routes.
+
+## 4. Guest checkout orders
+
+Checkout order routes (`/checkout/orders/view/:id`, `/checkout/orders/:id/payment`, `/checkout/orders/:id/stripe-return`) serve guests too, so they can't use `customerOwns`. They must go through `CheckoutService.findPlacedOrder` (order placed in this session **or** owned by the signed-in customer) and return 404 otherwise.
+
+## 5. Account activity log
+
+Customers see the updates and deletions they made in their own account at `/account/activity`.
+
+- The customer auth group runs `middleware.customerAuditActor()` after `auth({ guards: ['customer'] })`. It sets the audit actor to `{ userId: null, customerId, ipAddress }`, so model `save()` / `delete()` on customer routes write `audit_logs` rows with `customer_id`. Keep new `/account/*` routes inside that group.
+- Writes go through Lucid models (`merge().save()`, `delete()`) so they are logged. Query-builder `update()` / `delete()` skip the hooks and are not logged.
+- `AuditLogService.paginateForCustomer` filters by `customer_id` **and** `action IN ('updated', 'deleted')`. Changes staff make to a customer (`user_id` set, `customer_id` null) never show in the customer's feed.
+- Return entries through `CustomerActivityTransformer`. It drops `auditableId`, every `id` / `*Id` key in `changes`, and the staff-only `labels`. Never send the staff `AuditLogTransformer` output to customers.
+- Customer-owned models with no `name`-style column define `static auditLabelFor()` (e.g. `CustomerAddress` → `address1, city`) so entries have a readable label.
+
+## Hard bans
+
+- Serving customer activity through the staff `AuditLogTransformer`, or without the `customer_id` filter.
+- A customer `:id` route without `middleware.customerOwns(...)` (or, for guest checkout, without `findPlacedOrder`).
+- `Model.find(id)` / `findOrFail(id)` on customer-owned records in storefront/customer controllers or services.
+- Accepting an owner id (`customerId`, etc.) in a customer-facing request body or query.
+- Returning 403 for another customer's record (leaks existence) — use 404.
+
+## Tests
+
+Functional tests for each owned route must cover: owner succeeds, another customer gets 404, guest is redirected/401. Customer mutations that should be audited also need an activity test: the change shows in `/account/activity/list` without ids, and is not visible to other customers.

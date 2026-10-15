@@ -1,0 +1,92 @@
+# Local development only — PostgreSQL (app + test), Mailpit, Typesense and Redis.
+# The app itself runs on the host with `yarn dev`.
+#
+# The DB_* / TEST_DB_* / MAILPIT_* values come from the app's .env. Run from the repo root:
+#   yarn docker:up   (docker compose -f .infra/docker-compose.yml --env-file .env up -d)
+
+name: akinai
+
+services:
+  database:
+    container_name: akinai-database
+    # Keep in lockstep with CI. Postgres 18+ mounts at /var/lib/postgresql (not .../data).
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
+    volumes:
+      - postgres_volume:/var/lib/postgresql
+    ports:
+      - '127.0.0.1:${DB_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - app-local
+  databaseTest:
+    container_name: akinai-database-test
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_DB: ${TEST_DB_DATABASE:-test}
+      POSTGRES_USER: ${TEST_DB_USER:-test}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-test}
+    volumes:
+      - postgres_volume_test:/var/lib/postgresql
+    ports:
+      - '127.0.0.1:${TEST_DB_PORT:-5433}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - app-local
+  mailhog:
+    container_name: akinai-mailpit
+    # Mailpit: MailHog-compatible local SMTP catcher with arm64 support (Apple Silicon)
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025'
+      - '127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025'
+    networks:
+      - app-local
+  typesense:
+    container_name: akinai-typesense
+    # Product search index for @foadonis/magnify. Rebuild with `node ace search:reindex-products`.
+    image: typesense/typesense:29.0
+    restart: unless-stopped
+    command: '--data-dir /data --api-key=${TYPESENSE_API_KEY:-xyz} --enable-cors'
+    volumes:
+      - typesense_volume:/data
+    ports:
+      - '127.0.0.1:${TYPESENSE_PORT:-8108}:8108'
+    networks:
+      - app-local
+  redis:
+    container_name: akinai-redis
+    # Rate limiter store (@adonisjs/limiter). Counters are disposable, so no volume.
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${REDIS_PORT:-6379}:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - app-local
+networks:
+  app-local:
+    driver: bridge
+volumes:
+  postgres_volume:
+  postgres_volume_test:
+  typesense_volume:

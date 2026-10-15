@@ -1,0 +1,45 @@
+---
+description: Hard rule — every admin list page for a resource that can be archived (or has a draft/active status) must support multi-select bulk actions.
+alwaysApply: true
+---
+
+# List page bulk actions (hard rule)
+
+Every back-office list page (`inertia/pages/admin/<resource>/home.tsx`) whose resource can be **archived/unarchived** or has a **draft/active status** must let staff select rows (including "select all loaded rows") and apply bulk actions. When a new archivable resource is added, ship its bulk actions in the same PR as the list page.
+
+Current coverage: products, collections, product types, vendors, options, locations, customers, discounts, markets, taxes, shipping.
+
+## Actions
+
+| Resource has | Bulk actions | Permission |
+|---|---|---|
+| Archive / unarchive | Archive, Unarchive | `<resource>.archive` |
+| `draft` / `active` / `archived` status | Set active, Set draft (plus Archive, Unarchive) | `<resource>.edit` for status |
+
+## Backend
+
+- Routes go in the resource's existing permission group (the two-segment path never collides with `:id` routes):
+  - `PUT <resource>/bulk/archive` → `admin.<resource>.bulk.archive.update` (archive group)
+  - `PUT <resource>/bulk/status` → `admin.<resource>.bulk.status.update` (edit group)
+- Controllers: single action `Admin<Resource>BulkArchiveController` / `Admin<Resource>BulkStatusController`. Validate with the shared `adminBulkArchiveValidator` (`{ ids, archived }`) or `adminBulkStatusValidator` (`{ ids, status: 'draft' | 'active' }`). `ids` are capped at `MAX_BULK_IDS` (100) by `bulkIdsSchema`.
+- Repository: one `set…Many()` method built on `bulkUpdate()` from `#repositories/helpers/bulk_update` — one locking read plus one `UPDATE ... WHERE id IN (...)`. **Never loop `save()` per record.**
+- **The per-record policy rules must also hold in bulk.** Express them as `where` clauses in the `bulkUpdate` scope, so ineligible rows are skipped (not errored). Examples: the primary market, the default location, locations holding stock, options used by a product.
+- Service: `bulkSetArchived(ids, archived)` / `bulkSetStatus(ids, status)` calls the repository, records audit rows with `AuditLogService.recordBulkUpdate(Model, changed, changes)` (one insert), and returns `bulkResult(ids, changed)`.
+- Response: `ctx.serialize(BulkResultTransformer.transform(result))` → `{ data: { updated, skipped } }`.
+
+## Frontend
+
+- Hook in the page's `_hooks.ts`: `useBulkSetAdmin<Resource>Archived()` / `…Status()` wrapping `useAdminBulkArchive(url, keys.all)` / `useAdminBulkStatus(url, keys.all)` from `inertia/pages/admin/_hooks.ts` (invalidates on settle).
+- Page: `const selection = useBulkSelection([singular, plural])` from `~/hooks/use_bulk_selection`.
+  - Pass `selectedIds` / `onSelectionChange` to `InfiniteDataTable` **only when the user has a bulk permission**; otherwise omit them so no checkboxes render.
+  - Render `DataTableBulkBar` (above the table) with `BulkArchiveActions` / `BulkStatusActions` from `~/components/data_table`, gated by `useCan(...)`.
+  - Disable the buttons while a bulk mutation is pending or `selection.tooMany`.
+  - Pass `selection.feedback('archived' | 'unarchived' | 'activated' | 'set to draft')` as the mutation callbacks (toast with updated/skipped counts, clears selection).
+  - Call `selection.clear()` whenever the search or a filter changes.
+
+## Hard bans
+
+- Firing one request per selected row from the browser.
+- Per-record `save()` loops or per-id queries for bulk updates.
+- Bulk endpoints that bypass rules the single-record archive enforces.
+- Showing selection checkboxes to users who cannot perform any bulk action.

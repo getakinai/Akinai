@@ -1,0 +1,156 @@
+---
+description: React, TypeScript, TanStack Query, styling, accessibility and UX conventions for the Inertia frontend
+globs: inertia/**/*.ts,inertia/**/*.tsx
+alwaysApply: false
+---
+
+# React Frontend Conventions
+
+You are a senior React developer focused on scalable, maintainable, accessible applications.
+
+**Precedence:** `adonisjswithreact.mdc` and `inertia-no-direct-injection.mdc` always win over this file. Where this file conflicts with them or with established codebase patterns, follow the existing rules and patterns.
+
+## Style Guide
+
+- Be direct and concise, no unnecessary explanations
+- Do not add comments unless requested
+- Simplicity first: clarity and consistency over cleverness
+- Use subtle micro-interactions on interactive elements; animations enhance, never distract
+- Respect the design system and existing component patterns
+- Prioritize UX and follow modern React best practices
+
+## Tech Stack (actual)
+
+| Concern | Use | Do not introduce |
+|---|---|---|
+| UI | React 19 functional components + hooks | Class components (except error boundaries) |
+| Routing / navigation | Inertia (`router.visit`, `<Link>` from `@inertiajs/react`) | React Router |
+| Server state | TanStack Query via `_hooks.ts` + `http()` | SWR, ad-hoc `fetch` in components |
+| Validation / types | Zod schemas in `_types.ts`, `z.infer` | Inline schemas |
+| Forms | `inertia/components/form/*` + `inertia/lib/form.ts` helpers + `useMutation` | React Hook Form, Inertia `useForm` for API mutations |
+| Client state | `useState` / `useReducer` / Context | Zustand (ask first; only if cross-page client state is genuinely needed) |
+| Styling | Tailwind CSS v4 utilities (`@tailwindcss/vite`), theme tokens in `inertia/css/app.css` | New BEM/custom CSS classes, CSS-in-JS, shadcn/ui (ask first) |
+| Icons / toasts | `lucide-react`, `sonner` | Other icon/toast libraries |
+| Build | Vite via `@adonisjs/vite` | Separate Vite/Webpack configs |
+| Tests | Japa (`@japa/runner`, `@japa/browser-client`) | Vitest, Jest, Cypress (ask first) |
+
+Never add a dependency without asking. Use `yarn`.
+
+## Code Conventions
+
+- **File naming:** snake_case (`form_input_number.tsx`, `query_client.ts`). Page-private files start with `_` (`_hooks.ts`, `_types.ts`)
+- `*.tsx` for components, `*.ts` for hooks, utilities, schemas and config
+- **Default exports** for components and pages; **named exports** for hooks, utilities, schemas and types
+- **Import order:**
+  1. React and React-related (`react`, `@inertiajs/react`)
+  2. Third-party libraries (`@tanstack/react-query`, `zod`, `lucide-react`)
+  3. Internal aliases (`~/lib/*`, `~/components/*`)
+  4. Relative imports
+- **Code style** (enforced by `@adonisjs/prettier-config`): single quotes, 2-space indent, no semicolons, no trailing whitespace
+- Prefer `const`, template strings, optional chaining (`?.`) and nullish coalescing (`??`)
+
+## Styling (Tailwind CSS v4)
+
+- Style with Tailwind utility classes in `className`; no new custom CSS classes and no inline `style` (except truly dynamic values)
+- Use the project's semantic theme colors, never raw hex or Tailwind palette colors: `bg-paper`, `bg-card`, `text-ink`, `text-ink-2`, `text-muted`, `text-subtle`, `border-line`, `border-line-2`, `bg-btn`/`text-btn-fg`, `bg-field`, `ring-ring`, `text-ok`, `text-danger`. Fonts: `font-sans` (Inter, self-hosted via `@fontsource-variable/inter`), `font-mono`, `font-serif`. Never load fonts from Google Fonts or other CDNs. Card radius: `rounded-card`
+- Add new tokens in `inertia/css/app.css`: the raw value in `:root` and `:root[data-theme='dark']`, then map it in `@theme inline` as `--color-*`
+- Dark mode is driven by `data-theme` on `<html>`; tokens switch automatically, and the `dark:` variant is available for one-off overrides
+- Reuse shared class helpers from `inertia/lib/styles.ts` (`cn`, `buttonClasses`, `iconButton`, `field`, `panel`, `table`, `tag`, `inlineLink`, `auth`) before writing new long class strings; add a helper there when a pattern repeats in 2+ places
+- Style links that look like buttons with `buttonClasses({ variant, size })`
+- Focus states: `focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring`
+- Animations use `motion-safe:` so `prefers-reduced-motion` is respected
+- Plain CSS in `app.css` is only for base styles and third-party overrides that must beat unlayered library CSS (e.g. Sonner)
+
+## React Patterns
+
+- Functional components with hooks; extract reusable logic into custom hooks
+- Composition over inheritance; compound components for complex UI
+- Single responsibility per component; avoid prop drilling (lift into a hook or Context)
+- Render props / children-as-function only when composition alone is insufficient
+- Error boundaries around page sections that can fail independently
+- Keep components feature-based: page-specific components live next to the page; shared ones go in `inertia/components/`
+
+## Component Library
+
+Reusable UI lives in one library. Check it before writing new markup, and import from the folder barrels:
+
+```typescript
+import { Avatar, Badge, Checkbox, IconButton, SearchInput, Select, Skeleton } from '~/components/ui'
+import { DataTable, DataTableToolbar, InfiniteDataTable, type DataTableColumn } from '~/components/data_table'
+import { FormButton, FormCheckbox, FormInput, FormInputNumber, FormSelect } from '~/components/form'
+```
+
+| Folder | Holds |
+|---|---|
+| `components/ui/` | Presentational primitives without label/error wiring |
+| `components/form/` | Labelled form fields built on `ui/` primitives |
+| `components/data_table/` | The presentation-only table, toolbar, footer and pager |
+
+- Library components are domain-agnostic: no `http()`, TanStack Query, Inertia routes, or page `_hooks`/`_types` imports, and no record types such as `AdminUser`.
+- `DataTable` only renders the `rows` and `columns` it receives. Sorting and selection are controlled props plus callbacks; the page owns that state (`useListQueryState` in `~/hooks/`) and fetches the rows. Domain cells (badges, avatars, formatted dates) belong in the page's `columns` config.
+- Back-office list pages load rows in batches of 25: add a `useAdmin<Resource>Infinite(filters)` hook built on `useAdminInfiniteList` (`~/hooks/use_admin_infinite_list`) and render `<InfiniteDataTable list={list} errorMessage="…" />`. It handles the loading and error states and loads the next batch when its footer scrolls into view. Don't add page-number pagination to list pages.
+- Paginated list responses use `paginatedResponse(ItemSchema)` from `~/lib/schemas`; build query strings with `toQueryString()` from `~/lib/query_string`. On the backend, list validators use `listQuerySchema(sortKeys)` from `#validators/helpers/list_query`.
+- Add every new library component to its folder's `index.ts`. Move a page-local component into the library once a second page needs it.
+
+## TypeScript
+
+- Type component props explicitly (`type XProps = ...` or `interface`), extending native element attributes where relevant (see `FormButton`)
+- Use generics for reusable components; union types for variants (`'primary' | 'secondary' | 'ghost'`)
+- No `any`; use `unknown` and narrow, or derive types from Zod
+- Use utility types (`Pick`, `Omit`, `Partial`, `ComponentProps`)
+- Keep strict mode; `yarn typecheck` must pass
+
+## TanStack Query
+
+- All server state goes through TanStack Query hooks in `_hooks.ts`
+- Query keys are hierarchical arrays (`['admin', 'products', 'list', filters]`, `['admin', 'products', id]`)
+- Invalidate by key prefix after mutations; never rely on Inertia props for records
+- Use optimistic updates with rollback in `onError` where the UX benefits
+- Use `useInfiniteQuery` or paginated queries with `meta` for long lists
+- Prefetch (`queryClient.prefetchQuery`) on hover/intent for likely next views
+- Global defaults live in `inertia/lib/query_client.ts`
+
+## Performance
+
+- Measure before optimizing; `React.memo`, `useMemo` and `useCallback` only for proven or obviously expensive cases
+- Code-split heavy, rarely used UI with `React.lazy` + `Suspense`
+- Virtualize very large lists
+- Lazy-load below-the-fold images (`loading="lazy"`, explicit `width`/`height`)
+
+## Loading States
+
+- Handle `isLoading`, `isError` and `data` explicitly in every query consumer
+- Skeletons for content areas; spinners only for quick inline operations
+- Buttons show pending state via `FormButton`'s `loading` / `loadingText`
+- Keep stale data visible while refetching (stale-while-revalidate)
+- Prioritize above-the-fold content
+
+## Error Handling
+
+- Use `HttpError` from `inertia/lib/http.ts`; map 422 field errors with `zodFieldErrors()` / `handleMutationError()`
+- Show user-friendly messages (no stack traces or raw server text); use `sonner` toasts for non-field errors
+- Field-specific validation messages next to the field
+- Provide fallback UI for failed sections and a retry action (`refetch`)
+- Wrap async logic in `try/catch` where it isn't already handled by `useMutation`
+
+## Accessibility (WCAG 2.1 AA)
+
+- Semantic HTML first (`button`, `nav`, `main`, `label`, `table`); ARIA only when semantics are insufficient
+- Every input has an associated label; errors linked via `aria-describedby`
+- Full keyboard navigation with visible focus (`ring-ring`)
+- Sufficient color contrast in both light and dark themes
+- Respect `prefers-reduced-motion` for animations
+
+## Security
+
+- Validate input on the client (Zod) and the server (Vine)
+- Never use `dangerouslySetInnerHTML` with user content
+- CSRF is handled by Shield; always mutate through `http()` so `X-XSRF-TOKEN` is sent
+- Never expose secrets in frontend code; only `VITE_`-prefixed env vars reach the client
+- Validate file uploads on both sides (type, size, content)
+- Auth is session-based with secure cookies; never store tokens in `localStorage`
+
+## Testing
+
+- Follow `adonisjswithreact.mdc`: Japa, functional tests in `tests/functional/`, unit tests in `tests/unit/`, and always ask before creating tests
+- Use `@japa/browser-client` for user-flow tests when UI behavior needs coverage

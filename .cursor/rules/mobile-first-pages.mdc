@@ -1,0 +1,42 @@
+---
+description: Hard rule — every new Inertia page and UI surface must be mobile-first and usable on small viewports before desktop polish.
+alwaysApply: true
+---
+
+# Mobile-first pages (hard rule)
+
+Every **new or substantially changed** screen under `inertia/pages/` (admin, customers, marketing, errors) must be designed **mobile-first** and remain usable down to **320px** width. Do not ship desktop-only layouts and “fix mobile later.”
+
+## Required patterns (use what already exists)
+
+| Area | Do this |
+|------|---------|
+| Page shell | Use `<Page />` from `inertia/components/page.tsx` (responsive padding/title/actions). |
+| List pages | `DataTableToolbar` + `InfiniteDataTable` (loads 25 rows at a time as you scroll, via `useAdminInfiniteList`); search uses `listToolbarSearch` from `~/lib/styles`. |
+| Wide tables | `DataTable` + `dataTable.scroller` (scroll inside the card). Never use negative horizontal margins on table wrappers—they cause page-level sideways scroll on mobile. |
+| Cards / sections | `card.base`, `card.head` (wraps), `panel`; multi-column forms use `grid-cols-1` first, then `sm:` / `max-[720px]:` breakpoints to add columns. |
+| Page actions | Header actions must wrap; avoid single-row toolbars that overflow on narrow screens. |
+| Modals | Use shared `Dialog` (full-width minus margin on small screens). |
+| Admin chrome | Reuse `AdminLayout` (drawer nav ≤899px); do not add a second fixed sidebar. |
+
+## Layout rules
+
+- Prefer **stacked** layouts by default; add columns only from `sm` (640px) or explicit `max-[720px]:` breakpoints—not the other way around.
+- Avoid fixed widths without `max-w-full`, `min-w-0`, or `w-full` on flex children (truncation/scrolling break without `min-w-0`).
+- Do **not** use inline `style={{ width/height: … }}` for layout; use Tailwind or shared tokens (CSP-friendly).
+- Dense matrices (permissions, variants): **horizontal scroll inside the card**, not page-level scroll.
+- Touch targets: reuse existing buttons/inputs (already ~34–40px tall); do not shrink controls on mobile.
+
+## Before finishing UI work
+
+- Mentally check **320px, 390px, and 720px**: header, primary action, main form/table, and dialogs all reachable without horizontal page scroll (table scroll inside scroller is OK).
+- Do **not** open a browser to verify; tell the user what to spot-check in devtools device mode.
+
+## Hard bans
+
+- Multi-column grids with no single-column fallback on small viewports.
+- Toolbars with search + filters forced on one non-wrapping row.
+- `min-w-[900px]` (or similar) on the **page** wrapper instead of inside `dataTable.scroller`.
+- New page-specific side nav or duplicate layout shells instead of shared layouts.
+
+Applies to new marketing/auth/customer pages the same as admin.

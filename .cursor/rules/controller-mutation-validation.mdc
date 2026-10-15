@@ -1,0 +1,66 @@
+---
+description: Require Vine validator classes for controllers that read or mutate request input
+globs: app/controllers/**/*.ts
+alwaysApply: false
+---
+
+# Controller Request Validation
+
+Controllers that read **request input** (`request.only`, `request.input`, `request.qs`, `request.all`) or use **non-`:id` route params** in queries must validate them through a Vine validator in `app/validators/` before business logic runs.
+
+Single `:id` UUID params are validated by `UuidRouteParamMiddleware` (registered globally in `start/kernel.ts`), which returns 404 for anything that isn't a UUID. Controllers should use `params.id` directly and must **not** re-validate it.
+
+## Mutation controllers
+
+Every controller that **mutates data** (create, update, delete, archive, reactivate, unarchive) must validate body/query input through a Vine validator in `app/validators/` before business logic runs.
+
+## Required pattern
+
+```typescript
+import { inject } from '@adonisjs/core'
+import type { HttpContext } from '@adonisjs/core/http'
+import ProductService from '#services/product_service'
+import ProductTransformer from '#transformers/product_transformer'
+import { adminProductUpdateValidator } from '#validators/admin_product_update_validator'
+
+@inject()
+export default class AdminProductsUpdateController {
+  constructor(protected productService: ProductService) {}
+
+  async handle(ctx: HttpContext) {
+    // :id is already validated by UuidRouteParamMiddleware
+    const { id } = ctx.params
+    const payload = await ctx.request.validateUsing(adminProductUpdateValidator)
+
+    const product = await this.productService.update(id, payload)
+    return ctx.serialize(ProductTransformer.transform(product))
+  }
+}
+```
+
+## Rules
+
+- Never use raw `request.input()`, `request.only()`, or `request.all()` without passing the values through a validator.
+- Validator files live in `app/validators/` (lowercase, one validator per file, named `<area>_<resource>_<action>_validator.ts`).
+- Do not re-validate `:id` in the controller. Other param names (`slug`, `orderId`, `productId`) still need a Vine validator.
+- Controllers validate only. Business logic stays in services and repositories.
+- Pass only the validated fields to services. Don't spread the whole validated payload into a model (fields like `passwordConfirmation` are not columns).
+- For multipart uploads, validate query/body fields with Vine; file presence/size can stay on `request.file()` after query validation.
+- Validators that use Lucid rules (`unique`, `exists`) must not be imported at the top level of ace commands. Import them inside `run()`, because ace loads command metadata before Lucid registers those rules.
+
+## When adding a new mutation controller
+
+1. Create `app/validators/<area>_<resource>_<action>_validator.ts`
+2. Call `request.validateUsing(validator)` in the controller before any DB writes
+3. Use the validated output. Do not re-read raw request fields.
+
+## Formatting (required)
+
+After editing files under `app/controllers/` or `app/validators/`, format and lint the changed files before finishing:
+
+```bash
+yarn prettier --write <changed-files>
+yarn lint
+```
+
+ESLint runs `prettier/prettier`. Let Prettier break long destructuring from `request.validateUsing()` across lines rather than hand-formatting it.

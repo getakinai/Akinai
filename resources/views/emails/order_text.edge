@@ -1,0 +1,46 @@
+{{ title }}
+{{ orderLabel }}@if(placedOn) · placed {{ placedOn }}@end
+
+
+@each(line in lines)
+{{ line }}
+
+@end
+@if(actionUrl)
+{{ actionLabel }}: {{ actionUrl }}
+
+@end
+@each(block in blocks)
+{{ block.heading }}
+@each(row in block.rows)
+{{ row.label }}: {{ row.value }}
+@end
+@if(block.note)
+{{ block.note }}
+@end
+@if(block.link)
+{{ block.link.label }}: {{ block.link.url }}
+@end
+
+@end
+@if(items.length)
+{{ itemsHeading }}
+@each(item in items)
+- {{ item.title }} × {{ item.quantity }}@if(item.detail) ({{ item.detail }})@end: {{ item.amount }}
+@end
+
+@end
+@if(totals.length)
+@each(total in totals)
+{{ total.label }}: {{ total.amount }}
+@end
+
+@end
+@if(shippingAddress.length)
+Shipping address
+@each(addressLine in shippingAddress)
+{{ addressLine }}
+@end
+
+@end
+{{ footer }}

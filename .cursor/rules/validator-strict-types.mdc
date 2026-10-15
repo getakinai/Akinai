@@ -1,0 +1,41 @@
+---
+description: Vine validators accept only raw values of the declared type (no string-to-number/boolean coercion in JSON bodies)
+alwaysApply: true
+---
+
+# Strict validator types (hard rule)
+
+Every validator in `app/validators/` accepts only the raw JSON type it
+declares. Never rely on Vine's loose coercion for JSON bodies.
+
+| Field type | Use | Accepts | Rejects |
+|---|---|---|---|
+| Number | `vine.number({ strict: true })` | `12`, `12.5` | `"12"`, `true`, `null` (unless `.nullable()`) |
+| Boolean | `vine.boolean({ strict: true })` | `true`, `false` | `"true"`, `1`, `"on"`, `0` |
+| String | `vine.string()` (any text, then bound it: `trim`, `maxLength`, `email`, `uuid`, `regex`…) | strings | numbers, booleans, objects |
+| Enum | `vine.enum([...] as const)` | listed values only | anything else |
+| Array / object | `vine.array(...)`, `vine.object({...})` with typed members | that shape | extra loose types inside |
+
+```typescript
+// ✅ GOOD — JSON body
+quantity: vine.number({ strict: true }).withoutDecimals().min(1).max(MAX_LINE_QUANTITY),
+chargeTax: vine.boolean({ strict: true }).optional(),
+
+// ❌ BAD — "5" and "on" would be coerced
+quantity: vine.number().min(1),
+chargeTax: vine.boolean(),
+```
+
+## The only exception: values that arrive as text
+
+Query strings (`*QueryValidator`, validated from `request.qs()`) and
+multipart form fields (validators with `vine.file`) can only carry strings.
+There, use the non-strict `vine.number()` / `vine.boolean()` and always
+bound the result (`min`/`max`/`in`/`withoutDecimals`). Add a one-line
+comment above the first loose field saying the values arrive as text.
+
+## Also
+
+- Always bound strings (`maxLength`) and numbers (`min`/`max`); cap arrays with `maxLength`.
+- Shared field helpers in `app/validators/helpers/` follow the same rule.
+- The frontend must send real numbers/booleans (Zod-typed bodies), not strings.

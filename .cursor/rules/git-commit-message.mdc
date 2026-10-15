@@ -1,0 +1,68 @@
+---
+description: How to write git commit messages (subject + description) for this project. Use when asked to create, write, or suggest a commit message or commit text.
+alwaysApply: false
+---
+
+# Git Commit Messages
+
+## Workflow
+
+- When asked for "commit text" or a commit message, **only output the text**. Do not run `git commit` unless the user explicitly asks you to commit.
+- Base the message on the actual changes (`git status`, `git diff`, `git diff --staged`), not only on the conversation.
+- If the change set includes files the user made separately (e.g. a file they added themselves), point that out under the message so they can unstage it if they want a separate commit.
+- Never commit `.env`, secrets, or `package-lock.json` (this project uses yarn).
+
+## Format
+
+Output two separate code blocks: one for the subject, one for the description.
+
+### Subject
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <summary>
+```
+
+- `type`: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `chore`, `build`, `ci`
+- `scope`: the domain or area changed, lowercase (e.g. `auth`, `staff-users`, `products`, `orders`, `checkout`, `rules`)
+- `summary`: imperative mood ("add", not "added"/"adds"), lowercase start, no trailing period, max 72 characters for the whole line
+- Breaking changes: add `!` after the scope (`feat(auth)!: ...`) and a `BREAKING CHANGE:` paragraph in the description
+
+### Description
+
+- Start with one short paragraph saying what changed and why.
+- Then group bullet points under plain-text headings that match the areas touched, in this order and only when relevant:
+  - `Backend`: models, migrations, config, middleware, validators, repositories, services, transformers, controllers, routes, ace commands, seeders
+  - `Frontend`: dependencies, providers, helpers, components, pages, layouts, styles
+  - `Tests`
+  - `Rules and tooling`: `.cursor/rules`, package/tooling changes
+- Each bullet starts with an imperative verb (`Add`, `Replace`, `Remove`, `Rename`, `Switch`, `Fix`) and names the file, class or route in backticks only when it helps.
+- Wrap lines at 72 characters.
+- Mention migrations that require `node ace migration:fresh` or other manual steps in the description.
+
+## Example
+
+```
+feat(auth): add separate staff User and Customer authentication
+```
+
+```
+Replace the starter's single-user session auth with two isolated session
+guards: `web` for back-office Users under /admin and `customer` for
+storefront Customers under / and /account.
+
+Backend
+- Add Customer model and customers migration; switch users to UUID
+  primary keys. Both models extend BaseAppModel.
+- Configure `web` and `customer` session guards in config/auth.ts.
+- Add single-action staff and customer controllers; login/signup/logout
+  return JSON `{ data: { redirectTo } }`.
+
+Frontend
+- Add @tanstack/react-query and zod; wire QueryClientProvider.
+- Add staff and customer auth pages with co-located _hooks.ts/_types.ts.
+
+Rules and tooling
+- Update Cursor rules to cover the two guards and UUID models.
+```

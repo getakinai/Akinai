@@ -1,0 +1,371 @@
+@import 'tailwindcss' source('../');
+@import '@fontsource-variable/inter';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root {
+  --sans:
+    'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+
+  --paper: #f5f5f6;
+  --card: #ffffff;
+  --ink: #0a0a0b;
+  --ink-2: #2a2c30;
+  --muted: #6b6f76;
+  --subtle: #a4a8af;
+  --line: #ededee;
+  --line-2: #dddfe2;
+  --btn: #0a0a0b;
+  --btn-fg: #ffffff;
+  --ring: rgba(10, 10, 11, 0.13);
+  --field: #ffffff;
+  --ok: #18794e;
+  --danger: #c0392b;
+  --accent: #2563eb;
+  --info: #0891b2;
+  --purple: #7c3aed;
+  --warning: #d97706;
+  --ok-soft: rgba(24, 121, 78, 0.1);
+  --danger-soft: rgba(192, 57, 43, 0.1);
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --info-soft: rgba(8, 145, 178, 0.1);
+  --purple-soft: rgba(124, 58, 237, 0.1);
+  --warning-soft: rgba(217, 119, 6, 0.12);
+
+  /* Storefront theme defaults; overridden inline from the admin theme. */
+  --sf-primary: #14532d;
+  --sf-primary-fg: #ffffff;
+  --sf-accent: #84cc16;
+  --sf-bg: #f7f8f3;
+  --sf-surface: #ffffff;
+  --sf-text: #13201a;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --paper: #08080a;
+  --card: #111114;
+  --ink: #ededee;
+  --ink-2: #c4c6ca;
+  --muted: #8b8f97;
+  --subtle: #585c64;
+  --line: #1e1f23;
+  --line-2: #2c2e33;
+  --btn: #ededee;
+  --btn-fg: #0a0a0b;
+  --ring: rgba(237, 237, 238, 0.14);
+  --field: #0c0c0f;
+  --ok: #3ecf8e;
+  --danger: #e0685c;
+  --accent: #60a5fa;
+  --info: #22d3ee;
+  --purple: #a78bfa;
+  --warning: #fbbf24;
+  --ok-soft: rgba(62, 207, 142, 0.14);
+  --danger-soft: rgba(224, 104, 92, 0.14);
+  --accent-soft: rgba(96, 165, 250, 0.14);
+  --info-soft: rgba(34, 211, 238, 0.14);
+  --purple-soft: rgba(167, 139, 250, 0.14);
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+  --font-serif: var(--serif);
+
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-btn: var(--btn);
+  --color-btn-fg: var(--btn-fg);
+  --color-ring: var(--ring);
+  --color-field: var(--field);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --color-accent: var(--accent);
+  --color-info: var(--info);
+  --color-purple: var(--purple);
+  --color-warning: var(--warning);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger-soft: var(--danger-soft);
+  --color-accent-soft: var(--accent-soft);
+  --color-info-soft: var(--info-soft);
+  --color-purple-soft: var(--purple-soft);
+  --color-warning-soft: var(--warning-soft);
+
+  --color-sf-primary: var(--sf-primary);
+  --color-sf-primary-fg: var(--sf-primary-fg);
+  --color-sf-accent: var(--sf-accent);
+  --color-sf-bg: var(--sf-bg);
+  --color-sf-surface: var(--sf-surface);
+  --color-sf-text: var(--sf-text);
+  --color-sf-muted: var(--sf-muted);
+  --color-sf-line: var(--sf-line);
+  --color-sf-primary-soft: var(--sf-primary-soft);
+  --color-sf-accent-soft: var(--sf-accent-soft);
+}
+
+@theme {
+  --radius-card: 14px;
+
+  --animate-chunk-rise: chunk-rise 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+
+  @keyframes chunk-rise {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    font-size: 15px;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--field) inset;
+    -webkit-text-fill-color: var(--ink);
+    caret-color: var(--ink);
+    font-family: var(--sans);
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
+  /*
+   * Storefront scope. Derived colors must be declared on the same element
+   * as the inline `--sf-*` overrides so they resolve against them. Shared
+   * tokens are remapped so library components follow the storefront theme
+   * instead of the back-office light/dark theme.
+   */
+  [data-storefront] {
+    --sf-muted: color-mix(in oklab, var(--sf-text) 62%, var(--sf-surface));
+    --sf-line: color-mix(in oklab, var(--sf-text) 11%, var(--sf-surface));
+    --sf-primary-soft: color-mix(in oklab, var(--sf-primary) 10%, var(--sf-surface));
+    --sf-accent-soft: color-mix(in oklab, var(--sf-accent) 18%, var(--sf-surface));
+
+    --paper: var(--sf-bg);
+    --card: var(--sf-surface);
+    --field: var(--sf-surface);
+    --ink: var(--sf-text);
+    --ink-2: var(--sf-text);
+    --muted: var(--sf-muted);
+    --subtle: color-mix(in oklab, var(--sf-text) 40%, var(--sf-surface));
+    --line: var(--sf-line);
+    --line-2: color-mix(in oklab, var(--sf-text) 17%, var(--sf-surface));
+    --btn: var(--sf-primary);
+    --btn-fg: var(--sf-primary-fg);
+    --ring: color-mix(in oklab, var(--sf-primary) 24%, transparent);
+    color-scheme: light;
+    color: var(--sf-text);
+  }
+}
+
+/* Native modal dialogs (portaled to body). Unlayered — must not fight Tailwind preflight. */
+.app-dialog {
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+.app-dialog:not([open]) {
+  display: none;
+}
+.app-dialog::backdrop {
+  background: rgb(10 10 11 / 0.3);
+}
+.app-dialog:modal {
+  position: fixed;
+  inset: 0;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  height: fit-content;
+  max-height: min(calc(100% - 32px), calc(100dvh - 32px));
+  margin: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Rich text (Slate) editable + preview */
+.rich-text-content [data-slate-placeholder='true'] {
+  opacity: 1 !important;
+  color: var(--subtle);
+}
+.rich-text-content:focus {
+  outline: none;
+}
+
+/* react-date-range ships unlayered CSS; map it onto the theme variables */
+.app-date-range .rdrCalendarWrapper,
+.app-date-range .rdrMonthAndYearPickers select,
+.app-date-range .rdrMonthPicker select,
+.app-date-range .rdrYearPicker select {
+  background-color: var(--card);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+.app-date-range .rdrCalendarWrapper {
+  border-radius: var(--radius-card);
+}
+.app-date-range .rdrMonthAndYearPickers select:hover {
+  background-color: var(--paper);
+}
+.app-date-range .rdrNextPrevButton {
+  background: var(--paper);
+}
+.app-date-range .rdrNextPrevButton:hover {
+  background: var(--line-2);
+}
+.app-date-range .rdrPprevButton i {
+  border-color: transparent var(--ink) transparent transparent;
+}
+.app-date-range .rdrNextButton i {
+  border-color: transparent transparent transparent var(--ink);
+}
+.app-date-range .rdrMonthName,
+.app-date-range .rdrWeekDay {
+  color: var(--muted);
+}
+.app-date-range .rdrDayNumber span {
+  color: var(--ink);
+}
+.app-date-range .rdrDayPassive .rdrDayNumber span,
+.app-date-range .rdrDayDisabled .rdrDayNumber span {
+  color: var(--subtle);
+}
+.app-date-range .rdrDayDisabled {
+  background-color: var(--paper);
+}
+.app-date-range .rdrDay:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span,
+.app-date-range .rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span,
+.app-date-range .rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span,
+.app-date-range .rdrDay:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+  color: var(--card);
+}
+.app-date-range .rdrDayToday:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span:after,
+.app-date-range .rdrDayToday:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span:after,
+.app-date-range .rdrDayToday:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span:after {
+  background: var(--card);
+}
+.app-date-range .rdrDayToday .rdrDayNumber span:after {
+  background: var(--accent);
+}
+.app-date-range .rdrCalendarWrapper {
+  display: inline-flex;
+}
+.app-date-range .rdrMonth {
+  width: 27.667em;
+  max-width: min(27.667em, calc(100vw - 2rem));
+  padding: 0 0.75em 1em;
+}
+
+/* The floating reCAPTCHA badge covers mobile submit buttons; `RecaptchaNotice` shows the required text instead */
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
+/* Sonner injects unlayered styles, so these overrides must stay unlayered too */
+[data-sonner-toaster] {
+  --width: 400px;
+  --gap: 14px;
+  font-family: var(--sans);
+}
+[data-sonner-toaster] [data-sonner-toast] {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 10px 30px -12px rgba(10, 10, 11, 0.18);
+  padding: 16px 18px;
+}
+:root[data-theme='dark'] [data-sonner-toaster] [data-sonner-toast] {
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+}
+[data-sonner-toaster] [data-sonner-toast] [data-icon] {
+  margin: 1px 0 0;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-content] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-title] {
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+[data-sonner-toaster] [data-sonner-toast] [data-description] {
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
+  color: var(--ok);
+}
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-icon] {
+  color: var(--danger);
+}
+
+/* `unstyled` skips Sonner’s [data-styled='true'] stack rules — keep collapsed stacks readable */
+[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] > * {
+  opacity: 0;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-mounted='true'][data-expanded='true'] {
+  transform: translateY(calc(var(--lift, 1) * var(--offset, 0px)));
+}
+
+/* While the storefront cart prints, show only its print sheet (cart_print_sheet.tsx). */
+@media print {
+  body.print-cart > :not(.cart-print-sheet) {
+    display: none !important;
+  }
+}

@@ -1,0 +1,6 @@
+export { default as RichTextEditor } from './editor'
+export { default as RichTextEmailPreview } from './preview'
+export type { RichTextEditorHandle, RichTextEditorProps } from './editor'
+export { htmlToSlate, slateToHtml } from './html'
+export { createEmptyValue, EMPTY_VALUE } from './types'
+export type { CustomEditor, CustomElement, CustomText } from './types'

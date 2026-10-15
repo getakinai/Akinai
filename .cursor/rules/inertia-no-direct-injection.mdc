@@ -1,0 +1,106 @@
+---
+description: Hard rule — never inject records into inertia.render. Inertia pages are shells; data comes from a JSON view route so React Query can invalidate.
+globs: app/controllers/**/*.ts,app/middleware/inertia_middleware.ts,inertia/pages/**/*.tsx,inertia/pages/**/*.ts,start/routes.ts
+alwaysApply: true
+---
+
+# Inertia: No Direct Data Injection (Hard Rule)
+
+Do **not** pass records, serialized models, lists, or user/customer objects into `inertia.render()`. Pages must use an Inertia **shell** plus a JSON **view** (or list) route. The page fetches with TanStack Query so mutations can `invalidateQueries` without a full reload.
+
+## Route params are already on `params`
+
+Adonis routing captures `:id` (and other named segments). Controllers must use `params.id` (UUID routes are already validated by `UuidRouteParamMiddleware`). Pass that id into the Inertia shell, and fetch the record with a hook.
+
+**Never** write a frontend path parser (`url.split('/')`, `getXIdFromPath`, `urlSegments[2]`) to recover a route param.
+
+```typescript
+// ✅ GOOD — Adonis already has params.id from GET /admin/products/edit/:id
+return inertia.render('admin/products/edit', { id: params.id })
+
+// Frontend: use the id prop, then useAdminProduct(id)
+
+// ❌ BAD — do not parse the URL in the page or a helper
+const productId = url.split('/').filter(Boolean)[3]
+```
+
+## Required split
+
+| Route | Controller | Response |
+|---|---|---|
+| `home` / `create` / `edit` / `show` | Inertia shell | `inertia.render(page, { id: params.id })` or `{}` when there is no resource id |
+| `view` / `list` | JSON API | `ctx.serialize(XTransformer.transform(...))`, which returns `{ data, meta? }` |
+
+```typescript
+// ✅ GOOD — Inertia shell (id only)
+return inertia.render('admin/products/edit', { id: params.id })
+
+// ✅ GOOD — JSON view (separate controller/route)
+const product = await this.productService.find(params.id)
+return ctx.serialize(ProductTransformer.transform(product))
+
+// ❌ BAD — injecting records into Inertia (do not do this)
+return inertia.render('admin/products/edit', {
+  id: params.id,
+  product: product.serialize(),
+})
+```
+
+## Shared props
+
+`app/middleware/inertia_middleware.ts` only shares `errors`, `preferences` and flash messages. Do **not** add the authenticated User or Customer (or any record) to shared props. Pages and layouts get the current account from:
+
+- `useAdminMe()` in `inertia/pages/admin/_hooks.ts` (`GET /admin/me`)
+- `useCustomerMe()` in `inertia/pages/customers/_hooks.ts` (`GET /account/me`)
+
+## Inertia props allowed
+
+- Resource IDs from route params (`id`, `orderId`, `productId`)
+- Query flags (`mode`, `back_link`)
+- Empty `{}` only when the route has no resource id (list/home/create)
+
+## The one exception: storefront SEO head tags
+
+Social link previews don't run JavaScript and SSR only covers a few pages, so public storefront shells (home, product, collection, page) pass a `seo` **view prop** (the third argument, rendered by `inertia_layout.edge`, never an Inertia page prop):
+
+```typescript
+const seo = await this.storefrontSeoService.forProduct(payload.slug, market)
+return inertia.render('products/show', { slug: payload.slug }, { seo })
+```
+
+- Build it only with `StorefrontSeoService`. It returns a plain `SeoMeta` object (title, description, canonical URL, image, JSON-LD), never a model.
+- Only head tags read it. The page still fetches the record through its JSON view route.
+- JSON-LD goes through `serializeJsonLd()`; it is the only value printed raw (`{{{ }}}`).
+- Never use view props for back-office or account pages.
+
+## The second exception: SSR prefetch for public storefront pages
+
+Inertia SSR is on only for `home`, `products/show`, `collections/show` and `pages/show` (`ssr.pages` in `config/inertia.ts`, mirrored by the page glob in `inertia/ssr.tsx`). So crawlers see real headings and links, their shells pass a `prefetch` page prop:
+
+```typescript
+const prefetch = await this.storefrontPrefetchService.product(ctx, payload.slug)
+return inertia.render('products/show', {
+  slug: payload.slug,
+  prefetch: prefetch && (await ctx.serialize.withoutWrapping(prefetch)),
+}, { seo })
+```
+
+- Build it only with `StorefrontPrefetchService`. Each entry is the same transformer output as the page's JSON route (never a raw model, never staff or customer-private data).
+- It is `null` on Inertia visits (`X-Inertia` header); those pages fetch through their JSON routes as usual.
+- The client never reads `prefetch` in a component. `seedStorefrontQueries()` (`inertia/pages/_hooks.ts`) validates it with `StorefrontPrefetchSchema` and seeds the TanStack cache under the normal query keys before the app renders (`inertia/app.tsx`, `inertia/ssr.tsx`). Mutations still `invalidateQueries` as usual.
+- Adding a page to SSR: add it to `ssr.pages` and the `ssr.tsx` glob, add a `StorefrontPrefetchService` method, a schema field and a seed line. Its render must be SSR-safe (no `window`/`document` during render; `useSyncExternalStore` needs a server snapshot).
+- Never use SSR or `prefetch` for back-office, account or checkout pages.
+
+## Frontend
+
+- Use the `id` (or named) prop from the shell. Do not parse `usePage().url` or `window.location.pathname` for ids.
+- Fetch the view/list URL from `_hooks.ts` with `useQuery` / `useMutation` and the `http()` helper.
+- After create/update/archive, invalidate the query key. Do not rely on Inertia props for the record.
+
+## Hard bans
+
+- `inertia.render(..., { product, order, customer, user, ...serialize() })`
+- Passing arrays of records as page props
+- Sharing records through `InertiaMiddleware.share()`
+
+Applies to every area: staff back office, customer storefront and account pages. Not optional.

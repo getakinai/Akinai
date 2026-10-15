@@ -1,0 +1,34 @@
+name: Set up app
+description: Installs Node and dependencies (with a node_modules cache), prepares .env and runs codegen.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version-file: .nvmrc
+
+    # Native modules (sharp) are built for the Node version and platform, so both are in the key.
+    - name: Cache node_modules
+      id: node-modules
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
+
+    - name: Install dependencies
+      if: steps.node-modules.outputs.cache-hit != 'true'
+      shell: bash
+      run: HUSKY=0 yarn install --frozen-lockfile --prefer-offline
+
+    - name: Prepare .env
+      shell: bash
+      run: |
+        cp .env.example .env
+        node ace generate:key
+
+    - name: Codegen
+      shell: bash
+      run: node ace codegen

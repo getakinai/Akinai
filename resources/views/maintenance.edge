@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ request.plainCookie('app_theme', { defaultValue: 'light', encoded: false }) }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta property="csp-nonce" nonce="{{ cspNonce }}" />
+    <title>Upgrading — back soon</title>
+    @viteReactRefresh({ nonce: cspNonce })
+    @vite(['inertia/maintenance.tsx'])
+    <style nonce="{{ cspNonce }}">
+      :root {
+        --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        --paper: #f5f5f6;
+        --card: #ffffff;
+        --ink: #0a0a0b;
+        --ink-2: #2a2c30;
+        --muted: #6b6f76;
+        --line-2: #dddfe2;
+        --accent: #2563eb;
+        --accent-soft: rgba(37, 99, 235, 0.1);
+        --plug: #dbe6fc;
+        --warning: #d97706;
+      }
+
+      :root[data-theme='dark'] {
+        --paper: #08080a;
+        --card: #111114;
+        --ink: #ededee;
+        --ink-2: #c4c6ca;
+        --muted: #8b8f97;
+        --line-2: #2c2e33;
+        --accent: #60a5fa;
+        --accent-soft: rgba(96, 165, 250, 0.14);
+        --plug: #15233a;
+        --warning: #fbbf24;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 32px 0;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      .copy {
+        position: relative;
+        padding: 0 24px;
+      }
+
+      .copy::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: -1;
+        width: 440px;
+        height: 440px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        transform: translate(-50%, -38%);
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin: 0 0 14px;
+        padding: 4px 10px;
+        border: 1px solid var(--line-2);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--muted);
+        font-size: 12.5px;
+        font-weight: 500;
+      }
+
+      h1 {
+        margin: 0 auto;
+        max-width: 14ch;
+        font-size: clamp(28px, 5vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+      }
+
+      p.lead {
+        margin: 12px auto 0;
+        max-width: 38ch;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .illustration {
+        display: block;
+        width: 100%;
+        max-width: 760px;
+        height: auto;
+      }
+
+      .cable {
+        fill: none;
+        stroke: var(--ink-2);
+        stroke-width: 6;
+        stroke-linecap: round;
+      }
+
+      .plug {
+        fill: var(--plug);
+        stroke: var(--accent);
+        stroke-width: 5;
+        stroke-linejoin: round;
+      }
+
+      .prong {
+        fill: var(--card);
+        stroke: var(--accent);
+        stroke-width: 5;
+      }
+
+      .spark {
+        fill: none;
+        stroke: var(--warning);
+        stroke-width: 4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        animation: flicker 1.6s ease-in-out infinite;
+      }
+
+      .left {
+        animation: reach-left 3s ease-in-out infinite;
+      }
+
+      .right {
+        animation: reach-right 3s ease-in-out infinite;
+      }
+
+      @keyframes reach-left {
+        50% {
+          transform: translateX(8px);
+        }
+      }
+
+      @keyframes reach-right {
+        50% {
+          transform: translateX(-8px);
+        }
+      }
+
+      @keyframes flicker {
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      #newsletter-root {
+        width: 100%;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .left,
+        .right,
+        .spark {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <div class="copy">
+        <span class="eyebrow">Upgrade in progress</span>
+        <h1>We're plugging in something shiny</h1>
+        <p class="lead">
+          The store is getting an upgrade: faster pages, fresher features, and a hamster on a bigger wheel. We'll be back online in a few minutes.
+        </p>
+      </div>
+
+      <svg class="illustration" viewBox="0 0 760 300" role="img" aria-label="Two cables being connected during an upgrade">
+        <g class="left">
+          <path class="cable" d="M-10 170 H210" />
+          <rect class="plug" x="196" y="150" width="34" height="40" rx="9" />
+          <rect class="plug" x="226" y="126" width="96" height="88" rx="20" />
+          <rect class="prong" x="334" y="144" width="42" height="14" rx="7" />
+          <rect class="prong" x="334" y="182" width="42" height="14" rx="7" />
+          <rect class="plug" x="318" y="114" width="20" height="112" rx="5" />
+        </g>
+
+        <path class="spark" d="M392 128 l10 14 -8 4 12 16" />
+        <path class="spark" d="M384 206 l-10 10" />
+        <path class="spark" d="M418 204 l12 8" />
+
+        <g class="right">
+          <path class="cable" d="M550 170 H770" />
+          <rect class="plug" x="530" y="150" width="34" height="40" rx="9" />
+          <rect class="plug" x="438" y="126" width="96" height="88" rx="20" />
+          <rect class="plug" x="422" y="114" width="20" height="112" rx="5" />
+        </g>
+      </svg>
+
+      <div id="newsletter-root"></div>
+    </main>
+  </body>
+</html>

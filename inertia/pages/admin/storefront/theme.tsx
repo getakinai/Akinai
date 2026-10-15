@@ -1,0 +1,80 @@
+import { ExternalLink } from 'lucide-react'
+import Page from '~/components/page'
+import { FormButton } from '~/components/form'
+import { Skeleton } from '~/components/ui'
+import AdminLayout from '~/layouts/admin'
+import { buttonClasses, card } from '~/lib/styles'
+import { useCan } from '../_hooks'
+import BrandingCard from './_branding_card'
+import { useAdminStorefrontTheme } from './_hooks'
+import ThemeForm from './_theme_form'
+import { type AdminStorefrontTheme } from './_types'
+
+/** Changes only when the colors change, so a logo upload keeps unsaved colors. */
+function themeFormKey(theme: AdminStorefrontTheme) {
+  return [
+    theme.primaryColor,
+    theme.primaryForegroundColor,
+    theme.accentColor,
+    theme.backgroundColor,
+    theme.surfaceColor,
+    theme.textColor,
+  ].join('|')
+}
+
+export default function StorefrontThemePage() {
+  const { data: theme, isLoading, isError, refetch } = useAdminStorefrontTheme()
+  const canEdit = useCan('storefront.edit')
+
+  return (
+    <Page
+      title="Storefront theme"
+      description="Set the logo, favicon and colors customers see on your online store."
+      actions={
+        <a
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+          className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+        >
+          View storefront <ExternalLink size={14} />
+        </a>
+      }
+    >
+      {isLoading && (
+        <div className={card.base}>
+          <Skeleton className="h-5 w-40" />
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-20 w-full" />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {isError && (
+        <div className={card.base}>
+          <p className="text-[14px] text-muted">The theme could not be loaded.</p>
+          <FormButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="mt-3"
+            onClick={() => refetch()}
+          >
+            Try again
+          </FormButton>
+        </div>
+      )}
+
+      {theme && (
+        <div className="flex min-w-0 flex-col gap-6">
+          <BrandingCard theme={theme} />
+          <ThemeForm key={themeFormKey(theme)} theme={theme} disabled={!canEdit} />
+        </div>
+      )}
+    </Page>
+  )
+}
+
+StorefrontThemePage.layout = [AdminLayout]
