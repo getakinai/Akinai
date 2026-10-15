@@ -5,6 +5,7 @@ import {
   CreditCard,
   Globe,
   House,
+  Images,
   Inbox,
   LifeBuoy,
   Mail,
@@ -107,6 +108,7 @@ export const adminNav: AdminNavSectionGroup[] = [
         icon: UserRound,
         permission: 'customers.view',
       },
+      { label: 'Media', route: 'admin.media.home', icon: Images },
       {
         label: 'Analytics',
         route: 'admin.analytics.home',

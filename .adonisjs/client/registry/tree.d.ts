@@ -254,6 +254,12 @@ export interface ApiDefinition {
       archive: typeof routes['admin.product_labels.archive']
       unarchive: typeof routes['admin.product_labels.unarchive']
     }
+    media: {
+      home: typeof routes['admin.media.home']
+      list: typeof routes['admin.media.list']
+      store: typeof routes['admin.media.store']
+      delete: typeof routes['admin.media.delete']
+    }
     vendors: {
       home: typeof routes['admin.vendors.home']
       list: typeof routes['admin.vendors.list']

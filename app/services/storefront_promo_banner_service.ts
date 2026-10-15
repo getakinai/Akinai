@@ -10,7 +10,7 @@ import {
   type PromoTone,
 } from '#constants/storefront'
 import StorefrontPromoBannerRepository from '#repositories/storefront_promo_banner_repository'
-import { deleteImages, uploadImage } from '#utils/uploader'
+import { uploadImage } from '#utils/uploader'
 
 export type StorefrontPromoBannerInput = {
   eyebrow?: string | null
@@ -70,33 +70,26 @@ export default class StorefrontPromoBannerService {
     })
   }
 
+  /** The banner's image stays in the media gallery. */
   async delete(banner: StorefrontPromoBanner): Promise<void> {
-    const image = banner.image
     await this.storefrontPromoBannerRepository.delete(banner)
-    if (image) await deleteImages([image])
   }
 
   /**
-   * The new file is written before the banner points at it, and the
-   * previous file is removed only after the banner is saved.
+   * The new file is written before the banner points at it. The previous
+   * file stays in the media gallery.
    */
   async setImage(
     banner: StorefrontPromoBanner,
     file: MultipartFile
   ): Promise<StorefrontPromoBanner> {
-    const previous = banner.image
     const { key } = await uploadImage(file, PROMO_IMAGE_FOLDER)
-    const saved = await this.storefrontPromoBannerRepository.update(banner, { image: key })
-    if (previous) await deleteImages([previous])
-    return saved
+    return this.storefrontPromoBannerRepository.update(banner, { image: key })
   }
 
   async removeImage(banner: StorefrontPromoBanner): Promise<StorefrontPromoBanner> {
-    const previous = banner.image
-    if (!previous) return banner
-    const saved = await this.storefrontPromoBannerRepository.update(banner, { image: null })
-    await deleteImages([previous])
-    return saved
+    if (!banner.image) return banner
+    return this.storefrontPromoBannerRepository.update(banner, { image: null })
   }
 
   /**

@@ -263,13 +263,6 @@ export default class ProductImportService {
       throw error
     }
 
-    const replaced = ready.flatMap(({ imageUrls, previousImages, ...entry }) => {
-      if (!imageUrls || !('update' in entry)) return []
-      const kept = new Set([entry.update.changes.coverImage, ...(entry.update.galleryImages ?? [])])
-      return previousImages.filter((key) => !kept.has(key))
-    })
-    if (replaced.length > 0) await this.productImageService.remove(replaced)
-
     await this.productSearchService.sync([
       ...created.map(({ id }) => id),
       ...updates.map(({ id }) => id),

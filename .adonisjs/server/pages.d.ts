@@ -145,6 +145,9 @@ declare module '@adonisjs/inertia/types' {
     'admin/markets/_types': ExtractProps<(typeof import('../../inertia/pages/admin/markets/_types.ts'))['default']>
     'admin/markets/edit': ExtractProps<(typeof import('../../inertia/pages/admin/markets/edit.tsx'))['default']>
     'admin/markets/home': ExtractProps<(typeof import('../../inertia/pages/admin/markets/home.tsx'))['default']>
+    'admin/media/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/media/_hooks.ts'))['default']>
+    'admin/media/_types': ExtractProps<(typeof import('../../inertia/pages/admin/media/_types.ts'))['default']>
+    'admin/media/home': ExtractProps<(typeof import('../../inertia/pages/admin/media/home.tsx'))['default']>
     'admin/options/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/options/_hooks.ts'))['default']>
     'admin/options/_option_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/options/_option_dialog.tsx'))['default']>
     'admin/options/_types': ExtractProps<(typeof import('../../inertia/pages/admin/options/_types.ts'))['default']>

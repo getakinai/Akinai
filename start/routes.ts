@@ -596,6 +596,12 @@ router
           })
           .use(middleware.can({ permission: 'product_labels.archive' }))
 
+        // Every staff User can browse and upload media; MediaPolicy limits deletes to admins.
+        router.get('media', [controllers.admin.AdminMediaHome]).as('admin.media.home')
+        router.get('media/list', [controllers.admin.AdminMediaList]).as('admin.media.list')
+        router.post('media', [controllers.admin.AdminMediaStore]).as('admin.media.store')
+        router.delete('media/:id', [controllers.admin.AdminMediaDelete]).as('admin.media.delete')
+
         router
           .group(() => {
             router.get('vendors', [controllers.admin.AdminVendorsHome]).as('admin.vendors.home')

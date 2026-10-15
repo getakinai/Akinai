@@ -370,7 +370,7 @@ test.group('Staff storefront content: promo banner image', (group) => {
     return () => drive.restore()
   })
 
-  test('uploads, replaces and removes the image', async ({ client, assert }) => {
+  test('uploads, replaces and removes the image, keeping old files', async ({ client, assert }) => {
     const user = await createAdminUser(['storefront.view', 'storefront.upload'])
     const banner = await seedBanner()
     const png = await pngBuffer()
@@ -394,7 +394,7 @@ test.group('Staff storefront content: promo banner image', (group) => {
     await expectStatus(upload(), 200)
     await banner.refresh()
     assert.notEqual(banner.image, firstKey)
-    assert.isFalse(await drive.use().exists(firstKey))
+    assert.isTrue(await drive.use().exists(firstKey))
 
     const secondKey = banner.image!
     const removed = await client
@@ -405,7 +405,7 @@ test.group('Staff storefront content: promo banner image', (group) => {
       .loginAs(user)
     removed.assertStatus(200)
     assert.isNull(removed.body().data.imageUrl)
-    assert.isFalse(await drive.use().exists(secondKey))
+    assert.isTrue(await drive.use().exists(secondKey))
   })
 
   test('rejects files that are not images', async ({ client }) => {

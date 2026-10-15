@@ -140,6 +140,10 @@ export type ScannedRoutes = {
     'admin.product_labels.bulk.archive.update': { paramsTuple?: []; params?: {} }
     'admin.product_labels.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.product_labels.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.media.home': { paramsTuple?: []; params?: {} }
+    'admin.media.list': { paramsTuple?: []; params?: {} }
+    'admin.media.store': { paramsTuple?: []; params?: {} }
+    'admin.media.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.vendors.home': { paramsTuple?: []; params?: {} }
     'admin.vendors.list': { paramsTuple?: []; params?: {} }
     'admin.vendors.store': { paramsTuple?: []; params?: {} }
@@ -562,6 +566,8 @@ export type ScannedRoutes = {
     'admin.product_types.export': { paramsTuple?: []; params?: {} }
     'admin.product_labels.home': { paramsTuple?: []; params?: {} }
     'admin.product_labels.list': { paramsTuple?: []; params?: {} }
+    'admin.media.home': { paramsTuple?: []; params?: {} }
+    'admin.media.list': { paramsTuple?: []; params?: {} }
     'admin.vendors.home': { paramsTuple?: []; params?: {} }
     'admin.vendors.list': { paramsTuple?: []; params?: {} }
     'admin.vendors.import.sample': { paramsTuple?: []; params?: {} }
@@ -816,6 +822,8 @@ export type ScannedRoutes = {
     'admin.product_types.export': { paramsTuple?: []; params?: {} }
     'admin.product_labels.home': { paramsTuple?: []; params?: {} }
     'admin.product_labels.list': { paramsTuple?: []; params?: {} }
+    'admin.media.home': { paramsTuple?: []; params?: {} }
+    'admin.media.list': { paramsTuple?: []; params?: {} }
     'admin.vendors.home': { paramsTuple?: []; params?: {} }
     'admin.vendors.list': { paramsTuple?: []; params?: {} }
     'admin.vendors.import.sample': { paramsTuple?: []; params?: {} }
@@ -1037,6 +1045,7 @@ export type ScannedRoutes = {
     'admin.product_labels.store': { paramsTuple?: []; params?: {} }
     'admin.product_labels.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.product_labels.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.media.store': { paramsTuple?: []; params?: {} }
     'admin.vendors.store': { paramsTuple?: []; params?: {} }
     'admin.vendors.image.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.vendors.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1222,6 +1231,7 @@ export type ScannedRoutes = {
     'admin.collections.products.delete': { paramsTuple: [ParamValue,ParamValue]; params: {'collectionId': ParamValue,'id': ParamValue} }
     'admin.collections.image.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.options.values.delete': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'valueId': ParamValue} }
+    'admin.media.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.vendors.image.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.orders.drafts.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_theme.logo.delete': { paramsTuple?: []; params?: {} }

@@ -4,7 +4,7 @@ import { errors } from '@vinejs/vine'
 import type StorefrontHeroSlide from '#models/storefront_hero_slide'
 import { HERO_IMAGE_FOLDER, MAX_HERO_SLIDES, type MenuItemType } from '#constants/storefront'
 import StorefrontHeroSlideRepository from '#repositories/storefront_hero_slide_repository'
-import { deleteImages, uploadImage } from '#utils/uploader'
+import { uploadImage } from '#utils/uploader'
 
 export type StorefrontHeroSlideInput = {
   eyebrow?: string | null
@@ -54,30 +54,23 @@ export default class StorefrontHeroSlideService {
     })
   }
 
+  /** The slide's image stays in the media gallery. */
   async delete(slide: StorefrontHeroSlide): Promise<void> {
-    const image = slide.image
     await this.storefrontHeroSlideRepository.delete(slide)
-    if (image) await deleteImages([image])
   }
 
   /**
-   * The new file is written before the slide points at it, and the previous
-   * file is removed only after the slide is saved.
+   * The new file is written before the slide points at it. The previous
+   * file stays in the media gallery.
    */
   async setImage(slide: StorefrontHeroSlide, file: MultipartFile): Promise<StorefrontHeroSlide> {
-    const previous = slide.image
     const { key } = await uploadImage(file, HERO_IMAGE_FOLDER)
-    const saved = await this.storefrontHeroSlideRepository.update(slide, { image: key })
-    if (previous) await deleteImages([previous])
-    return saved
+    return this.storefrontHeroSlideRepository.update(slide, { image: key })
   }
 
   async removeImage(slide: StorefrontHeroSlide): Promise<StorefrontHeroSlide> {
-    const previous = slide.image
-    if (!previous) return slide
-    const saved = await this.storefrontHeroSlideRepository.update(slide, { image: null })
-    await deleteImages([previous])
-    return saved
+    if (!slide.image) return slide
+    return this.storefrontHeroSlideRepository.update(slide, { image: null })
   }
 
   /**

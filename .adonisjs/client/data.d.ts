@@ -43,6 +43,7 @@ import type HelpSearchResultTransformer from '#transformers/help_search_result_t
 import type LocationTransformer from '#transformers/location_transformer'
 import type MaintenanceTransformer from '#transformers/maintenance_transformer'
 import type MarketTransformer from '#transformers/market_transformer'
+import type MediaTransformer from '#transformers/media_transformer'
 import type NewsletterSubscriberTransformer from '#transformers/newsletter_subscriber_transformer'
 import type OptionDefinitionTransformer from '#transformers/option_definition_transformer'
 import type OptionDefinitionValueTransformer from '#transformers/option_definition_value_transformer'
@@ -255,6 +256,10 @@ export namespace Data {
   export type Market = InferData<MarketTransformer>
   export namespace Market {
     export type Variants = InferVariants<MarketTransformer>
+  }
+  export type Media = InferData<MediaTransformer>
+  export namespace Media {
+    export type Variants = InferVariants<MediaTransformer>
   }
   export type NewsletterSubscriber = InferData<NewsletterSubscriberTransformer>
   export namespace NewsletterSubscriber {

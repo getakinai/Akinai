@@ -265,10 +265,7 @@ export default class ProductService {
     return this.productRepository.variantIdsFor(productId)
   }
 
-  /**
-   * Photos no longer used after the update are deleted from Drive once the
-   * product is saved.
-   */
+  /** Photos no longer used after the update stay in the media gallery. */
   async update(
     product: Product,
     {
@@ -305,28 +302,12 @@ export default class ProductService {
     if (seoTitle !== undefined) data.seoTitle = blankToNull(seoTitle)
     if (seoDescription !== undefined) data.seoDescription = blankToNull(seoDescription)
 
-    const imagesChanged = coverImage !== undefined || galleryImages !== undefined
-    const previousCover = product.coverImage
-    const previousGallery = imagesChanged
-      ? await this.productRepository.galleryPaths(product.id)
-      : []
-
     const updated = await this.productRepository.update(
       product,
       data,
       tags === undefined ? undefined : normalizeTags(tags),
       galleryImages
     )
-
-    if (imagesChanged) {
-      const kept = new Set([updated.coverImage, ...(galleryImages ?? previousGallery)])
-      const candidates = [
-        ...(coverImage === undefined ? [] : [previousCover]),
-        ...(galleryImages === undefined ? [] : previousGallery),
-      ]
-      const removed = candidates.filter((key): key is string => key !== null && !kept.has(key))
-      if (removed.length > 0) await this.productImageService.remove(removed)
-    }
 
     await this.productSearchService.sync([updated.id])
     return updated

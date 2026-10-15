@@ -4,6 +4,8 @@ import type { MultipartFile } from '@adonisjs/core/bodyparser'
 import { errors } from '@vinejs/vine'
 import sharp from 'sharp'
 import { v7 as uuidv7 } from 'uuid'
+import MediaRepository from '#repositories/media_repository'
+import { auditActor } from '#services/audit_actor'
 import { privateDriveDisk } from '#utils/drive_disk'
 import { imageUrl } from '#utils/image_url'
 
@@ -86,12 +88,37 @@ export async function uploadImageBytes(
   const raster = RASTER_FORMATS[extension]
   const key = `${folder}/${uuidv7()}.${extension}`
   const encoded = await reencodeSource(contents, raster.format, field)
-  await drive.use().put(key, encoded, {
-    contentType: raster.contentType,
-    contentDisposition: 'inline',
-  })
+  await storePublicImage(key, folder, encoded, raster.contentType, null)
 
   return { key, url: imageUrl(key) }
+}
+
+/**
+ * Writes a public image and lists it in the media gallery, credited to the
+ * staff User of the running request (if any).
+ */
+async function storePublicImage(
+  key: string,
+  folder: string,
+  contents: Buffer,
+  contentType: string,
+  originalName: string | null
+): Promise<void> {
+  await drive.use().put(key, contents, { contentType, contentDisposition: 'inline' })
+
+  const { width, height } = await sharp(contents)
+    .metadata()
+    .catch(() => ({ width: undefined, height: undefined }))
+  await new MediaRepository().create({
+    key,
+    folder,
+    contentType,
+    sizeBytes: contents.length,
+    width: width ?? null,
+    height: height ?? null,
+    originalName: originalName ? originalName.slice(0, 255) : null,
+    uploadedById: auditActor.current()?.userId ?? null,
+  })
 }
 
 /**
@@ -111,10 +138,7 @@ export async function uploadImage(file: MultipartFile, folder: string): Promise<
 
   const key = `${folder}/${uuidv7()}.${extension}`
   const contents = await reencode(file, raster.format)
-  await drive.use().put(key, contents, {
-    contentType: raster.contentType,
-    contentDisposition: 'inline',
-  })
+  await storePublicImage(key, folder, contents, raster.contentType, file.clientName)
 
   return { key, url: imageUrl(key) }
 }
@@ -197,8 +221,12 @@ export async function imageExists(key: string): Promise<boolean> {
   return drive.use().exists(key)
 }
 
-/** Best-effort delete; failures are logged, not thrown, so they can be cleaned up later. */
+/**
+ * Removes images from the media gallery and Drive. The file delete is
+ * best-effort; failures are logged, not thrown, so they can be cleaned up later.
+ */
 export async function deleteImages(keys: string[]): Promise<void> {
+  await new MediaRepository().deleteByKeys(keys)
   const results = await Promise.allSettled(keys.map((key) => drive.use().delete(key)))
   results.forEach((result, index) => {
     if (result.status === 'rejected') {

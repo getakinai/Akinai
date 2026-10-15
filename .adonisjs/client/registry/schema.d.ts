@@ -1639,6 +1639,54 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_product_labels_unarchive_controller').default['handle']>>>
     }
   }
+  'admin.media.home': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/media'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_home_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_home_controller').default['handle']>>>
+    }
+  }
+  'admin.media.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/media/list'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/admin_media_list_query_validator').adminMediaListQueryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_list_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_list_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.media.store': {
+    methods: ["POST"]
+    pattern: '/admin/media'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_media_store_validator').adminMediaStoreValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_media_store_validator').adminMediaStoreValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_store_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_store_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.media.delete': {
+    methods: ["DELETE"]
+    pattern: '/admin/media/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_delete_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_media_delete_controller').default['handle']>>>
+    }
+  }
   'admin.vendors.home': {
     methods: ["GET","HEAD"]
     pattern: '/admin/vendors'

@@ -4,6 +4,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import drive from '@adonisjs/drive/services/main'
 import sharp from 'sharp'
 import Collection, { type CollectionStatus } from '#models/collection'
+import Media from '#models/media'
 import StorefrontHeroSlide from '#models/storefront_hero_slide'
 import type User from '#models/user'
 import { MAX_HERO_SLIDES } from '#constants/storefront'
@@ -318,7 +319,10 @@ test.group('Staff storefront hero: image', (group) => {
     return () => drive.restore()
   })
 
-  test('uploads, replaces and removes the slide image', async ({ client, assert }) => {
+  test('uploads, replaces and removes the slide image, keeping old files in the gallery', async ({
+    client,
+    assert,
+  }) => {
     const user = await createAdminUser(['storefront.view', 'storefront.upload'])
     const slide = await seedSlide()
     const png = await pngBuffer()
@@ -345,7 +349,8 @@ test.group('Staff storefront hero: image', (group) => {
     second.assertStatus(200)
     await slide.refresh()
     assert.notEqual(slide.image, firstKey)
-    assert.isFalse(await drive.use().exists(firstKey!))
+    assert.isTrue(await drive.use().exists(firstKey!))
+    assert.isNotNull(await Media.findBy('key', firstKey))
 
     const secondKey = slide.image!
     const removed = await client
@@ -358,7 +363,7 @@ test.group('Staff storefront hero: image', (group) => {
     assert.isNull(removed.body().data.imageUrl)
     await slide.refresh()
     assert.isNull(slide.image)
-    assert.isFalse(await drive.use().exists(secondKey))
+    assert.isTrue(await drive.use().exists(secondKey))
   })
 
   test('rejects files that are not images', async ({ client }) => {
@@ -391,7 +396,7 @@ test.group('Staff storefront hero: image', (group) => {
     response.assertStatus(403)
   })
 
-  test('deleting a slide removes its image', async ({ client, assert }) => {
+  test('deleting a slide keeps its image in the gallery', async ({ client, assert }) => {
     const user = await createAdminUser('admin')
     const slide = await seedSlide()
     await client
@@ -412,7 +417,7 @@ test.group('Staff storefront hero: image', (group) => {
       .loginAs(user)
 
     response.assertStatus(204)
-    assert.isFalse(await drive.use().exists(key))
+    assert.isTrue(await drive.use().exists(key))
   })
 })
 

@@ -6,6 +6,7 @@ export const policies = {
   HelpCategoryPolicy: () => import('#policies/help_category_policy'),
   LocationPolicy: () => import('#policies/location_policy'),
   MarketPolicy: () => import('#policies/market_policy'),
+  MediaPolicy: () => import('#policies/media_policy'),
   OptionDefinitionPolicy: () => import('#policies/option_definition_policy'),
   OrderPolicy: () => import('#policies/order_policy'),
   PagePolicy: () => import('#policies/page_policy'),

@@ -28,7 +28,7 @@ import { bulkResult, type BulkResult } from '#transformers/bulk_result_transform
 import { COLLECTION_IMAGE_FOLDER } from '#constants/storefront'
 import { blankToNull } from '#utils/blank_to_null'
 import { sanitizeEditorHtml } from '#utils/sanitize_rich_text'
-import { deleteImages, uploadImage } from '#utils/uploader'
+import { uploadImage } from '#utils/uploader'
 
 export type ListCollectionsFilters = Partial<PaginateCollectionsData>
 
@@ -194,23 +194,17 @@ export default class CollectionService {
   }
 
   /**
-   * The new file is written before the collection points at it, and the
-   * previous file is removed only after the collection is saved.
+   * The new file is written before the collection points at it. The
+   * previous file stays in the media gallery.
    */
   async setImage(collection: Collection, file: MultipartFile): Promise<Collection> {
-    const previous = collection.image
     const { key } = await uploadImage(file, COLLECTION_IMAGE_FOLDER)
-    const saved = await this.collectionRepository.setImage(collection, key)
-    if (previous) await deleteImages([previous])
-    return saved
+    return this.collectionRepository.setImage(collection, key)
   }
 
   async removeImage(collection: Collection): Promise<Collection> {
-    const previous = collection.image
-    if (!previous) return collection
-    const saved = await this.collectionRepository.setImage(collection, null)
-    await deleteImages([previous])
-    return saved
+    if (!collection.image) return collection
+    return this.collectionRepository.setImage(collection, null)
   }
 
   async archive(collection: Collection): Promise<Collection> {

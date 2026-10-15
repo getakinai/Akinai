@@ -11,11 +11,12 @@ import StorefrontThemeRepository from '#repositories/storefront_theme_repository
 import StorefrontThemeService from '#services/storefront_theme_service'
 import { FaviconSourceError, renderFavicons } from '#utils/favicon'
 import { imageUrl } from '#utils/image_url'
-import { deleteFolder, deleteImages, putFiles, uploadImage } from '#utils/uploader'
+import { deleteFolder, putFiles, uploadImage } from '#utils/uploader'
 
 /**
  * Store logo and favicon. New files are written before the theme points at
- * them, and the previous files are removed only after the theme is saved.
+ * them. Previous favicon sets are removed once the theme is saved; previous
+ * logos stay in the media gallery.
  */
 @inject()
 export default class StorefrontBrandingService {
@@ -30,24 +31,17 @@ export default class StorefrontBrandingService {
     return this.storefrontThemeRepository.update(theme, { brandName: brandName || null })
   }
 
+  /** Replaced and removed logos stay in the media gallery. */
   async setLogo(file: MultipartFile): Promise<StorefrontTheme> {
     const theme = await this.storefrontThemeService.get()
-    const previous = theme.logoImage
     const { key } = await uploadImage(file, LOGO_FOLDER)
-
-    const saved = await this.storefrontThemeRepository.update(theme, { logoImage: key })
-    if (previous) await deleteImages([previous])
-    return saved
+    return this.storefrontThemeRepository.update(theme, { logoImage: key })
   }
 
   async removeLogo(): Promise<StorefrontTheme> {
     const theme = await this.storefrontThemeService.get()
-    const previous = theme.logoImage
-    if (!previous) return theme
-
-    const saved = await this.storefrontThemeRepository.update(theme, { logoImage: null })
-    await deleteImages([previous])
-    return saved
+    if (!theme.logoImage) return theme
+    return this.storefrontThemeRepository.update(theme, { logoImage: null })
   }
 
   async setFavicon(file: MultipartFile): Promise<StorefrontTheme> {

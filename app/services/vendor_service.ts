@@ -8,7 +8,7 @@ import VendorRepository, {
 } from '#repositories/vendor_repository'
 import AuditLogService from '#services/audit_log_service'
 import { bulkResult, type BulkResult } from '#transformers/bulk_result_transformer'
-import { deleteImages, uploadImage } from '#utils/uploader'
+import { uploadImage } from '#utils/uploader'
 
 export type ListVendorsFilters = Partial<PaginateVendorsData>
 
@@ -55,23 +55,17 @@ export default class VendorService {
   }
 
   /**
-   * The new file is written before the vendor points at it, and the
-   * previous file is removed only after the vendor is saved.
+   * The new file is written before the vendor points at it. The previous
+   * file stays in the media gallery.
    */
   async setImage(vendor: Vendor, file: MultipartFile): Promise<Vendor> {
-    const previous = vendor.image
     const { key } = await uploadImage(file, VENDOR_IMAGE_FOLDER)
-    const saved = await this.vendorRepository.setImage(vendor, key)
-    if (previous) await deleteImages([previous])
-    return saved
+    return this.vendorRepository.setImage(vendor, key)
   }
 
   async removeImage(vendor: Vendor): Promise<Vendor> {
-    const previous = vendor.image
-    if (!previous) return vendor
-    const saved = await this.vendorRepository.setImage(vendor, null)
-    await deleteImages([previous])
-    return saved
+    if (!vendor.image) return vendor
+    return this.vendorRepository.setImage(vendor, null)
   }
 
   async archive(vendor: Vendor): Promise<Vendor> {

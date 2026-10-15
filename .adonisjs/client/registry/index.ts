@@ -822,6 +822,30 @@ const routes = {
     tokens: [{"old":"/admin/product-labels/:id/unarchive","type":0,"val":"admin","end":""},{"old":"/admin/product-labels/:id/unarchive","type":0,"val":"product-labels","end":""},{"old":"/admin/product-labels/:id/unarchive","type":1,"val":"id","end":""},{"old":"/admin/product-labels/:id/unarchive","type":0,"val":"unarchive","end":""}],
     types: placeholder as Registry['admin.product_labels.unarchive']['types'],
   },
+  'admin.media.home': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/media',
+    tokens: [{"old":"/admin/media","type":0,"val":"admin","end":""},{"old":"/admin/media","type":0,"val":"media","end":""}],
+    types: placeholder as Registry['admin.media.home']['types'],
+  },
+  'admin.media.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/media/list',
+    tokens: [{"old":"/admin/media/list","type":0,"val":"admin","end":""},{"old":"/admin/media/list","type":0,"val":"media","end":""},{"old":"/admin/media/list","type":0,"val":"list","end":""}],
+    types: placeholder as Registry['admin.media.list']['types'],
+  },
+  'admin.media.store': {
+    methods: ["POST"],
+    pattern: '/admin/media',
+    tokens: [{"old":"/admin/media","type":0,"val":"admin","end":""},{"old":"/admin/media","type":0,"val":"media","end":""}],
+    types: placeholder as Registry['admin.media.store']['types'],
+  },
+  'admin.media.delete': {
+    methods: ["DELETE"],
+    pattern: '/admin/media/:id',
+    tokens: [{"old":"/admin/media/:id","type":0,"val":"admin","end":""},{"old":"/admin/media/:id","type":0,"val":"media","end":""},{"old":"/admin/media/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['admin.media.delete']['types'],
+  },
   'admin.vendors.home': {
     methods: ["GET","HEAD"],
     pattern: '/admin/vendors',
