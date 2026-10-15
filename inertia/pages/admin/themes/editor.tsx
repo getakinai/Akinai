@@ -63,6 +63,7 @@ import {
   sectionThemeSourcePath,
   sectionTypesForTemplate,
   staticSectionIds as staticSectionIdsFromSettings,
+  templateDisplayName,
   templateRefreshSectionIds,
 } from './_editor_utils'
 
@@ -341,6 +342,24 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
     setIframeKey((value) => value + 1)
   }, [notifyMarkupRefresh])
 
+  /** Reorder template section nodes inside the preview iframe without a full reload. */
+  const applySectionOrderToPreview = useCallback(
+    (order: string[]) => {
+      if (editorMode !== 'visual') return
+      const doc = iframeRef.current?.contentDocument
+      const main = doc?.getElementById('main')
+      if (!doc || !main) return
+      const nodes = order
+        .map((id) => doc.getElementById(`akinai-section-${id}`))
+        .filter((node): node is HTMLElement => node instanceof HTMLElement)
+      if (nodes.length === 0) return
+      for (const node of nodes) {
+        main.appendChild(node)
+      }
+    },
+    [editorMode]
+  )
+
   const refreshSections = useCallback(
     async (sectionIds: string[]) => {
       if (editorMode !== 'visual') return
@@ -445,7 +464,9 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
     const oldIndex = template.order.indexOf(String(event.active.id))
     const newIndex = template.order.indexOf(String(event.over.id))
     if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return
-    setTemplateDraft({ ...template, order: arrayMove(template.order, oldIndex, newIndex) })
+    const order = arrayMove(template.order, oldIndex, newIndex)
+    setTemplateDraft({ ...template, order })
+    applySectionOrderToPreview(order)
   }
 
   function updateThemeSetting(id: string, value: unknown) {
@@ -778,7 +799,7 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
               type="button"
               className={cn(
                 'rounded-md p-2 lg:hidden',
-                leftSidebarOpen ? 'bg-accent text-accent-foreground' : 'text-muted'
+                leftSidebarOpen ? 'bg-btn text-btn-fg' : 'text-muted hover:text-ink'
               )}
               aria-label={leftSidebarOpen ? 'Hide sections panel' : 'Show sections panel'}
               aria-pressed={leftSidebarOpen}
@@ -790,7 +811,7 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
               type="button"
               className={cn(
                 'rounded-md p-2 lg:hidden',
-                rightSidebarOpen ? 'bg-accent text-accent-foreground' : 'text-muted'
+                rightSidebarOpen ? 'bg-btn text-btn-fg' : 'text-muted hover:text-ink'
               )}
               aria-label={rightSidebarOpen ? 'Hide settings panel' : 'Show settings panel'}
               aria-pressed={rightSidebarOpen}
@@ -810,8 +831,10 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
                 type="button"
                 className={cn(
                   'rounded-md p-2',
-                  device === key ? 'bg-accent text-accent-foreground' : 'text-muted'
+                  device === key ? 'bg-btn text-btn-fg' : 'text-muted hover:text-ink'
                 )}
+                aria-label={`View by ${key}`}
+                aria-pressed={device === key}
                 onClick={() => setDevice(key)}
               >
                 <Icon size={16} />
@@ -894,7 +917,7 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
                 )}
                 <div>
                   <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-muted">
-                    {templateName} sections
+                    {templateDisplayName(templateName)} sections
                   </p>
                   <DndContext
                     sensors={sensors}

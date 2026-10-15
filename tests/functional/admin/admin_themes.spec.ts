@@ -293,6 +293,24 @@ test.group('Storefront themes: preview', (group) => {
     assert.include(String(response.header('content-security-policy')), "frame-ancestors 'self'")
   })
 
+  test('storefront pages allow same-origin framing during staff preview', async ({
+    client,
+    assert,
+  }) => {
+    const user = await createAdminUser(['themes.view'])
+    const theme = await dawnLite()
+
+    const response = await client
+      .get('/')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({ [THEME_PREVIEW_SESSION_KEY]: { themeId: theme.id, staff: true } })
+
+    response.assertStatus(200)
+    assert.include(String(response.header('x-frame-options')), 'SAMEORIGIN')
+    assert.include(String(response.header('content-security-policy')), "frame-ancestors 'self'")
+  })
+
   test('staff preview an unpublished theme without affecting customers', async ({
     client,
     assert,

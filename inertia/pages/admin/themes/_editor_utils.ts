@@ -5,6 +5,13 @@ import type {
   ThemeTemplateData,
 } from './_editor_types'
 
+/** Human-readable label for a template file name (e.g. `index` → Homepage). */
+export function templateDisplayName(templateName: string): string {
+  const base = templateName.split('.')[0]
+  if (base === 'index') return 'Homepage'
+  return base.charAt(0).toUpperCase() + base.slice(1)
+}
+
 /** Accept Shopify-style `block_order` in pasted template JSON. */
 export function normalizeTemplateJsonPayload(data: {
   sections: Record<string, Record<string, unknown>>

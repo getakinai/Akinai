@@ -1,35 +1,20 @@
 import { useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import {
-  Copy,
-  Download,
-  Eye,
-  LayoutTemplate,
-  Link2,
-  Paintbrush,
-  Pencil,
-  ShieldAlert,
-  Trash2,
-  Upload,
-} from 'lucide-react'
+import { Eye, LayoutTemplate, Paintbrush, ShieldAlert, Trash2, Upload } from 'lucide-react'
 import { Link } from '@adonisjs/inertia/react'
 import Page from '~/components/page'
-import { FormButton, FormInput } from '~/components/form'
+import { FormButton } from '~/components/form'
 import { Badge, Dialog, Skeleton } from '~/components/ui'
 import { useDateFormat } from '~/hooks/use_date_format'
 import AdminLayout from '~/layouts/admin'
-import { HttpError, downloadFile } from '~/lib/http'
+import { HttpError } from '~/lib/http'
 import { buttonClasses, card, cn } from '~/lib/styles'
 import { useCan } from '../_hooks'
 import {
-  adminThemeDownloadUrl,
   adminThemePreviewUrl,
-  createAdminThemeShareLink,
   useAdminThemes,
   useDeleteAdminTheme,
-  useDuplicateAdminTheme,
   usePublishAdminTheme,
-  useRenameAdminTheme,
   useUnpublishAdminTheme,
   useUploadAdminTheme,
 } from './_hooks'
@@ -194,14 +179,17 @@ export default function AdminThemesPage() {
   const { formatDate } = useDateFormat()
   const publish = usePublishAdminTheme()
   const unpublish = useUnpublishAdminTheme()
-  const duplicate = useDuplicateAdminTheme()
-  const rename = useRenameAdminTheme()
   const remove = useDeleteAdminTheme()
   const [publishing, setPublishing] = useState<AdminTheme | 'builtin' | null>(null)
-  const [renaming, setRenaming] = useState<AdminTheme | null>(null)
-  const [newName, setNewName] = useState('')
   const [deleting, setDeleting] = useState<AdminTheme | null>(null)
-  const [shareLink, setShareLink] = useState<{ name: string; url: string } | null>(null)
+  const [previewing, setPreviewing] = useState<{ id: string | 'builtin'; name: string } | null>(
+    null
+  )
+
+  function closePreview() {
+    setPreviewing(null)
+    void fetch('/themes/preview/exit', { credentials: 'include', redirect: 'manual' })
+  }
 
   const live = themes?.find((theme) => theme.role === 'live') ?? null
   const library = themes?.filter((theme) => theme.role !== 'live') ?? []
@@ -240,22 +228,15 @@ export default function AdminThemesPage() {
     })
   }
 
-  async function share(theme: AdminTheme) {
-    try {
-      const { url } = await createAdminThemeShareLink(theme.id)
-      setShareLink({ name: theme.name, url })
-    } catch (error) {
-      onError(error)
-    }
-  }
-
-  const previewLink = (id: string | 'builtin') => (
-    <a
-      href={adminThemePreviewUrl(id)}
-      className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+  const previewButton = (id: string | 'builtin', name: string) => (
+    <FormButton
+      type="button"
+      variant="secondary"
+      size="sm"
+      onClick={() => setPreviewing({ id, name })}
     >
       <Eye size={14} /> Preview
-    </a>
+    </FormButton>
   )
 
   const builtinCustomize = canEditBuiltin && (
@@ -291,7 +272,7 @@ export default function AdminThemesPage() {
             </FormButton>
           )}
           {builtinCustomize}
-          {!isLive && previewLink('builtin')}
+          {!isLive && previewButton('builtin', 'Built-in theme')}
         </>
       }
     />
@@ -323,7 +304,7 @@ export default function AdminThemesPage() {
                 Publish
               </FormButton>
             )}
-            {previewLink(theme.id)}
+            {previewButton(theme.id, theme.name)}
             {canEdit && (
               <a
                 href={`/admin/themes/${encodeURIComponent(theme.id)}/editor`}
@@ -332,50 +313,6 @@ export default function AdminThemesPage() {
                 <Paintbrush size={14} /> Customize
               </a>
             )}
-            {!isLive && (
-              <FormButton type="button" variant="secondary" size="sm" onClick={() => share(theme)}>
-                <Link2 size={14} /> Share preview
-              </FormButton>
-            )}
-            {canEdit && (
-              <FormButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                loading={duplicate.isPending && duplicate.variables === theme.id}
-                onClick={() =>
-                  duplicate.mutate(theme.id, {
-                    onSuccess: () => toast.success(`Copy of ${theme.name} added`),
-                    onError,
-                  })
-                }
-              >
-                <Copy size={14} /> Duplicate
-              </FormButton>
-            )}
-            {canEdit && (
-              <FormButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setNewName(theme.name)
-                  setRenaming(theme)
-                }}
-              >
-                <Pencil size={14} /> Rename
-              </FormButton>
-            )}
-            <FormButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() =>
-                downloadFile(adminThemeDownloadUrl(theme.id), `${theme.key}.zip`).catch(onError)
-              }
-            >
-              <Download size={14} /> Download
-            </FormButton>
             {!isLive && canDelete && (
               <FormButton
                 type="button"
@@ -455,6 +392,22 @@ export default function AdminThemesPage() {
       )}
 
       <Dialog
+        open={previewing !== null}
+        onClose={closePreview}
+        title={previewing ? `Preview · ${previewing.name}` : 'Preview'}
+        className="app-dialog--wide"
+      >
+        {previewing && (
+          <iframe
+            key={previewing.id}
+            title={`Preview of ${previewing.name}`}
+            src={adminThemePreviewUrl(previewing.id)}
+            className="h-[min(75dvh,720px)] w-full rounded-lg border border-line bg-paper"
+          />
+        )}
+      </Dialog>
+
+      <Dialog
         open={publishing !== null}
         onClose={() => setPublishing(null)}
         title="Publish theme?"
@@ -486,60 +439,13 @@ export default function AdminThemesPage() {
         </div>
       </Dialog>
 
-      <Dialog open={renaming !== null} onClose={() => setRenaming(null)} title="Rename theme">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault()
-            if (!renaming) return
-            rename.mutate(
-              { id: renaming.id, name: newName },
-              {
-                onSuccess: () => {
-                  toast.success('Theme renamed')
-                  setRenaming(null)
-                },
-                onError,
-              }
-            )
-          }}
-        >
-          <FormInput
-            name="theme-name"
-            label="Name"
-            value={newName}
-            maxLength={120}
-            required
-            onChange={(event) => setNewName(event.target.value)}
-          />
-          <div className="flex justify-end gap-2.5">
-            <FormButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setRenaming(null)}
-            >
-              Cancel
-            </FormButton>
-            <FormButton
-              type="submit"
-              size="sm"
-              loading={rename.isPending}
-              disabled={!newName.trim()}
-            >
-              Save
-            </FormButton>
-          </div>
-        </form>
-      </Dialog>
-
       <Dialog
         open={deleting !== null}
         onClose={() => setDeleting(null)}
         title="Delete theme?"
         description={
           deleting
-            ? `${deleting.name} and its settings will be removed from your library. Download it first if you may need it again.`
+            ? `${deleting.name} and its settings will be removed from your library.`
             : undefined
         }
       >
@@ -566,50 +472,6 @@ export default function AdminThemesPage() {
           >
             Delete
           </FormButton>
-        </div>
-      </Dialog>
-
-      <Dialog
-        open={shareLink !== null}
-        onClose={() => setShareLink(null)}
-        title="Share preview"
-        description={
-          shareLink
-            ? `Anyone with this link can preview ${shareLink.name} for the next 14 days, without signing in.`
-            : undefined
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <input
-            readOnly
-            aria-label="Preview link"
-            value={shareLink?.url ?? ''}
-            className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-[13px] text-ink"
-            onFocus={(event) => event.target.select()}
-          />
-          <div className="flex justify-end gap-2.5">
-            <FormButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setShareLink(null)}
-            >
-              Close
-            </FormButton>
-            <FormButton
-              type="button"
-              size="sm"
-              onClick={() => {
-                if (!shareLink) return
-                navigator.clipboard
-                  .writeText(shareLink.url)
-                  .then(() => toast.success('Link copied'))
-                  .catch(() => toast.error('Copy the link from the box above'))
-              }}
-            >
-              <Copy size={14} /> Copy link
-            </FormButton>
-          </div>
         </div>
       </Dialog>
     </Page>

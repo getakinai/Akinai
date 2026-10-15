@@ -46,12 +46,12 @@ function onError(error: unknown) {
 
 function CategorySection({
   category,
-  installed,
+  enabled,
   total,
   children,
 }: {
   category: string
-  installed: number
+  enabled: number
   total: number
   children: ReactNode
 }) {
@@ -69,7 +69,7 @@ function CategorySection({
           )}
         </div>
         <span className={card.eyebrow}>
-          {installed} of {total} installed
+          {enabled} of {total} enabled
         </span>
       </header>
       {children}
@@ -83,8 +83,8 @@ function PluginCard({
   pending,
   payment,
   onConfigure,
-  onInstall,
-  onUninstall,
+  onEnable,
+  onDisable,
 }: {
   plugin: AdminPlugin
   canEdit: boolean
@@ -93,11 +93,12 @@ function PluginCard({
   payment?: AdminPaymentMethod
   /** Opens the setup dialog in place of the plugin's admin page. */
   onConfigure?: () => void
-  onInstall: () => void
-  onUninstall: () => void
+  onEnable: () => void
+  onDisable: () => void
 }) {
   const Icon = categoryInfo(plugin.category).icon
   const configured = payment?.configured
+  const notSetUp = payment && configured === false
   return (
     <li className={`${card.base} flex flex-col`}>
       <div className="flex items-start gap-3">
@@ -108,7 +109,7 @@ function PluginCard({
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-[15px] font-semibold text-ink">{plugin.name}</h3>
             {!plugin.isInstalled ? (
-              <Badge tone="neutral">Not installed</Badge>
+              <Badge tone="neutral">Not enabled</Badge>
             ) : (
               payment &&
               (payment.configured ? (
@@ -149,18 +150,20 @@ function PluginCard({
         )}
         {canEdit &&
           (plugin.isInstalled ? (
-            <FormButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={pending}
-              onClick={onUninstall}
-            >
-              Uninstall
-            </FormButton>
+            !notSetUp && (
+              <FormButton
+                type="button"
+                variant="danger"
+                size="sm"
+                disabled={pending}
+                onClick={onDisable}
+              >
+                Disable
+              </FormButton>
+            )
           ) : (
-            <FormButton type="button" size="sm" loading={pending} onClick={onInstall}>
-              Install
+            <FormButton type="button" size="sm" loading={pending} onClick={onEnable}>
+              Enable
             </FormButton>
           ))}
       </div>
@@ -172,7 +175,7 @@ export default function AdminPluginsPage() {
   const { data: plugins, isLoading, isError, refetch } = useAdminPlugins()
   const canEdit = useCan('plugins.edit')
   const setInstalled = useSetAdminPluginInstalled()
-  const [uninstalling, setUninstalling] = useState<AdminPlugin | null>(null)
+  const [disabling, setDisabling] = useState<AdminPlugin | null>(null)
   const canConfigurePayments = useCan('payments.edit')
   const paymentMethods = useAdminPaymentMethods(useCan('payments.view'))
   const [openPayment, setOpenPayment] = useState<ManagedCode | null>(null)
@@ -194,22 +197,22 @@ export default function AdminPluginsPage() {
   }
   const paymentByCode = new Map((paymentMethods.data ?? []).map((method) => [method.code, method]))
 
-  function install(plugin: AdminPlugin) {
+  function enable(plugin: AdminPlugin) {
     setInstalled.mutate(
       { key: plugin.key, installed: true },
-      { onSuccess: () => toast.success(`${plugin.name} installed`), onError }
+      { onSuccess: () => toast.success(`${plugin.name} enabled`), onError }
     )
   }
 
-  function confirmUninstall() {
-    if (!uninstalling) return
-    const plugin = uninstalling
+  function confirmDisable() {
+    if (!disabling) return
+    const plugin = disabling
     setInstalled.mutate(
       { key: plugin.key, installed: false },
       {
         onSuccess: () => {
-          toast.success(`${plugin.name} uninstalled`)
-          setUninstalling(null)
+          toast.success(`${plugin.name} disabled`)
+          setDisabling(null)
         },
         onError,
       }
@@ -221,7 +224,7 @@ export default function AdminPluginsPage() {
   return (
     <Page
       title="Plugins"
-      description="Add features to your store. Installed plugins appear in their place on the storefront."
+      description="Add features to your store. Enabled plugins appear in their place on the storefront."
     >
       {isLoading ? (
         <div className={sectionClasses} aria-busy="true" aria-label="Loading plugins">
@@ -247,7 +250,7 @@ export default function AdminPluginsPage() {
             <CategorySection
               key={group.category}
               category={group.category}
-              installed={group.plugins.filter((plugin) => plugin.isInstalled).length}
+              enabled={group.plugins.filter((plugin) => plugin.isInstalled).length}
               total={group.plugins.length}
             >
               <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -263,8 +266,8 @@ export default function AdminPluginsPage() {
                         ? () => setOpenPayment(plugin.key as ManagedCode)
                         : undefined
                     }
-                    onInstall={() => install(plugin)}
-                    onUninstall={() => setUninstalling(plugin)}
+                    onEnable={() => enable(plugin)}
+                    onDisable={() => setDisabling(plugin)}
                   />
                 ))}
               </ul>
@@ -304,14 +307,14 @@ export default function AdminPluginsPage() {
       />
 
       <Dialog
-        open={uninstalling !== null}
-        onClose={() => setUninstalling(null)}
-        title="Uninstall plugin?"
+        open={disabling !== null}
+        onClose={() => setDisabling(null)}
+        title="Disable plugin?"
         description={
-          uninstalling
-            ? uninstalling.category === 'payments'
-              ? `Customers won't be able to pay with ${uninstalling.name}. Its settings are kept, so installing it again restores them.`
-              : `${uninstalling.name} will be removed from the storefront. Its settings and content are kept, so installing it again restores them.`
+          disabling
+            ? disabling.category === 'payments'
+              ? `Customers won't be able to pay with ${disabling.name}. Its settings are kept, so enabling it again restores them.`
+              : `${disabling.name} will be hidden from the storefront. Its settings and content are kept, so enabling it again restores them.`
             : undefined
         }
       >
@@ -320,7 +323,7 @@ export default function AdminPluginsPage() {
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => setUninstalling(null)}
+            onClick={() => setDisabling(null)}
           >
             Cancel
           </FormButton>
@@ -329,9 +332,9 @@ export default function AdminPluginsPage() {
             variant="danger"
             size="sm"
             loading={setInstalled.isPending}
-            onClick={confirmUninstall}
+            onClick={confirmDisable}
           >
-            Uninstall
+            Disable
           </FormButton>
         </div>
       </Dialog>
