@@ -101,7 +101,7 @@ export default function AdminSetup() {
           />
           <FormSelectWithSearch
             name="operatingCountryCode"
-            label="Country you deliver to"
+            label="Default country you deliver to"
             placeholder="Choose a country"
             searchPlaceholder="Search countries"
             tooltip="Sets up starting markets, taxes and shipping zones for some countries. You can change them later."

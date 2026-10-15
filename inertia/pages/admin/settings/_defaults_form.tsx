@@ -111,7 +111,7 @@ export default function DefaultsForm({ settings, disabled }: DefaultsFormProps) 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormSelectWithSearch
           name="operatingCountryCode"
-          label="Country you deliver to"
+          label="Default country you deliver to"
           placeholder="Not set"
           searchPlaceholder="Search countries"
           tooltip="Tailors examples and suggestions, such as province groups for shipping zones. Changing it doesn't add or remove markets or zones."
