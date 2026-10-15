@@ -296,7 +296,7 @@ export default function ThemeEditor({ themeId, themeName, themeRole }: Props) {
   const commit = useCommitThemeDraft(themeId)
   const discard = useDiscardThemeDraft(themeId)
 
-  const [templateName, setTemplateName] = useState('index')
+  const [templateName] = useState('index')
   const [selection, setSelection] = useState<Selection>({ scope: 'theme' })
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const [settingsDraft, setSettingsDraft] = useState<ThemeSettingsData | null>(null)

@@ -23,6 +23,7 @@ export const ThemeSettingDefinitionSchema = z.object({
   id: z.string().optional(),
   label: z.string().optional(),
   content: z.string().optional(),
+  info: z.string().optional(),
   default: z.unknown().optional(),
   min: z.number().optional(),
   max: z.number().optional(),
