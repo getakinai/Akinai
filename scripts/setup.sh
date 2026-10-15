@@ -60,7 +60,20 @@ step "Running migrations"
 node ace migration:run
 
 step "Seeding the database"
-node ace db:seed
+SEED_MODE=clean
+if [ -t 0 ]; then
+  printf 'Seed a clean store or one with demo products? [c]lean / [d]emo (default: clean): '
+  read -r answer || answer=""
+  case "$answer" in
+    d|D|demo|Demo) SEED_MODE=demo ;;
+  esac
+fi
+if [ "$SEED_MODE" = demo ]; then
+  yarn db:seed:demo
+else
+  node ace db:seed
+  node ace search:reindex-products
+fi
 
 step "Done"
 cat <<EOF

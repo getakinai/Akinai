@@ -7,7 +7,7 @@
 With Node 24+, Yarn and Docker installed:
 
 ```bash
-yarn setup   # install, create .env, start Docker, migrate, seed
+yarn setup   # install, create .env, start Docker, migrate, seed (clean or demo)
 yarn dev     # http://localhost:3333
 ```
 
@@ -94,7 +94,7 @@ tests/            unit/ and functional/ Japa suites
 
 ## Running locally
 
-`yarn setup` runs steps 1 to 4 below for you (including generating `SETUP_TOKEN`) and is safe to re-run. The manual steps are here for when you need to run one on its own.
+`yarn setup` runs steps 1 to 4 below for you (including generating `SETUP_TOKEN`) and is safe to re-run. At the seed step it asks whether you want a clean store (`yarn db:seed`) or one with demo products (`yarn db:seed:demo`); without an interactive terminal it seeds a clean store. The manual steps are here for when you need to run one on its own.
 
 ### Prerequisites
 

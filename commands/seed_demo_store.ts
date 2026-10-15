@@ -18,6 +18,21 @@ export default class SeedDemoStore extends BaseCommand {
     const { default: DemoStoreSeeder } = await import('../database/demo/demo_store_seeder.js')
     const { default: ProductSearchService } = await import('#services/product_search_service')
 
+    /**
+     * The collection must exist before seeding: every product save syncs
+     * to the index, and Typesense rejects writes to a missing collection.
+     */
+    const search = await this.app.container.make(ProductSearchService)
+    let searchReady = true
+    try {
+      await search.ensureIndex()
+    } catch (error) {
+      searchReady = false
+      this.logger.warning(
+        `Search index not available (${error instanceof Error ? error.message : error}). Run "node ace search:reindex-products" once Typesense is up.`
+      )
+    }
+
     const seeder = new DemoStoreSeeder(db.connection())
     await seeder.run()
 
@@ -26,8 +41,9 @@ export default class SeedDemoStore extends BaseCommand {
       `Demo store ready: ${products} products, ${collections} collections and ${menuItems} menu links added`
     )
 
+    if (!searchReady) return
+
     try {
-      const search = await this.app.container.make(ProductSearchService)
       const indexed = await search.reindexAll()
       this.logger.success(`Indexed ${indexed} products for search`)
     } catch (error) {
