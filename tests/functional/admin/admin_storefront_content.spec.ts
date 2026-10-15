@@ -122,6 +122,19 @@ function totalOf(row: { $extras: Record<string, unknown> } | null) {
 test.group('Staff storefront content: announcement and footer', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
 
+  test('the content page redirects to the built-in theme', async ({ client }) => {
+    const user = await createAdminUser(['storefront.view'])
+
+    const response = await client
+      .get('/admin/storefront/content')
+      .withGuard('web')
+      .loginAs(user)
+      .redirects(0)
+
+    response.assertStatus(302)
+    response.assertHeader('location', '/admin/storefront/theme')
+  })
+
   test('saves the announcement and footer tagline', async ({ client, assert }) => {
     const user = await createAdminUser(['storefront.view', 'storefront.edit'])
 

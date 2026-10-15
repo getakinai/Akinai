@@ -3,11 +3,18 @@ import Page from '~/components/page'
 import { FormButton } from '~/components/form'
 import { Skeleton } from '~/components/ui'
 import AdminLayout from '~/layouts/admin'
+import { PROMO_PLACEMENTS } from '~/lib/storefront'
 import { buttonClasses, card } from '~/lib/styles'
+import HeroSlidesCard from '@plugins/hero_slideshow/client/pages/admin/_hero_slides_card'
 import { useCan } from '../_hooks'
+import { useAdminNavPlugins } from '../plugins/_hooks'
 import LiveThemeNotice from '../themes/_live_theme_notice'
 import BrandingCard from './_branding_card'
-import { useAdminStorefrontTheme } from './_hooks'
+import ContentTextsCard from './_content_texts_card'
+import FeaturedReviewsCard from './_featured_reviews_card'
+import FeaturesCard from './_features_card'
+import { useAdminStorefrontPromoBanners, useAdminStorefrontTheme } from './_hooks'
+import PromoBannersCard from './_promo_banners_card'
 import ThemeForm from './_theme_form'
 import { type AdminStorefrontTheme } from './_types'
 
@@ -26,11 +33,14 @@ function themeFormKey(theme: AdminStorefrontTheme) {
 export default function StorefrontThemePage() {
   const { data: theme, isLoading, isError, refetch } = useAdminStorefrontTheme()
   const canEdit = useCan('storefront.edit')
+  const banners = useAdminStorefrontPromoBanners()
+  const navPlugins = useAdminNavPlugins()
+  const heroEnabled = navPlugins?.some((plugin) => plugin.key === 'hero_slideshow') ?? false
 
   return (
     <Page
       title="Built-in theme"
-      description="Set the logo, favicon and colors of the built-in theme. Uploaded themes have their own settings."
+      description="Set the logo, favicon, colors, hero, announcement, promo banners, highlights and testimonials of the built-in theme. Uploaded themes have their own settings."
       actions={
         <a
           href="/"
@@ -74,6 +84,20 @@ export default function StorefrontThemePage() {
         <div className="flex min-w-0 flex-col gap-6">
           <BrandingCard theme={theme} />
           <ThemeForm key={themeFormKey(theme)} theme={theme} disabled={!canEdit} />
+          {heroEnabled && <HeroSlidesCard />}
+          <ContentTextsCard editable={canEdit} />
+          {PROMO_PLACEMENTS.map((placement) => (
+            <PromoBannersCard
+              key={placement}
+              placement={placement}
+              banners={banners.data?.filter((banner) => banner.placement === placement)}
+              isLoading={banners.isLoading}
+              isError={banners.isError}
+              onRetry={() => banners.refetch()}
+            />
+          ))}
+          <FeaturesCard editable={canEdit} />
+          <FeaturedReviewsCard />
         </div>
       )}
     </Page>

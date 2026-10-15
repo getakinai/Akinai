@@ -281,7 +281,6 @@ declare module '@adonisjs/inertia/types' {
     'admin/storefront/_theme_form': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_theme_form.tsx'))['default']>
     'admin/storefront/_theme_preview': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_theme_preview.tsx'))['default']>
     'admin/storefront/_types': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/_types.ts'))['default']>
-    'admin/storefront/content': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/content.tsx'))['default']>
     'admin/storefront/menu': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/menu.tsx'))['default']>
     'admin/storefront/theme': ExtractProps<(typeof import('../../inertia/pages/admin/storefront/theme.tsx'))['default']>
     'admin/support/tickets/_format': ExtractProps<(typeof import('../../inertia/pages/admin/support/tickets/_format.ts'))['default']>

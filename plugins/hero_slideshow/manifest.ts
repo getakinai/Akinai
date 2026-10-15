@@ -9,7 +9,7 @@ const manifest = {
   slots: ['home.hero'],
   appBlocks: [{ type: 'hero', name: 'Hero slideshow' }],
   defaultInstalled: true,
-  adminRoute: 'admin.storefront_hero.home',
+  adminRoute: 'admin.storefront_theme.home',
 } as const satisfies PluginManifest
 
 export default manifest

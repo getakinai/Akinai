@@ -262,7 +262,7 @@ export default function AdminThemesPage() {
           <Badge tone="neutral">Built in</Badge>
         </>
       }
-      meta="Comes with your store · colors and content are set in the Built-in theme pages"
+      meta="Comes with your store · colors and content are set when you customize it"
       thumbnail={<Thumbnail url={null} name="Built-in theme" />}
       actions={
         <>
