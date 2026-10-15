@@ -27,8 +27,8 @@ export async function fetchAdminPaymentMethods() {
   return data
 }
 
-export function useAdminPaymentMethods() {
-  return useQuery({ queryKey: adminPaymentKeys.list, queryFn: fetchAdminPaymentMethods })
+export function useAdminPaymentMethods(enabled = true) {
+  return useQuery({ queryKey: adminPaymentKeys.list, queryFn: fetchAdminPaymentMethods, enabled })
 }
 
 export async function fetchAdminPaymentMarkets() {
@@ -39,8 +39,12 @@ export async function fetchAdminPaymentMarkets() {
 }
 
 /** Active markets payment methods can be offered in, primary first. */
-export function useAdminPaymentMarkets() {
-  return useQuery({ queryKey: adminPaymentKeys.markets, queryFn: fetchAdminPaymentMarkets })
+export function useAdminPaymentMarkets(enabled = true) {
+  return useQuery({
+    queryKey: adminPaymentKeys.markets,
+    queryFn: fetchAdminPaymentMarkets,
+    enabled,
+  })
 }
 
 export async function fetchAdminBankTransfer() {

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { http } from '~/lib/http'
 import { storefrontKeys, useStorefrontPlugins } from '~/pages/_hooks'
+import { adminPaymentKeys } from '../payments/_hooks'
 import { EmptyResponseSchema } from '../storefront/_types'
 import { AdminPluginListResponseSchema } from './_types'
 
@@ -38,6 +39,7 @@ export function useSetAdminPluginInstalled() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: adminPluginKeys.all }),
         queryClient.invalidateQueries({ queryKey: storefrontKeys.plugins }),
+        queryClient.invalidateQueries({ queryKey: adminPaymentKeys.all }),
       ]),
   })
 }

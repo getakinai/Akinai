@@ -201,6 +201,15 @@ Delete its folder and restart (or rebuild). Its routes, marketplace card, sideba
 
 A plugin folder that fails to load (syntax error, bad manifest, duplicate key) is logged at error level and skipped; the rest of the app boots normally.
 
+## Payment plugins
+
+Bank transfer, Stripe and POLi ship as `payments` plugins (`plugins/bank_transfer`, `plugins/stripe`, `plugins/poli`). Their folders hold only a manifest; the gateway code (services, webhooks, setup dialogs) still lives in core.
+
+- The plugin key must equal the payment method code, and the code must be listed in `PLUGIN_PAYMENT_METHOD_CODES` (`app/constants/payment_methods.ts`).
+- While a payment plugin is uninstalled, its method is left out of `/admin/payments` and checkout, and its admin setup routes return 404.
+- Webhooks and return pages stay open, so payments already in progress still settle after an uninstall.
+- Removing a payment plugin's folder also removes the method, because it no longer counts as installed.
+
 ## 7. Before opening a PR
 
 ```bash

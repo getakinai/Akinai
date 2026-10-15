@@ -28,6 +28,29 @@ test.group('Staff plugins: marketplace', (group) => {
     assert.equal(hero.adminRoute, 'admin.storefront_hero.home')
   })
 
+  test('lists the payment methods as installed payment plugins', async ({ client, assert }) => {
+    const user = await createAdminUser(['plugins.view'])
+
+    const response = await client
+      .get('/admin/plugins/list')
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+
+    response.assertStatus(200)
+    const payments = response
+      .body()
+      .data.filter((plugin: { category: string }) => plugin.category === 'payments')
+    assert.sameMembers(
+      payments.map((plugin: { key: string }) => plugin.key),
+      ['bank_transfer', 'stripe', 'poli']
+    )
+    for (const plugin of payments) {
+      assert.isTrue(plugin.isInstalled)
+      assert.equal(plugin.adminRoute, 'admin.payments.home')
+    }
+  })
+
   test('needs plugins.view to list', async ({ client }) => {
     const user = await createAdminUser(['storefront.view'])
 

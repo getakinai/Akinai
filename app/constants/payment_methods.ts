@@ -109,6 +109,18 @@ export const STRIPE_SECRET_KEY = /^(sk|rk)_(test|live)_[A-Za-z0-9]+$/
 
 export const STRIPE_WEBHOOK_SECRET = /^whsec_[A-Za-z0-9]+$/
 
+/**
+ * Methods shipped as installable plugins. Each code is also its plugin key,
+ * so a method is only offered while plugins/<code> is installed.
+ */
+export const PLUGIN_PAYMENT_METHOD_CODES = ['bank_transfer', 'stripe', 'poli'] as const
+
+export type PluginPaymentMethodCode = (typeof PLUGIN_PAYMENT_METHOD_CODES)[number]
+
+export function isPluginPaymentMethod(code: string): code is PluginPaymentMethodCode {
+  return (PLUGIN_PAYMENT_METHOD_CODES as readonly string[]).includes(code)
+}
+
 /** Methods paid on the provider's own page; the order waits as a pending checkout until paid. */
 export const ONLINE_PAYMENT_METHODS = ['stripe', 'poli'] as const
 

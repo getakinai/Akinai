@@ -217,6 +217,37 @@
   overscroll-behavior: contain;
 }
 
+.app-sheet {
+  padding: 0;
+  color: inherit;
+}
+.app-sheet:not([open]) {
+  display: none;
+}
+.app-sheet::backdrop {
+  background: rgb(10 10 11 / 0.3);
+}
+.app-sheet:modal {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(440px, 100%);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .app-sheet[open] {
+    animation: sheet-in 0.28s cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
 /* Rich text (Slate) editable + preview */
 .rich-text-content [data-slate-placeholder='true'] {
   opacity: 1 !important;

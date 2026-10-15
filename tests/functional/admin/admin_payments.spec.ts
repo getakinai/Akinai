@@ -4,6 +4,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import type User from '#models/user'
 import PaymentMethodRepository from '#repositories/payment_method_repository'
 import MarketService from '#services/market_service'
+import PluginService from '#services/plugin_service'
 import StripeGatewayService from '#services/stripe_gateway_service'
 import { createAdminUser } from '#tests/helpers/admin'
 
@@ -311,5 +312,61 @@ test.group('Staff payments: POLi', (group) => {
 
     update.assertStatus(403)
     view.assertStatus(403)
+  })
+})
+
+test.group('Staff payments: plugin install state', (group) => {
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
+
+  test('an uninstalled payment plugin is left out of the list', async ({ client, assert }) => {
+    await seedMarkets()
+    const plugins = await app.container.make(PluginService)
+    await plugins.uninstall('stripe')
+    const user = await createAdminUser(['payments.view'])
+
+    const response = await get(client, user, '/admin/payments/list')
+
+    response.assertStatus(200)
+    const codes = response.body().data.map((method: { code: string }) => method.code)
+    assert.notInclude(codes, 'stripe')
+    assert.includeMembers(codes, ['bank_transfer', 'poli'])
+  })
+
+  test('lists installed payment plugins before the coming-soon methods', async ({
+    client,
+    assert,
+  }) => {
+    await seedMarkets()
+    const user = await createAdminUser(['payments.view'])
+
+    const response = await get(client, user, '/admin/payments/list')
+
+    response.assertStatus(200)
+    const rows: { code: string; status: string }[] = response.body().data
+    assert.deepEqual(
+      rows.slice(0, 3).map((row) => row.code),
+      ['bank_transfer', 'stripe', 'poli']
+    )
+    assert.isTrue(rows.slice(3).every((row) => row.status === 'coming_soon'))
+    assert.include(
+      rows.map((row) => row.code),
+      'windcave'
+    )
+  })
+
+  test('setup routes return 404 while the plugin is uninstalled', async ({ client }) => {
+    await seedMarkets()
+    const plugins = await app.container.make(PluginService)
+    await plugins.uninstall('stripe')
+    const user = await createAdminUser(['payments.view', 'payments.edit'])
+
+    const view = await get(client, user, '/admin/payments/stripe/view')
+    const update = await put(client, user, '/admin/payments/stripe', {
+      ...STRIPE_KEYS,
+      marketIds: [],
+    })
+
+    view.assertStatus(404)
+    update.assertStatus(404)
   })
 })

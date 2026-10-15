@@ -1,22 +1,16 @@
 import { useState } from 'react'
 import { Building2, CreditCard, Landmark, Wallet, type LucideIcon } from 'lucide-react'
+import { Link } from '@adonisjs/inertia/react'
 import { DataTableToolbar } from '~/components/data_table'
 import { FormButton, FormSelectWithSearch } from '~/components/form'
 import Page from '~/components/page'
 import { Badge, Skeleton } from '~/components/ui'
 import AdminLayout from '~/layouts/admin'
-import { card } from '~/lib/styles'
+import type { NavRoute } from '~/components/nav_link'
+import { buttonClasses, card } from '~/lib/styles'
 import { useCan } from '../_hooks'
-import BankTransferDialog from './_bank_transfer_dialog'
-import {
-  useAdminBankTransfer,
-  useAdminPaymentMarkets,
-  useAdminPaymentMethods,
-  useAdminPoli,
-  useAdminStripe,
-} from './_hooks'
-import PoliDialog from './_poli_dialog'
-import StripeDialog from './_stripe_dialog'
+import { useAdminPaymentMarkets, useAdminPaymentMethods } from './_hooks'
+import { isManaged, PaymentMethodDialog, type ManagedCode } from './_method_dialog'
 import { STRIPE_MODE_LABELS, type AdminPaymentMethod } from './_types'
 
 const rowsCard = 'overflow-hidden rounded-card border border-line-2 bg-card divide-y divide-line'
@@ -28,13 +22,6 @@ const METHOD_ICONS: Record<string, LucideIcon> = {
   stripe: CreditCard,
   poli: Building2,
 }
-
-const MANAGED_CODES = ['bank_transfer', 'stripe', 'poli'] as const
-
-type ManagedCode = (typeof MANAGED_CODES)[number]
-
-const isManaged = (code: string): code is ManagedCode =>
-  MANAGED_CODES.some((managed) => managed === code)
 
 function StatusBadge({ method }: { method: AdminPaymentMethod }) {
   if (method.status === 'coming_soon') return <Badge>Coming soon</Badge>
@@ -82,10 +69,19 @@ function PaymentRow({ method, onManage }: { method: AdminPaymentMethod; onManage
           <AvailabilityBadges method={method} />
         </div>
       </div>
-      {onManage && (
+      {onManage ? (
         <FormButton type="button" variant="secondary" size="sm" onClick={onManage}>
           {method.configured ? 'Manage' : 'Set up'}
         </FormButton>
+      ) : (
+        method.adminRoute && (
+          <Link
+            route={method.adminRoute as NavRoute}
+            className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+          >
+            Manage
+          </Link>
+        )
       )}
     </div>
   )
@@ -97,9 +93,7 @@ export default function AdminPaymentsHome() {
   const canEdit = useCan('payments.edit')
   const [marketFilter, setMarketFilter] = useState('')
   const [openDialog, setOpenDialog] = useState<ManagedCode | null>(null)
-  const bankTransfer = useAdminBankTransfer(canEdit)
-  const stripe = useAdminStripe(canEdit)
-  const poli = useAdminPoli(canEdit)
+  const canViewPlugins = useCan('plugins.view')
   const close = () => setOpenDialog(null)
   const manage = (code: string) =>
     canEdit && isManaged(code) ? () => setOpenDialog(code) : undefined
@@ -110,6 +104,8 @@ export default function AdminPaymentsHome() {
         method.markets.some((market) => market.id === filterMarket.id)
       )
     : (methods ?? [])
+  const installed = visible.filter((method) => method.status !== 'coming_soon')
+  const comingSoon = visible.filter((method) => method.status === 'coming_soon')
 
   return (
     <Page title="Payments" description="Payment methods offered to customers in each market.">
@@ -153,28 +149,44 @@ export default function AdminPaymentsHome() {
             No payment methods are offered in {filterMarket?.name ?? 'this market'} yet.
           </div>
         ) : (
-          <div className={rowsCard}>
-            {visible.map((method) => (
-              <PaymentRow key={method.code} method={method} onManage={manage(method.code)} />
-            ))}
-          </div>
+          <>
+            {installed.length > 0 && (
+              <div className={rowsCard}>
+                {installed.map((method) => (
+                  <PaymentRow key={method.code} method={method} onManage={manage(method.code)} />
+                ))}
+              </div>
+            )}
+            {comingSoon.length > 0 && (
+              <section className="mt-3 flex flex-col gap-2" aria-labelledby="payments-coming-soon">
+                <h2 id="payments-coming-soon" className={card.eyebrow}>
+                  Coming soon
+                </h2>
+                <div className={rowsCard}>
+                  {comingSoon.map((method) => (
+                    <PaymentRow key={method.code} method={method} />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+        {canViewPlugins && (
+          <p className="text-[13px] text-muted">
+            Add more payment methods from{' '}
+            <Link route="admin.plugins.home" className="font-medium text-ink underline">
+              Plugins
+            </Link>
+            .
+          </p>
         )}
       </div>
 
-      {openDialog === 'bank_transfer' && bankTransfer.data && (
-        <BankTransferDialog
-          open
-          setup={bankTransfer.data}
-          initialMarketId={filterMarket?.id ?? null}
-          onClose={close}
-        />
-      )}
-      {openDialog === 'stripe' && stripe.data && markets.data && (
-        <StripeDialog open setup={stripe.data} markets={markets.data} onClose={close} />
-      )}
-      {openDialog === 'poli' && poli.data && markets.data && (
-        <PoliDialog open setup={poli.data} markets={markets.data} onClose={close} />
-      )}
+      <PaymentMethodDialog
+        code={openDialog}
+        initialMarketId={filterMarket?.id ?? null}
+        onClose={close}
+      />
     </Page>
   )
 }

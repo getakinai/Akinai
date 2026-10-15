@@ -14,6 +14,7 @@ export const AdminPaymentMethodSchema = z.object({
   description: z.string(),
   regions: z.array(z.enum(PAYMENT_REGIONS)),
   status: z.enum(['available', 'coming_soon']),
+  adminRoute: z.string().nullable(),
   isEnabled: z.boolean(),
   configured: z.boolean(),
   mode: z.enum(['test', 'live']).nullable(),

@@ -1,6 +1,7 @@
 import { inject } from '@adonisjs/core'
 import { errors } from '@vinejs/vine'
 import {
+  isPluginPaymentMethod,
   isPoliCurrency,
   PAYMENT_METHOD_CATALOG,
   type PaymentMethodCode,
@@ -23,6 +24,7 @@ import PaymentMethodMarket from '#models/payment_method_market'
 import MarketRepository from '#repositories/market_repository'
 import PaymentMethodRepository from '#repositories/payment_method_repository'
 import AuditLogService from '#services/audit_log_service'
+import PluginService from '#services/plugin_service'
 import PoliGatewayService, {
   activePoliCredentials,
   isPoliConfig,
@@ -37,7 +39,11 @@ export type PaymentMethodMarketRef = {
   name: string
 }
 
-export type PaymentMethodListItem = PaymentMethodDefinition & {
+export type PaymentMethodListItem = Omit<PaymentMethodDefinition, 'code'> & {
+  /** A catalog code, or the key of a payments plugin the catalog doesn't know. */
+  code: string
+  /** The plugin's own setup page when it isn't managed on the Payments page. */
+  adminRoute: string | null
   isEnabled: boolean
   configured: boolean
   /** Stripe's or POLi's payment mode once it is set up; null for other methods. */
@@ -45,6 +51,8 @@ export type PaymentMethodListItem = PaymentMethodDefinition & {
   /** Active markets the method is offered in, primary first. */
   markets: PaymentMethodMarketRef[]
 }
+
+type ListedDefinition = Omit<PaymentMethodListItem, 'isEnabled' | 'configured' | 'mode' | 'markets'>
 
 export type BankTransferMarketSetup = {
   marketId: string
@@ -221,7 +229,8 @@ export default class PaymentMethodService {
     protected marketRepository: MarketRepository,
     protected stripeGateway: StripeGatewayService,
     protected poliGateway: PoliGatewayService,
-    protected auditLogService: AuditLogService
+    protected auditLogService: AuditLogService,
+    protected pluginService: PluginService
   ) {}
 
   /** Active markets, primary first, that payment methods can be offered in. */
@@ -229,14 +238,57 @@ export default class PaymentMethodService {
     return this.marketRepository.listActiveWithCountries()
   }
 
+  /** Catalog entries, leaving out plugin-backed methods whose plugin isn't installed. */
+  protected async installedCatalog(): Promise<PaymentMethodDefinition[]> {
+    const installed = new Set(await this.pluginService.installedKeys())
+    return PAYMENT_METHOD_CATALOG.filter(
+      (definition) => !isPluginPaymentMethod(definition.code) || installed.has(definition.code)
+    )
+  }
+
+  /**
+   * Installed payments plugins in catalog order (plugins the catalog doesn't
+   * know go after), then the coming-soon methods.
+   */
+  protected async listedMethods(): Promise<ListedDefinition[]> {
+    const plugins = await this.pluginService.catalog()
+    const catalogIndex = (code: string) => {
+      const index = PAYMENT_METHOD_CATALOG.findIndex((definition) => definition.code === code)
+      return index === -1 ? PAYMENT_METHOD_CATALOG.length : index
+    }
+    const installed = plugins
+      .filter((plugin) => plugin.category === 'payments' && plugin.isInstalled)
+      .sort((a, b) => catalogIndex(a.key) - catalogIndex(b.key))
+      .map((plugin): ListedDefinition => {
+        const known = PAYMENT_METHOD_CATALOG.find((definition) => definition.code === plugin.key)
+        return {
+          code: plugin.key,
+          name: known?.name ?? plugin.name,
+          description: known?.description ?? plugin.description,
+          regions: known?.regions ?? [],
+          status: 'available',
+          adminRoute:
+            plugin.adminRoute && plugin.adminRoute !== 'admin.payments.home'
+              ? plugin.adminRoute
+              : null,
+        }
+      })
+    const pluginKeys = new Set(plugins.map((plugin) => plugin.key))
+    const comingSoon = PAYMENT_METHOD_CATALOG.filter(
+      (definition) => definition.status === 'coming_soon' && !pluginKeys.has(definition.code)
+    ).map((definition): ListedDefinition => ({ ...definition, adminRoute: null }))
+    return [...installed, ...comingSoon]
+  }
+
   async list(): Promise<PaymentMethodListItem[]> {
-    const [saved, markets] = await Promise.all([
+    const [saved, markets, listed] = await Promise.all([
       this.paymentMethodRepository.allWithMarkets(),
       this.markets(),
+      this.listedMethods(),
     ])
-    const byCode = new Map(saved.map((method) => [method.code, method]))
+    const byCode = new Map<string, PaymentMethod>(saved.map((method) => [method.code, method]))
     const currencyById = new Map(markets.map((market) => [market.id, market.currencyCode]))
-    return PAYMENT_METHOD_CATALOG.map((definition) => {
+    return listed.map((definition) => {
       const method = byCode.get(definition.code)
       const offered = new Set(
         method?.markets
@@ -583,7 +635,10 @@ export default class PaymentMethodService {
 
   /** Methods shoppers in the market can pay with, in catalog order. */
   async enabledForCheckout(market: Market): Promise<CheckoutPaymentMethod[]> {
-    const enabled = await this.paymentMethodRepository.listEnabledForMarket(market.id)
+    const [enabled, catalog] = await Promise.all([
+      this.paymentMethodRepository.listEnabledForMarket(market.id),
+      this.installedCatalog(),
+    ])
     const byCode = new Map(
       enabled.flatMap((method) => {
         const row = method.markets[0]
@@ -592,7 +647,7 @@ export default class PaymentMethodService {
           : []
       })
     )
-    return PAYMENT_METHOD_CATALOG.flatMap((definition) => {
+    return catalog.flatMap((definition) => {
       const offered = byCode.get(definition.code)
       if (!offered) return []
       return [

@@ -1166,12 +1166,15 @@ router
             router
               .get('payments/bank-transfer/view', [controllers.admin.AdminPaymentsBankTransferView])
               .as('admin.payments.bank_transfer.view')
+              .use(middleware.plugin({ key: 'bank_transfer' }))
             router
               .get('payments/stripe/view', [controllers.admin.AdminPaymentsStripeView])
               .as('admin.payments.stripe.view')
+              .use(middleware.plugin({ key: 'stripe' }))
             router
               .get('payments/poli/view', [controllers.admin.AdminPaymentsPoliView])
               .as('admin.payments.poli.view')
+              .use(middleware.plugin({ key: 'poli' }))
           })
           .use(middleware.can({ permission: 'payments.view' }))
 
@@ -1182,12 +1185,15 @@ router
                 controllers.admin.AdminPaymentsBankTransferUpdate,
               ])
               .as('admin.payments.bank_transfer.update')
+              .use(middleware.plugin({ key: 'bank_transfer' }))
             router
               .put('payments/stripe', [controllers.admin.AdminPaymentsStripeUpdate])
               .as('admin.payments.stripe.update')
+              .use(middleware.plugin({ key: 'stripe' }))
             router
               .put('payments/poli', [controllers.admin.AdminPaymentsPoliUpdate])
               .as('admin.payments.poli.update')
+              .use(middleware.plugin({ key: 'poli' }))
           })
           .use(middleware.can({ permission: 'payments.edit' }))
 

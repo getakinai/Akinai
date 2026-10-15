@@ -12,6 +12,7 @@ export default class PaymentMethodListTransformer extends BaseTransformer<Paymen
       description: this.resource.description,
       regions: [...this.resource.regions],
       status: this.resource.status,
+      adminRoute: this.resource.adminRoute,
       isEnabled: this.resource.isEnabled,
       configured: this.resource.configured,
       mode: this.resource.mode,

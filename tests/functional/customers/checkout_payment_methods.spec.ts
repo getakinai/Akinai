@@ -4,6 +4,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import CustomerRepository from '#repositories/customer_repository'
 import MarketService from '#services/market_service'
 import PaymentMethodService from '#services/payment_method_service'
+import PluginService from '#services/plugin_service'
 import { createCustomerAccount, createPlacedOrder } from '#tests/helpers/customers'
 import { createOrderProduct, seedOrderSetup } from '#tests/helpers/orders'
 
@@ -74,6 +75,48 @@ test.group('Checkout: payment methods per market', (group) => {
   test('rejects a method not offered in the shopper market', async ({ client }) => {
     const { nz, rate, paymentMethods } = await seedMarkets()
     await paymentMethods.updateBankTransfer(nz.id, NZ_BANK)
+    const { variant } = await createOrderProduct('Mug', 20)
+
+    const response = await client
+      .post('/checkout')
+      .json({
+        lineItems: [{ variantId: variant.id, quantity: 1 }],
+        countryCode: 'AU',
+        province: 'NSW',
+        postalCode: '2000',
+        shippingRateId: rate.id,
+        email: `guest-${Date.now()}@example.com`,
+        firstName: 'Jane',
+        lastName: 'Buyer',
+        address1: '1 George Street',
+        city: 'Sydney',
+        phone: '+61400000000',
+        paymentMethod: 'bank_transfer',
+      })
+      .accept('json')
+      .withCsrfToken()
+
+    response.assertStatus(422)
+    response.assertBodyContains({ errors: [{ field: 'paymentMethod' }] })
+  })
+
+  test('leaves out a method whose plugin is uninstalled', async ({ client, assert }) => {
+    const { au, paymentMethods } = await seedMarkets()
+    await paymentMethods.updateBankTransfer(au.id, AU_BANK)
+    const plugins = await app.container.make(PluginService)
+    await plugins.uninstall('bank_transfer')
+
+    const response = await client.get('/checkout/payment-methods').accept('json')
+
+    response.assertStatus(200)
+    assert.deepEqual(response.body().data, [])
+  })
+
+  test('rejects a method whose plugin is uninstalled', async ({ client }) => {
+    const { au, rate, paymentMethods } = await seedMarkets()
+    await paymentMethods.updateBankTransfer(au.id, AU_BANK)
+    const plugins = await app.container.make(PluginService)
+    await plugins.uninstall('bank_transfer')
     const { variant } = await createOrderProduct('Mug', 20)
 
     const response = await client

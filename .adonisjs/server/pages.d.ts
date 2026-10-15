@@ -196,10 +196,13 @@ declare module '@adonisjs/inertia/types' {
     'admin/payments/_bank_transfer_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_bank_transfer_dialog.tsx'))['default']>
     'admin/payments/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_hooks.ts'))['default']>
     'admin/payments/_markets_field': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_markets_field.tsx'))['default']>
+    'admin/payments/_method_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_method_dialog.tsx'))['default']>
     'admin/payments/_poli_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_poli_dialog.tsx'))['default']>
     'admin/payments/_stripe_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_stripe_dialog.tsx'))['default']>
     'admin/payments/_types': ExtractProps<(typeof import('../../inertia/pages/admin/payments/_types.ts'))['default']>
     'admin/payments/home': ExtractProps<(typeof import('../../inertia/pages/admin/payments/home.tsx'))['default']>
+    'admin/plugins/_categories': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/_categories.ts'))['default']>
+    'admin/plugins/_dev_guide': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/_dev_guide.tsx'))['default']>
     'admin/plugins/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/_hooks.ts'))['default']>
     'admin/plugins/_types': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/_types.ts'))['default']>
     'admin/plugins/home': ExtractProps<(typeof import('../../inertia/pages/admin/plugins/home.tsx'))['default']>
