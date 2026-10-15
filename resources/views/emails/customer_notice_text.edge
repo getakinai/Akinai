@@ -1,0 +1,15 @@
+{{ title }}
+
+@each(line in lines)
+{{ line }}
+
+@end
+@if(code)
+{{ code }}
+
+@end
+@if(actionUrl)
+{{ actionLabel }}: {{ actionUrl }}
+
+@end
+{{ footer }}

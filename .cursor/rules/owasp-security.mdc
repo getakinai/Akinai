@@ -1,0 +1,27 @@
+---
+description: OWASP Top 10:2025 checklist to follow before and while implementing any feature
+alwaysApply: true
+---
+
+# OWASP Top 10:2025 (hard rule)
+
+Before implementing a feature, check it against every item below. If a
+change would weaken one, stop and say so instead of shipping it.
+
+| Risk | Do this |
+|---|---|
+| A01 Access control | Admin routes: `auth({ guards: ['web'] })` + `middleware.can({ permission })`; record rules in a policy. Customer `:id` routes: `customerOwns` + queries scoped by session customer (404, not 403). Never trust owner ids from the client. |
+| A02 Misconfiguration | No new secrets in code; add env vars to `start/env.ts` and `.env.example`. Keep CSP/CSRF/HSTS on; no inline styles/scripts. No stack traces outside dev/test. |
+| A03 Supply chain | `yarn add` only well-maintained packages; commit `yarn.lock`. Run `yarn security:audit` after dependency changes. Pin GitHub Action SHAs. |
+| A04 Crypto | Secrets at rest via `encryption.encrypt(value, { purpose })`; one-time codes hashed (HMAC/hash), compared with `timingSafeEqual`. Never log or return secrets (`serializeAs: null`, `auditHidden`). |
+| A05 Injection | Vine validator on every input (see `validator-strict-types.mdc`). Raw SQL only with bindings; whitelist sort keys; `containsPattern()` for LIKE. Rich text: `sanitizeEditorHtml` on save, `sanitizeHtml` (DOMPurify) before `dangerouslySetInnerHTML`. |
+| A06 Insecure design | Rate-limit new public/expensive/auth endpoints in `start/limiter.ts`. Guard every public form with invisible reCAPTCHA (`public-form-recaptcha.mdc`). Money/stock changes in one repository transaction; recompute totals server-side; idempotency for retries. Build external URLs from `APP_URL`, never `Host`. |
+| A07 Authentication | Sensitive changes (email, password, MFA) need the current password; password changes bump `sessionVersion`. New passwords use `newPasswordSchema()`; login passwords `currentPasswordSchema()`. Regenerate session on login/logout. |
+| A08 Integrity | Uploads: validate extension/size in Vine, store via `uploadImage()` (re-encodes, server Content-Type). Verify webhook signatures and amounts before acting. |
+| A09 Logging | Record security events with `AuditLogService.recordSecurityEvent`; alert-worthy ones log `warn` with an `event` field. Add new sensitive keys to `SENSITIVE_KEYS` in `config/logger.ts`. |
+| A10 Exceptions | Never swallow errors (`.catch(() => null)`, empty `catch {}`). Use `orNullIfMissing()` for not-found; log best-effort failures; await or `void` every promise. Fail closed. |
+
+## Before finishing
+
+- State which OWASP items the feature touches and how each is handled.
+- New endpoints: validator, guard/ownership, limiter (if public or auth), transformer (no raw models).

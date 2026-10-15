@@ -1,0 +1,22 @@
+export const policies = {
+  CollectionPolicy: () => import('#policies/collection_policy'),
+  CustomerPolicy: () => import('#policies/customer_policy'),
+  DiscountPolicy: () => import('#policies/discount_policy'),
+  HelpArticlePolicy: () => import('#policies/help_article_policy'),
+  HelpCategoryPolicy: () => import('#policies/help_category_policy'),
+  LocationPolicy: () => import('#policies/location_policy'),
+  MarketPolicy: () => import('#policies/market_policy'),
+  OptionDefinitionPolicy: () => import('#policies/option_definition_policy'),
+  OrderPolicy: () => import('#policies/order_policy'),
+  PagePolicy: () => import('#policies/page_policy'),
+  ProductLabelPolicy: () => import('#policies/product_label_policy'),
+  ProductPolicy: () => import('#policies/product_policy'),
+  ProductTypePolicy: () => import('#policies/product_type_policy'),
+  ReturnPolicy: () => import('#policies/return_policy'),
+  RolePolicy: () => import('#policies/role_policy'),
+  ShippingZonePolicy: () => import('#policies/shipping_zone_policy'),
+  TaxRatePolicy: () => import('#policies/tax_rate_policy'),
+  UserPolicy: () => import('#policies/user_policy'),
+  VendorPolicy: () => import('#policies/vendor_policy'),
+}
+

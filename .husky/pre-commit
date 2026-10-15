@@ -1,0 +1,4 @@
+yarn lint-staged
+yarn lint:check
+yarn format:check
+yarn build

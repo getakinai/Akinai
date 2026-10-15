@@ -1,0 +1,51 @@
+---
+description: Hard rule — create, edit, and show Inertia CRUD pages must include a back link in the Page eyebrow.
+alwaysApply: true
+---
+
+# CRUD page back link (hard rule)
+
+Every **internal CRUD screen** (staff back office and signed-in customer account) that is not a list/home index must give users a clear way back to the parent list or resource.
+
+## When required
+
+| Page kind | Back link |
+|-----------|-----------|
+| `create.tsx` | Required — return to the resource list (e.g. Products, Users). |
+| `edit.tsx` | Required — same as create, or to the parent record when nested (e.g. variant edit → product). |
+| `show.tsx` / detail (non-edit) | Required when it is a dedicated route, same rules as edit. |
+| `home.tsx` / list / dashboard / auth | Not required — no parent list. |
+| Create/edit via **modal on a list page** | Not required on the list; the modal has Cancel. |
+
+Applies under `inertia/pages/admin/` and `inertia/pages/customers/` (and future account areas).
+
+## Implementation
+
+Use `<Page eyebrow={…} />` from `inertia/components/page.tsx`. Do **not** rely on browser history alone.
+
+```tsx
+import { Link } from '@adonisjs/inertia/react'
+import { ArrowLeft } from 'lucide-react'
+
+<Page
+  eyebrow={
+    <Link route="admin.products.home" className="inline-flex items-center gap-1 hover:text-ink">
+      <ArrowLeft size={12} /> Products
+    </Link>
+  }
+  title="Add product"
+  …
+/>
+```
+
+- Use the **named route** for the list or parent record (`route="admin.products.home"`, `routeParams` when needed).
+- Label the link with the short resource name (Products, Users, Options), not “Back”.
+- Match existing edit pages (e.g. `inertia/pages/admin/products/edit.tsx`).
+
+## Hard bans
+
+- CRUD pages with only static eyebrow text (`Back office · Catalog`) and no link.
+- Parsing `window.location` or `usePage().url` to build back targets — use named routes.
+- Duplicate back controls in the page body when the eyebrow link already covers navigation (Cancel to list in a form footer is still OK).
+
+When adding a new resource, ship create and edit with back links in the same PR as the routes.

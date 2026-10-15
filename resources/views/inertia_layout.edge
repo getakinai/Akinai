@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html data-theme="{{ request.plainCookie('app_theme', { defaultValue: 'light', encoded: false }) }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="csp-nonce" nonce="{{ cspNonce }}" />
+    <link rel="icon" href="/brand/favicons/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/brand/favicons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/brand/favicons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/brand/favicons/android-icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/brand/favicons/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/brand/favicons/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/brand/favicons/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/brand/favicons/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/brand/favicons/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/brand/favicons/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/brand/favicons/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/brand/favicons/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/favicons/apple-icon-180x180.png" />
+    <link rel="manifest" href="/brand/manifest.json" />
+    <meta name="msapplication-TileImage" content="/brand/favicons/ms-icon-144x144.png" />
+    {{-- Server-rendered pages get their <title> from @inertiaHead() --}}
+    @if(!(page && page.ssrHead && page.ssrHead.length))
+      <title data-inertia>
+        {{ seo ? seo.title + ' - ' + appName : appName }}
+      </title>
+    @end
+    <link rel="canonical" href="{{ seo ? seo.canonicalUrl : canonicalUrl(request) }}" />
+    @if(seo)
+      @if(seo.description)
+        <meta name="description" content="{{ seo.description }}" />
+        <meta property="og:description" content="{{ seo.description }}" />
+      @end
+      <meta property="og:type" content="{{ seo.type }}" />
+      <meta property="og:title" content="{{ seo.title }}" />
+      <meta property="og:url" content="{{ seo.canonicalUrl }}" />
+      <meta property="og:site_name" content="{{ seo.siteName }}" />
+      @if(seo.image)
+        <meta property="og:image" content="{{ seo.image }}" />
+        <meta name="twitter:card" content="summary_large_image" />
+      @else
+        <meta name="twitter:card" content="summary" />
+      @end
+      @if(seo.jsonLd)
+        <script type="application/ld+json" nonce="{{ cspNonce }}">{{{ seo.jsonLd }}}</script>
+      @end
+    @end
+
+    @viteReactRefresh({ nonce: cspNonce })
+    @vite(['inertia/app.tsx'])
+    @inertiaHead()
+    @stack('dumper')
+  </head>
+
+  <body>
+    @inertia()
+  </body>
+
+</html>

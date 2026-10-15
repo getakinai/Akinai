@@ -1,0 +1,12 @@
+---
+description: Keep the CI typecheck step in sync with the `typecheck` script in package.json.
+globs: package.json,.github/workflows/ci.yml,tsconfig*.json,inertia/tsconfig.json
+alwaysApply: false
+---
+
+# CI typecheck must match `yarn typecheck`
+
+The `Typecheck` job in `.github/workflows/ci.yml` does **not** call `yarn typecheck`. It runs the same two `tsc` commands directly, adding `--incremental --tsBuildInfoFile .tscache/*.tsbuildinfo` so the build info is cached between runs (about 27s down to 6s).
+
+- When you change the `typecheck` script in `package.json` (add/remove a project, change flags), update the `Typecheck` step in `ci.yml` the same way, keeping the incremental flags.
+- When you add a tsconfig that CI must check, also add it to the `hashFiles(...)` list in the "Cache TypeScript build info" key.

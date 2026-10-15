@@ -1,0 +1,145 @@
+---
+alwaysApply: true
+---
+
+You are an expert fullstack developer following strict architectural standards. This project is an e-commerce app built with AdonisJS 7, Inertia.js and React.
+
+### FRONTEND (React + TypeScript + TanStack Query + Zod)
+
+- Always use React functional components with TypeScript.
+- Use TanStack React Query for all data fetching (`useQuery`, `useMutation`). The `QueryClientProvider` is set up in `inertia/app.tsx` and `inertia/ssr.tsx`.
+- Make API calls with the `http()` helper in `inertia/lib/http.ts`. It sends the Shield `X-XSRF-TOKEN` header on mutations, validates the response with a Zod schema, and throws `HttpError` with `fieldErrors` for VineJS 422 responses.
+- Validate all data with Zod schemas before using it in components.
+- Derive TypeScript types from Zod (`z.infer<typeof Schema>`).
+- Place API functions and React Query hooks together in `_hooks.ts` files within each page folder (e.g., `inertia/pages/admin/users/_hooks.ts`).
+- Pages live in `inertia/pages/`. Back-office pages go in `inertia/pages/admin/`, and storefront pages go in `inertia/pages/customers/` (or at the top level for public pages).
+- Co-locate Zod schemas with pages as `_types.ts` files (e.g., `inertia/pages/admin/users/_types.ts`). Always create Zod schemas in separate files and import them where needed. Never define schemas inline.
+- Use relative URLs for API calls (e.g., `/admin/users/list`) since this is an Inertia.js monolith.
+- Never inject backend data directly into templates. Fetch through APIs only (see `inertia-no-direct-injection.mdc`).
+- Handle `isLoading`, `isError`, and `data` states cleanly.
+- Implement optimistic updates and cache invalidation properly.
+- Always use the custom form components in `inertia/components/form/` instead of vanilla HTML elements: `<FormInput />` instead of `<input />`, and `<FormButton />` instead of `<button>`. Add new form components there (e.g., `FormSelect`) when you need them.
+- Dropdowns always use `<FormSelectWithSearch />` (the searchable dropdown). Never use the vanilla `<Select />` / `<select>`, on admin and storefront pages alike.
+- On/off fields (opt-ins like email marketing, settings, "save for next time") always use `<FormSwitch />` (pass `tone="storefront"` on storefront pages). Never use `<FormCheckbox />`, `<Checkbox />` or `<input type="checkbox" />` for them. Plain `Checkbox` is only for picking rows in a list (table row selection, product pickers, permission matrices).
+- Numeric fields (price, quantity, stock, rates) must use `<FormInputNumber />`. Never use `<FormInput type="number" />` or `<input type="number" />`.
+- Form helpers live in `inertia/lib/form.ts`: `zodFieldErrors()`, `handleMutationError()` and `emptyToNull()`.
+
+### BACKEND (AdonisJS)
+
+Follow this layered pattern:
+Validator → Controller → Service → Repository
+
+Rules:
+
+- Validator files live in `app/validators/` (lowercase, one validator per file, e.g., `admin_user_store_validator.ts`).
+- Repository files live in `app/repositories/` (lowercase, imported as `#repositories/*`).
+- Service files live in `app/services/` (lowercase, imported as `#services/*`).
+- Controller files live in `app/controllers/` (lowercase, organized by domain, e.g., `app/controllers/admin/`, `app/controllers/customers/`).
+- Always use single action controllers with a `handle()` method (e.g., `AdminUsersHomeController`, `AdminUsersStoreController`). Reference them in `start/routes.ts` through the generated barrel: `router.get('users', [controllers.admin.AdminUsersHome]).as('admin.users.home')`. The barrel (`#generated/controllers`) is regenerated when the dev server runs.
+- Use `@inject()` constructor injection for services in controllers, and for repositories in services.
+- **Every mutation controller** (`*Store`, `*Update`, `*Delete`, `*Archive`, `*Reactivate`, `*Unarchive`) must validate the request body/query through a Vine validator in `app/validators/` before calling services or repositories. Single `:id` route params are validated by `UuidRouteParamMiddleware` (global router middleware); use `params.id` in the controller. Other param shapes (`:slug`, `:orderId`, etc.) still need a Vine validator in the controller.
+- **List/read/API controllers** that use `request.input`, `request.qs`, or `request.only` must also validate the query/body through Vine validators (e.g., `*QueryValidator`) before using values in queries or responses.
+- Controllers must only handle request validation and call the corresponding service.
+- Services contain business logic and call the repository.
+- Repositories interact directly with Lucid models for database queries.
+- Always return data as JSON (`{ data, meta?, error? }`).
+- Never pass model data directly into templates. Expose an API endpoint and let the frontend fetch it over HTTP.
+- Never return raw ORM entities. Shape responses with transformers in `app/transformers/` (extend `BaseTransformer`) and return them with `ctx.serialize(XTransformer.transform(record))`, which wraps the output in `{ data }`.
+- Route naming must follow the pattern `resource.action` (e.g., `admin.products.home`, `admin.products.list`, `admin.products.create`, `admin.products.store`, `admin.products.edit`, `admin.products.update`, `admin.products.delete`). GET routes use verb names (`home`, `list`, `create`, `edit`, `view`), while POST/PUT/DELETE routes use action names (`store`, `update`, `delete`).
+
+### AUTHENTICATION
+
+There are two separate account types. Each has its own table, model and session guard (`config/auth.ts`):
+
+| Account | Model | Guard | Routes | Login page |
+|---|---|---|---|---|
+| User (back-office staff) | `#models/user` | `web` | `/admin/*` | `/admin/login` |
+| Customer (storefront shopper) | `#models/customer` | `customer` | `/`, `/account/*` | `/login` |
+
+- Always pass the guard explicitly: `middleware.auth({ guards: ['web'] })` for admin routes and `middleware.auth({ guards: ['customer'] })` for customer routes. The same goes for `middleware.guest(...)`.
+- In controllers, use `auth.use('web')` or `auth.use('customer')`. Never rely on the default guard, and never mix the two (a Customer must never be able to reach `/admin/*`).
+- Users have no public signup. They are created with `node ace create:admin-user` or by existing Users at `/admin/users/create`. Customers self-register at `/signup`.
+- Login/signup/logout endpoints return JSON (`{ data: { redirectTo } }`). Invalid credentials return `400 { error }`. The frontend calls `router.visit(redirectTo)` after the mutation succeeds.
+- The current account is never shared as an Inertia prop. Fetch it with `useAdminMe()` (`/admin/me`) or `useCustomerMe()` (`/account/me`).
+
+### AUTHORIZATION (staff roles and permissions)
+
+Staff authorization uses Bouncer with database-backed roles. Each User has one role (`users.role_id`). Customers are never authorized through Bouncer.
+
+- **Permission catalog**: `app/abilities/permissions.ts` (`PERMISSION_SECTIONS`). Keys are `<resource>.<action>` with actions `view`, `create`, `edit`, `archive`, `upload`. Add the resource there before guarding anything with it. Role grants live in `role_permissions` and are edited on the Team & Permissions page (`/admin/roles`).
+- **Roles**: `admin` is locked (`is_locked`) and always has every permission. `staff` is the default role (`is_default`) given to new Users. Seeded by `database/seeders/role_seeder.ts`.
+- **Route guards**: protect every admin route (Inertia shell and JSON) with `.use(middleware.can({ permission: 'users.view' }))`. The `hasPermission` ability in `app/abilities/main.ts` backs it.
+- **Record rules**: rules that depend on the record (locked role, role still in use) go in a policy in `app/policies/` and run in the controller with `await ctx.bouncer.with(XPolicy).authorize('action', record)`. Return `AuthorizationResponse.deny(message, 422)` for business-rule denials.
+- `InitializeBouncerMiddleware` preloads `role.permissions` for the `web` user, so `user.hasPermission()` stays synchronous. Don't query permissions elsewhere.
+- **Frontend**: `/admin/me` returns `role` and `permissions`. Hide UI with `useCan('users.create')` from `inertia/pages/admin/_hooks.ts`, and gate nav items with `permission` in `admin_nav.ts`. This is UI-only; the server always authorizes.
+- Denied Inertia/HTML GETs render `errors/forbidden`; JSON requests get `403 { errors: [{ message }] }`.
+
+### DATABASE AND MODELS
+
+- **Always** use UUID primary keys in migrations: `table.uuid('id').primary()`. Foreign keys are `table.uuid('x_id').references('id').inTable('xs')`.
+- Models extend `BaseAppModel` (`#models/base/base_app_model`). It generates a UUID v7 `id` in a `beforeCreate` hook and already declares `id`, `createdAt` and `updatedAt`, so don't redeclare them. Every table therefore needs `id`, `created_at` and `updated_at` columns. Authenticatable models use `compose(BaseAppModel, withAuthFinder(hash))`.
+- Lucid schema generation is disabled (`config/database.ts`), so declare the remaining columns by hand on each model with `@column` decorators.
+- Migration scripts should not use raw queries because they need to be reversible.
+- **Migrations change schema only.** Never read, insert, update or delete rows in a migration (no `this.defer()`, no `db.from(...)`, no model calls). A rollback can't undo data changes, and a destructive query can't be recovered. Put one-time data work (backfills, moving data between columns or tables, cleanup) in a seeder in `database/seeders/` that calls a service method, skips work that's already done so it's safe to re-run (seeders run alphabetically, so name it to run after the seeders it depends on), and tell the user to run `yarn db:seed` after `node ace migration:run`.
+- **Always** create new migration files with `node ace make:migration <name>`. Never hand-write migration filenames or invent timestamps under `database/migrations/`.
+
+### QUERY EFFICIENCY AND INDEXES
+
+- **One query per set, not one per record.** Never loop over ids and run a query (or `save()`) for each one. Use set-based queries:
+  - Reads: `whereIn('id', ids)` in one query, then map the results in memory.
+  - Updates: `Model.query().whereIn('id', ids).update({...})` in one statement.
+  - Inserts: `createMany()` / a single multi-row insert.
+  - Per-row values (e.g. reordering `position`): one `UPDATE ... SET col = CASE id WHEN ? THEN ? ... END WHERE id IN (...)` built in the repository with bindings (`db.raw` / `whereIn`), not N updates.
+- **No N+1 queries.** Load relations with `preload()`, counts with `withCount()`, and aggregates with `withAggregate()` or a subquery. Never query inside a `.map()` / `for` loop over records. When a list needs data per parent (e.g. products per collection), fetch it for all parents in one query (`whereIn` on the parent ids, window function or lateral join for "top N per parent") and group in memory.
+- Select only the columns the response needs on hot paths (`.select(...)`), and always paginate or `limit()` lists.
+- Run independent queries in parallel with `Promise.all`, not sequentially.
+- Query-builder `update()` / `delete()` skip model hooks, so they write no audit log entries. For bulk changes that must be audited, update in one statement and record the audit rows in one batch insert. Never fall back to per-record `save()` loops.
+- **Indexes.** Every migration must add indexes for how the table is queried:
+  - Every foreign key column (`table.index(['x_id'])`) unless it is already the leading column of a unique or composite index.
+  - Columns used in `where`, `orderBy` and filters on list pages (e.g. `status`, `created_at`, `slug`, `position`).
+  - Composite indexes for common combined filters/sorts, with the equality column first (e.g. `['collection_id', 'position']`, `['status', 'updated_at']`).
+  - `unique()` for natural keys (slugs, codes, emails), which also serves as the index.
+  - When a new query filters or sorts on an unindexed column of an existing table, add the index in a new migration (`node ace make:migration add_x_index_to_ys_table`).
+
+### GENERAL RULES
+
+- **Security first:** check every new feature against the OWASP Top 10 checklist in `owasp-security.mdc` before implementing it.
+- **Strict validators:** Vine validators accept only raw values of the declared type (`vine.number({ strict: true })`, `vine.boolean({ strict: true })`); see `validator-strict-types.mdc`.
+- Everything is written in TypeScript.
+- Use async/await with proper try/catch error handling.
+- Maintain consistent naming conventions (`UserService`, `UserRepository`, `adminUserStoreValidator`).
+- Keep code modular, predictable, and stateless.
+- All endpoints must validate both request and response payloads.
+- All database transactions and database queries must be placed in repository classes, not in controllers or services. Controllers handle validation and call services, services orchestrate business logic and call repositories, and repositories handle all database operations and transactions, for better testability and scalability (thin controller / fat repository pattern).
+- Controllers expose endpoints only: no direct DB or template calls.
+- Always use the `node ace` command for AdonisJS actions (e.g., `node ace migration:run`, `node ace db:seed`, `node ace make:controller`, etc.).
+- Always use `yarn` (Yarn classic, `yarn.lock`) as the package manager (e.g., `yarn add`, `yarn install`, `yarn remove`). Never use npm or commit a `package-lock.json`. Only commit `yarn.lock` changes when dependencies actually change.
+- Back-office features always live under `/admin` routes and `inertia/pages/admin/`. Customer-facing features live under `/`, `/account`, and `inertia/pages/customers/`.
+
+### TESTING
+
+- Always create unit and functional tests for every code change.
+- Functional tests live in `tests/functional/`, organized by domain (e.g., `tests/functional/admin/admin_session_store_controller.spec.ts`).
+- Unit tests live in `tests/unit/` (e.g., `tests/unit/customer_service.spec.ts`).
+- **IMPORTANT**: Before creating tests, always ask the user: "Do you want me to create the tests now, or are you still debugging this feature?"
+- Tests should cover happy paths, error cases, edge cases, and validation scenarios.
+- Use the Japa test runner (`@japa/runner`) for writing tests.
+- Follow the existing test structure and patterns in the codebase.
+- **Never open a browser** (browser tools, browser subagents, screenshots) to verify or test changes. The user does all visual and browser testing by hand. Stop at typecheck, then tell the user what to check in the browser.
+- **Never run lint or the test suite** (`yarn lint`, `yarn lint:check`, `eslint`, `node ace test`, `yarn test`). Husky runs lint on commit, and the tests need access outside the sandbox, so the user runs them manually. Typecheck (`yarn typecheck`) is fine. When you add or change tests, tell the user which test files to run.
+
+### EXAMPLE
+
+Feature: "Product" (back office)
+
+- Frontend: API functions and hooks in `inertia/pages/admin/products/_hooks.ts` (e.g., `fetchAdminProducts`, `useAdminProducts`, `useCreateAdminProduct`)
+- Frontend: Zod schemas and inferred types in `inertia/pages/admin/products/_types.ts`
+- Backend defines:
+  - `app/validators/admin_product_store_validator.ts`, `admin_product_update_validator.ts`
+  - `app/repositories/product_repository.ts`
+  - `app/services/product_service.ts`
+  - `app/transformers/product_transformer.ts`
+  - `app/controllers/admin/admin_products_home_controller.ts`, `admin_products_list_controller.ts`, `admin_products_store_controller.ts`, etc. (single action controllers)
+- Routes follow the naming pattern `admin.products.home`, `admin.products.list`, `admin.products.store`, `admin.products.update`, etc., behind `middleware.auth({ guards: ['web'] })`.
+
+Follow these principles for all future code generation.

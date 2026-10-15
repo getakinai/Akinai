@@ -1,0 +1,59 @@
+---
+description: Every public (signed-out) form is guarded by invisible reCAPTCHA v3 on the server and the client
+alwaysApply: true
+---
+
+# Public forms need invisible reCAPTCHA (hard rule)
+
+Every form a person can submit **without being signed in** must be checked by reCAPTCHA v3 (invisible, score-based). This includes forms on routes that both guests and signed-in users can reach, like checkout. Never use the v2 checkbox or an image challenge.
+
+Covered: login (admin and customer), admin MFA code, signup, signup code verify and resend, forgot/reset password and resend, checkout, and any future guest form (contact, newsletter, guest reviews, back-in-stock alerts, order lookup).
+
+Not covered:
+- Requests the page sends on its own, not on submit (cart prices, checkout quote, market switch, autocomplete). Use a limiter for these.
+- Webhooks, which are verified by signature instead.
+- Routes behind `auth(...)`.
+
+## Server
+
+1. Add the action to `RECAPTCHA_ACTIONS` in `app/utils/verify_recaptcha.ts`. Name it `<area>_<form>`, e.g. `customer_newsletter`.
+2. Add the route's limiter first, then `middleware.recaptcha({ action })`:
+
+```typescript
+router
+  .post('newsletter', [controllers.storefront.StorefrontNewsletterStore])
+  .as('storefront.newsletter.store')
+  .use([newsletterThrottle, middleware.recaptcha({ action: 'customer_newsletter' })])
+```
+
+- One action per form. Google checks that the token's action matches, so a token can't be replayed on another form.
+- reCAPTCHA doesn't replace the rate limit. Every public form needs both (see `owasp-security.mdc` A06).
+- Never verify tokens in controllers or services. Use the middleware so the request is rejected before validation runs.
+
+## Client
+
+1. Add the same action to the `RecaptchaAction` union in `inertia/lib/recaptcha.ts`.
+2. In the page's `_hooks.ts`, fetch a fresh token right before the request (tokens expire after 2 minutes):
+
+```typescript
+return http('/newsletter', {
+  method: 'POST',
+  body: payload,
+  headers: await recaptchaHeaders('customer_newsletter'),
+  schema: NewsletterResponseSchema,
+})
+```
+
+3. Call `usePreloadRecaptcha()` in the page, or use `AuthLayout`, which already calls it.
+4. Render `<RecaptchaNotice />` near the submit button. The floating badge is hidden in CSS, so Google's terms require this text.
+
+## Tests
+
+Swap `RecaptchaService` in functional tests (`app.container.swap(RecaptchaService, …)`). Cover both cases: a failed check returns `400 { error }`, and a passing check reaches the controller.
+
+## Hard bans
+
+- A public POST/PUT/DELETE form route with no `middleware.recaptcha(...)`.
+- Reusing one action name for different forms.
+- Calling `grecaptcha.execute` outside `recaptchaHeaders()`, or caching tokens.
+- Showing the v2 checkbox or a visible challenge.

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f5f5f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0a0a0b;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f6;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #dddfe2;border-radius:12px;">
+            <tr>
+              <td style="padding:28px 28px 8px;font-size:14px;font-weight:600;color:#6b6f76;">
+                {{ brandName }}
+                <span style="float:right;font-weight:500;">{{ orderLabel }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 28px;">
+                <h1 style="margin:8px 0 12px;font-size:20px;line-height:1.3;">{{ title }}</h1>
+                @each(line in lines)
+                  <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#2a2c30;">{{ line }}</p>
+                @end
+                @if(actionUrl)
+                  <p style="margin:20px 0;">
+                    <a href="{{ actionUrl }}" style="display:inline-block;padding:10px 18px;background:#2563eb;color:#ffffff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">{{ actionLabel }}</a>
+                  </p>
+                @end
+              </td>
+            </tr>
+            @each(block in blocks)
+              <tr>
+                <td style="padding:8px 28px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f6;border-radius:8px;">
+                    <tr>
+                      <td style="padding:14px 16px 6px;font-size:13px;font-weight:600;color:#2a2c30;">{{ block.heading }}</td>
+                    </tr>
+                    @each(row in block.rows)
+                      <tr>
+                        <td style="padding:2px 16px;font-size:14px;line-height:1.5;color:#2a2c30;">
+                          <span style="color:#6b6f76;">{{ row.label }}:</span> {{ row.value }}
+                        </td>
+                      </tr>
+                    @end
+                    @if(block.note)
+                      <tr>
+                        <td style="padding:8px 16px 0;font-size:13px;line-height:1.5;color:#6b6f76;">{{ block.note }}</td>
+                      </tr>
+                    @end
+                    @if(block.link)
+                      <tr>
+                        <td style="padding:8px 16px 0;font-size:14px;">
+                          <a href="{{ block.link.url }}" style="color:#2563eb;">{{ block.link.label }}</a>
+                        </td>
+                      </tr>
+                    @end
+                    <tr><td style="padding:0 0 12px;"></td></tr>
+                  </table>
+                </td>
+              </tr>
+            @end
+            @if(items.length)
+              <tr>
+                <td style="padding:16px 28px 0;">
+                  <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#2a2c30;">{{ itemsHeading }}</p>
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    @each(item in items)
+                      <tr>
+                        <td style="padding:8px 0;border-top:1px solid #ececee;font-size:14px;line-height:1.45;color:#2a2c30;">
+                          {{ item.title }} × {{ item.quantity }}
+                          @if(item.detail)
+                            <br /><span style="font-size:12.5px;color:#6b6f76;">{{ item.detail }}</span>
+                          @end
+                        </td>
+                        <td align="right" style="padding:8px 0;border-top:1px solid #ececee;font-size:14px;white-space:nowrap;color:#2a2c30;">{{ item.amount }}</td>
+                      </tr>
+                    @end
+                  </table>
+                </td>
+              </tr>
+            @end
+            @if(totals.length)
+              <tr>
+                <td style="padding:8px 28px 0;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #dddfe2;">
+                    @each(total in totals)
+                      <tr>
+                        <td style="padding:6px 0;font-size:14px;color:{{ total.strong ? '#0a0a0b' : '#6b6f76' }};font-weight:{{ total.strong ? '600' : '400' }};">{{ total.label }}</td>
+                        <td align="right" style="padding:6px 0;font-size:14px;white-space:nowrap;color:#0a0a0b;font-weight:{{ total.strong ? '600' : '400' }};">{{ total.amount }}</td>
+                      </tr>
+                    @end
+                  </table>
+                </td>
+              </tr>
+            @end
+            @if(shippingAddress.length)
+              <tr>
+                <td style="padding:16px 28px 0;">
+                  <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#2a2c30;">Shipping address</p>
+                  @each(addressLine in shippingAddress)
+                    <div style="font-size:14px;line-height:1.5;color:#2a2c30;">{{ addressLine }}</div>
+                  @end
+                </td>
+              </tr>
+            @end
+            <tr>
+              <td style="padding:20px 28px 28px;font-size:12.5px;line-height:1.5;color:#6b6f76;">
+                @if(placedOn)
+                  {{ orderLabel }} · placed {{ placedOn }}<br />
+                @end
+                {{ footer }}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
