@@ -1,6 +1,7 @@
 # Akinai
 
 [Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office (`/admin`) and a customer storefront (`/`, `/account`). It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
+[![CI](https://github.com/getakinai/storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/getakinai/storefront/actions/workflows/ci.yml)
 
 ## Quick start
 

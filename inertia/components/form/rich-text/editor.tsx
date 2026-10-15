@@ -161,7 +161,6 @@ const RichTextEditorDocument = forwardRef<RichTextEditorHandle, RichTextEditorDo
               style={{ minHeight: editableMinHeight }}
               placeholder={placeholder}
               readOnly={disabled}
-              autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
               data-form-type="other"
