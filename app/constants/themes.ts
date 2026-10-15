@@ -20,6 +20,9 @@ export const THEME_TEMPLATE_NAME = /^(index|product|collection|page)(\.[a-z0-9_-
 
 export const THEME_SECTION_TYPE = /^[a-z0-9_-]{1,60}$/
 
+/** Shopify-style app block type in section schemas and template JSON. */
+export const THEME_APP_BLOCK_TYPE = '@app'
+
 export const THEME_KEY = /^[a-z0-9_]{1,60}$/
 
 export const THEME_SETTING_TYPES = [

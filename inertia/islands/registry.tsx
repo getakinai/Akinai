@@ -2,7 +2,9 @@ import type { ComponentType, ReactNode } from 'react'
 import { useCart } from 'snappycart'
 import { useCartDrawer } from '~/hooks/use_cart_drawer'
 import { trackEvent } from '~/lib/analytics'
+import { useStorefrontPlugins } from '~/pages/_hooks'
 import { PluginSlot, type PluginSlotName } from '~/plugins'
+import { pluginRegistry } from '~/plugins/registry'
 
 /**
  * React widgets an Edge theme can place. Keep the names in sync with
@@ -42,6 +44,22 @@ function CartButtonIsland({ props }: IslandProps) {
   )
 }
 
+function AppBlockIsland({ props, fallback }: IslandProps) {
+  const pluginKey = typeof props.plugin === 'string' ? props.plugin : ''
+  const blockType = typeof props.block === 'string' ? props.block : ''
+  const { data: installed, isLoading } = useStorefrontPlugins()
+  const entry = pluginKey ? pluginRegistry[pluginKey] : undefined
+  const Block = blockType && entry?.appBlocks?.[blockType]
+  if (!pluginKey || !blockType || !Block) return null
+  if (isLoading) {
+    const Skeleton = entry?.Skeleton
+    return Skeleton ? <Skeleton /> : null
+  }
+  const installedKeys = new Set((installed ?? []).map((plugin) => plugin.key))
+  if (!installedKeys.has(pluginKey)) return null
+  return <Block fallback={fallback} />
+}
+
 function AddToCartIsland({ props }: IslandProps) {
   const { addItem } = useCart()
   const { openCart } = useCartDrawer()
@@ -79,6 +97,7 @@ function AddToCartIsland({ props }: IslandProps) {
 
 export const islandRegistry = {
   plugin_slot: { Component: PluginSlotIsland, usesCart: false },
+  app_block: { Component: AppBlockIsland, usesCart: false },
   cart_button: { Component: CartButtonIsland, usesCart: true },
   add_to_cart: { Component: AddToCartIsland, usesCart: true },
 } satisfies Record<string, { Component: ComponentType<IslandProps>; usesCart: boolean }>

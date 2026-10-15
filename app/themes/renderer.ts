@@ -6,11 +6,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { urlFor } from '@adonisjs/core/services/url_builder'
 import { errors as lucidErrors } from '@adonisjs/lucid'
 import { Edge } from 'edge.js'
-import type {
-  ThemeSectionData,
-  ThemeSettingsData,
-  ThemeTemplateData,
-  ThemeTemplateType,
+import {
+  THEME_APP_BLOCK_TYPE,
+  type ThemeSectionData,
+  type ThemeSettingsData,
+  type ThemeTemplateData,
+  type ThemeTemplateType,
 } from '#constants/themes'
 import type Theme from '#models/theme'
 import ThemeRepository from '#repositories/theme_repository'
@@ -35,7 +36,7 @@ const SECTION_ID = /^[A-Za-z0-9_-]{1,80}$/
 export type ThemePreviewState = { themeId: string | 'builtin'; staff: boolean }
 
 /** React islands a theme may place with `island(name, props)`. */
-export const THEME_ISLANDS = ['cart_button', 'add_to_cart'] as const
+export const THEME_ISLANDS = ['cart_button', 'add_to_cart', 'app_block'] as const
 
 /** Prefetch keys that belong to the built-in theme; uploaded themes get `store` and their own `settings`. */
 const BUILTIN_ONLY_KEYS = ['settings', 'theme', 'homeContent'] as const
@@ -241,6 +242,14 @@ export default class ThemeRenderer {
       },
       pluginSlot: (name: string, fallback?: string) =>
         islandMarkup('plugin_slot', { name }, fallback),
+      appBlock: (appBlockSettings: Record<string, unknown>) => {
+        const plugin = typeof appBlockSettings.plugin === 'string' ? appBlockSettings.plugin : ''
+        const block = typeof appBlockSettings.block === 'string' ? appBlockSettings.block : ''
+        if (!plugin || !block) {
+          return editor ? '<!-- App block: missing plugin or block -->' : ''
+        }
+        return islandMarkup('app_block', { plugin, block }, '')
+      },
       island: (name: string, props?: Record<string, unknown>, fallback?: string) =>
         (THEME_ISLANDS as readonly string[]).includes(name)
           ? islandMarkup(name, props, fallback)
@@ -280,12 +289,16 @@ export default class ThemeRenderer {
           .map(async (blockId) => {
             const block = section.blocks[blockId]
             const blockSchema = schema.blocks.find((entry) => entry.type === block.type)
+            const resolvedSettings =
+              block.type === THEME_APP_BLOCK_TYPE
+                ? block.settings
+                : blockSchema
+                  ? await resolver.resolve(ctx, blockSchema.settings, block.settings, assetUrl)
+                  : {}
             return {
               id: blockId,
               type: block.type,
-              settings: blockSchema
-                ? await resolver.resolve(ctx, blockSchema.settings, block.settings, assetUrl)
-                : {},
+              settings: resolvedSettings,
               attrs: `data-akinai-block-id="${escapeHtml(blockId)}"`,
             }
           })
@@ -307,7 +320,8 @@ export default class ThemeRenderer {
     }
 
     if (sectionOnly) {
-      const section = templateData.sections[sectionOnly]
+      const section =
+        templateData.sections[sectionOnly] ?? settingsData.sections[sectionOnly] ?? null
       if (!section) return ''
       return renderSection(sectionOnly, section)
     }

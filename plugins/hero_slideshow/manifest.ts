@@ -7,6 +7,7 @@ const manifest = {
     'A rotating banner at the top of the home page. Each slide links to a collection, page or URL.',
   category: 'storefront',
   slots: ['home.hero'],
+  appBlocks: [{ type: 'hero', name: 'Hero slideshow' }],
   defaultInstalled: true,
   adminRoute: 'admin.storefront_hero.home',
 } as const satisfies PluginManifest

@@ -17,7 +17,10 @@ import {
 } from '#constants/themes'
 import { assertValidSettingsData, assertValidTemplateData } from '#theme_host/draft'
 import type Theme from '#models/theme'
+import type { MediaUsage } from '#repositories/media_repository'
 import ThemeRepository from '#repositories/theme_repository'
+import PluginService from '#services/plugin_service'
+import { mediaUsagesFromThemeRows } from '#theme_host/media_usages'
 import { packThemeFolder, readThemePackage, repackTheme } from '#theme_host/package'
 import { deleteThemeZip, loadThemePackage, storeThemeZip } from '#theme_host/storage'
 
@@ -28,7 +31,10 @@ import { deleteThemeZip, loadThemePackage, storeThemeZip } from '#theme_host/sto
  */
 @inject()
 export default class ThemeService {
-  constructor(protected themeRepository: ThemeRepository) {}
+  constructor(
+    protected themeRepository: ThemeRepository,
+    protected pluginService: PluginService
+  ) {}
 
   async library(): Promise<Theme[]> {
     await this.installBundled()
@@ -163,10 +169,20 @@ export default class ThemeService {
       collection: collection ? `/collections/${collection.slug}` : '/',
       page: page ? `/pages/${page.slug}` : '/',
     }
+    const pluginCatalog = await this.pluginService.catalog()
+    const installedPlugins = pluginCatalog
+      .filter((plugin) => plugin.isInstalled)
+      .map((plugin) => ({
+        key: plugin.key,
+        name: plugin.name,
+        appBlocks: plugin.appBlocks ?? [],
+      }))
+
     return {
       theme,
       settingsSchema: theme.settingsSchema,
       sectionSchemas: theme.sectionSchemas,
+      installedPlugins,
       settings: {
         published: settings?.data ?? { current: {}, sections: {} },
         draft: settings?.draftData ?? null,
@@ -204,6 +220,27 @@ export default class ThemeService {
     const theme = await this.themeRepository.findOrFail(id)
     await this.themeRepository.discardDrafts(theme)
     return theme
+  }
+
+  /** Gallery images referenced in published or draft theme JSON. */
+  async mediaUsages(key: string): Promise<MediaUsage[]> {
+    const themes = await this.themeRepository.all()
+    const usages: MediaUsage[] = []
+    for (const theme of themes) {
+      const [settings, templates] = await Promise.all([
+        this.themeRepository.settings(theme),
+        this.themeRepository.templates(theme),
+      ])
+      const map = mediaUsagesFromThemeRows(
+        theme.name,
+        theme.settingsSchema,
+        theme.sectionSchemas,
+        settings ? [settings] : [],
+        templates
+      )
+      usages.push(...(map.get(key) ?? []))
+    }
+    return usages
   }
 
   protected async install(zip: Uint8Array, source: ThemeSource, uploadedById: string | null) {

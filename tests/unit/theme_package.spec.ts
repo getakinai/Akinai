@@ -133,6 +133,35 @@ test.group('readThemePackage', () => {
     assert.deepEqual(problems, [])
   })
 
+  test('accepts @app blocks when the section schema allows them', ({ assert }) => {
+    const problems = problemsOf({
+      ...MINIMAL,
+      'sections/apps.edge': '<div>{{{ appBlock(block.settings) }}}</div>',
+      'sections/apps.schema.json': JSON.stringify({
+        name: 'Apps',
+        blocks: [{ type: '@app', name: 'App' }],
+      }),
+      'templates/index.json': JSON.stringify({
+        sections: {
+          apps: {
+            type: 'apps',
+            settings: {},
+            blocks: {
+              hero: {
+                type: '@app',
+                settings: { plugin: 'hero_slideshow', block: 'hero' },
+              },
+            },
+            block_order: ['hero'],
+          },
+        },
+        order: ['apps'],
+      }),
+    })
+
+    assert.deepEqual(problems, [])
+  })
+
   test('rejects templates that use unknown sections or bad setting values', ({ assert }) => {
     const problems = problemsOf({
       ...MINIMAL,

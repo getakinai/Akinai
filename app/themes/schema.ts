@@ -1,6 +1,7 @@
 import {
   MAX_THEME_BLOCKS_PER_SECTION,
   MAX_THEME_SECTIONS_PER_TEMPLATE,
+  THEME_APP_BLOCK_TYPE,
   THEME_KEY,
   THEME_SECTION_TYPE,
   THEME_SETTING_TYPES,
@@ -32,6 +33,24 @@ type Problems = string[]
 
 const SETTING_ID = /^[a-z0-9_]{1,60}$/
 const ENTRY_ID = /^[A-Za-z0-9_-]{1,80}$/
+
+function isBlockSchemaType(type: string) {
+  return type === THEME_APP_BLOCK_TYPE || ENTRY_ID.test(type)
+}
+
+function isAppBlockSettings(settings: Record<string, unknown>, where: string, problems: Problems) {
+  const plugin = settings.plugin
+  const block = settings.block
+  if (typeof plugin !== 'string' || !THEME_KEY.test(plugin)) {
+    problems.push(`${where}: app block needs a valid "plugin" key in settings`)
+    return false
+  }
+  if (typeof block !== 'string' || !ENTRY_ID.test(block)) {
+    problems.push(`${where}: app block needs a valid "block" type in settings`)
+    return false
+  }
+  return true
+}
 
 function isRecord(value: Json): value is Record<string, Json> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -180,7 +199,7 @@ export function parseSectionSchema(
   }
   const blocks: ThemeBlockSchema[] = (Array.isArray(raw.blocks) ? raw.blocks : [])
     .map((block): ThemeBlockSchema | null => {
-      if (!isRecord(block) || typeof block.type !== 'string' || !ENTRY_ID.test(block.type)) {
+      if (!isRecord(block) || typeof block.type !== 'string' || !isBlockSchemaType(block.type)) {
         problems.push(`${where}: each block needs a "type"`)
         return null
       }
@@ -257,11 +276,15 @@ function parseSectionData(
         continue
       }
       const blockSettings = isRecord(block.settings) ? block.settings : {}
-      problems.push(
-        ...settingsProblems(blockSchema.settings, blockSettings).map(
-          (error) => `${where} block "${id}": ${error}`
+      if (block.type === THEME_APP_BLOCK_TYPE) {
+        isAppBlockSettings(blockSettings, `${where} block "${id}"`, problems)
+      } else {
+        problems.push(
+          ...settingsProblems(blockSchema.settings, blockSettings).map(
+            (error) => `${where} block "${id}": ${error}`
+          )
         )
-      )
+      }
       blocks[id] = {
         type: block.type,
         settings: blockSettings,

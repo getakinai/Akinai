@@ -39,7 +39,8 @@
         { "type": "text", "id": "label", "label": "Label", "default": "Learn more" },
         { "type": "url", "id": "link", "label": "Link" }
       ]
-    }
+    },
+    { "type": "@app", "name": "App" }
   ],
   "presets": [{ "name": "Rich text", "blocks": [{ "type": "heading" }, { "type": "text" }] }]
 }

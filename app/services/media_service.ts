@@ -7,6 +7,7 @@ import MediaRepository, {
   type MediaUsage,
   type PaginateMediaData,
 } from '#repositories/media_repository'
+import ThemeService from '#services/theme_service'
 import { deleteImages, uploadImage } from '#utils/uploader'
 
 export type ListMediaFilters = Partial<PaginateMediaData>
@@ -23,7 +24,10 @@ export class MediaInUseError extends Error {
  */
 @inject()
 export default class MediaService {
-  constructor(protected mediaRepository: MediaRepository) {}
+  constructor(
+    protected mediaRepository: MediaRepository,
+    protected themeService: ThemeService
+  ) {}
 
   async paginate(filters: ListMediaFilters = {}) {
     return this.mediaRepository.paginate({
@@ -52,11 +56,12 @@ export default class MediaService {
    * image they show again on reinstall is not deleted.
    */
   async usages(media: Media): Promise<MediaUsage[]> {
-    const [core, ...fromPlugins] = await Promise.all([
+    const [core, fromThemes, ...fromPlugins] = await Promise.all([
       this.mediaRepository.usages(media.key),
+      this.themeService.mediaUsages(media.key),
       ...registeredPlugins().map((plugin) => plugin.mediaUsages?.(media.key) ?? []),
     ])
-    return [...core, ...fromPlugins.flat()]
+    return [...core, ...fromThemes, ...fromPlugins.flat()]
   }
 
   /** Throws `MediaInUseError` while a record still shows the image. */

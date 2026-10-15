@@ -92,6 +92,15 @@ export const ThemeEditorDataSchema = z.object({
     collection: z.string(),
     page: z.string(),
   }),
+  installedPlugins: z
+    .array(
+      z.object({
+        key: z.string(),
+        name: z.string(),
+        appBlocks: z.array(z.object({ type: z.string(), name: z.string() })),
+      })
+    )
+    .default([]),
 })
 
 export type ThemeEditorData = z.infer<typeof ThemeEditorDataSchema>

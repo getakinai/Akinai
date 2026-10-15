@@ -295,6 +295,7 @@ declare module '@adonisjs/inertia/types' {
     'admin/taxes/home': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/home.tsx'))['default']>
     'admin/themes/_editor_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_hooks.ts'))['default']>
     'admin/themes/_editor_types': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_types.ts'))['default']>
+    'admin/themes/_editor_utils': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_utils.ts'))['default']>
     'admin/themes/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_hooks.ts'))['default']>
     'admin/themes/_live_theme_notice': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_live_theme_notice.tsx'))['default']>
     'admin/themes/_media_picker_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_media_picker_dialog.tsx'))['default']>

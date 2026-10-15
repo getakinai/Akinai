@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { FormCheckbox, FormInput, FormSelect, FormTextarea } from '~/components/form'
+import {
+  FormCheckbox,
+  FormInput,
+  FormRichtextEditor,
+  FormSelect,
+  FormTextarea,
+} from '~/components/form'
 import type { ThemeSettingDefinition } from './_editor_types'
 import { MediaPickerDialog } from './_media_picker_dialog'
 
@@ -7,9 +13,11 @@ type Props = {
   setting: ThemeSettingDefinition
   value: unknown
   onChange: (value: unknown) => void
+  /** Remount rich text when another section or field is selected. */
+  editorKey?: string
 }
 
-export function ThemeSettingField({ setting, value, onChange }: Props) {
+export function ThemeSettingField({ setting, value, onChange, editorKey }: Props) {
   const [mediaOpen, setMediaOpen] = useState(false)
   const fieldName = setting.id ?? setting.type
 
@@ -42,11 +50,14 @@ export function ThemeSettingField({ setting, value, onChange }: Props) {
       )
     case 'richtext':
       return (
-        <FormTextarea
+        <FormRichtextEditor
           name={fieldName}
           label={setting.label ?? setting.id}
           value={typeof value === 'string' ? value : ''}
-          onChange={(event) => onChange(event.target.value)}
+          editorKey={editorKey ?? fieldName}
+          onChange={(html) => onChange(html)}
+          minHeight={200}
+          placeholder={setting.label ? `Enter ${setting.label.toLowerCase()}…` : undefined}
         />
       )
     case 'number':

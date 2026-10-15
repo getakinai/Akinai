@@ -2,13 +2,17 @@
   [data-akinai-section-id] { outline: 2px solid transparent; outline-offset: -2px; }
   [data-akinai-section-id]:hover { outline-color: rgba(37, 99, 235, 0.55); }
   [data-akinai-section-id].akinai-section--selected { outline-color: rgb(37, 99, 235); }
+  [data-akinai-block-id] { outline: 1px dashed transparent; outline-offset: 2px; }
+  [data-akinai-block-id]:hover { outline-color: rgba(37, 99, 235, 0.45); }
+  [data-akinai-block-id].akinai-block--selected { outline-color: rgb(37, 99, 235); }
 </style>
 <script nonce="{{ cspNonce }}">
   (function () {
-    var selected = null
-    function post(type, id) {
+    var selectedSection = null
+    var selectedBlock = null
+    function post(payload) {
       if (window.parent === window) return
-      window.parent.postMessage({ source: 'akinai-theme', type: type, sectionId: id }, window.location.origin)
+      window.parent.postMessage(Object.assign({ source: 'akinai-theme' }, payload), window.location.origin)
     }
     function isInteractive(target) {
       return target.closest(
@@ -19,14 +23,31 @@
       'click',
       function (event) {
         if (isInteractive(event.target)) return
+        var blockNode = event.target.closest('[data-akinai-block-id]')
+        if (blockNode) {
+          event.preventDefault()
+          event.stopPropagation()
+          var sectionNode = blockNode.closest('[data-akinai-section-id]')
+          if (selectedBlock) selectedBlock.classList.remove('akinai-block--selected')
+          selectedBlock = blockNode
+          selectedBlock.classList.add('akinai-block--selected')
+          post({
+            type: 'block-select',
+            sectionId: sectionNode ? sectionNode.getAttribute('data-akinai-section-id') : null,
+            blockId: blockNode.getAttribute('data-akinai-block-id'),
+          })
+          return
+        }
         var node = event.target.closest('[data-akinai-section-id]')
         if (!node) return
         event.preventDefault()
         event.stopPropagation()
-        if (selected) selected.classList.remove('akinai-section--selected')
-        selected = node
-        selected.classList.add('akinai-section--selected')
-        post('section-select', node.getAttribute('data-akinai-section-id'))
+        if (selectedSection) selectedSection.classList.remove('akinai-section--selected')
+        if (selectedBlock) selectedBlock.classList.remove('akinai-block--selected')
+        selectedBlock = null
+        selectedSection = node
+        selectedSection.classList.add('akinai-section--selected')
+        post({ type: 'section-select', sectionId: node.getAttribute('data-akinai-section-id') })
       },
       true
     )

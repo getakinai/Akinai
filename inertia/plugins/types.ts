@@ -20,6 +20,8 @@ export type PluginAdminNavItem = {
 export type PluginClientEntry = {
   slot: PluginSlotName
   Component: ComponentType<PluginSlotProps>
+  /** Theme editor `@app` blocks keyed by block type from the plugin manifest. */
+  appBlocks?: Record<string, ComponentType<PluginSlotProps>>
   /** Shown in the slot while the installed plugins load. */
   Skeleton?: ComponentType
   seedQueries?: (queryClient: QueryClient, data: unknown) => void

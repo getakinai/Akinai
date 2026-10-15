@@ -22,6 +22,7 @@ export default class AdminThemesEditorDataController {
       settings: payload.settings,
       templates: payload.templates,
       previewPaths: payload.previewPaths,
+      installedPlugins: payload.installedPlugins,
     })
   }
 }

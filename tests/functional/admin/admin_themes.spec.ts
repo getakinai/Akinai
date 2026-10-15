@@ -345,6 +345,45 @@ test.group('Storefront themes: preview', (group) => {
     tampered.assertStatus(410)
   })
 
+  test('editor section_id returns one section without the full layout', async ({
+    client,
+    assert,
+  }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+    await publish(theme)
+
+    const response = await client
+      .get('/?section_id=banner')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({ [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } })
+
+    response.assertStatus(200)
+    const html = response.text()
+    assert.include(html, 'akinai-section--image_banner')
+    assert.notInclude(html, '<html')
+  })
+
+  test('editor data lists installed plugin app blocks', async ({ client, assert }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+
+    const response = await client
+      .get(`/admin/themes/${theme.id}/editor/data`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+
+    response.assertStatus(200)
+    const plugins = response.body().data.installedPlugins as { key: string; appBlocks: unknown[] }[]
+    assert.isTrue(plugins.some((plugin) => plugin.key === 'hero_slideshow'))
+    assert.isAbove(
+      plugins.find((plugin) => plugin.key === 'hero_slideshow')?.appBlocks.length ?? 0,
+      0
+    )
+  })
+
   test('exiting the preview clears it', async ({ client, assert }) => {
     const theme = await dawnLite()
 
