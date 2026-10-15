@@ -8,7 +8,8 @@
     "font_body": "sans",
     "font_scale": 100,
     "page_width": 1200,
-    "corner_radius": 8
+    "corner_radius": 8,
+    "custom_css": ""
   },
   "sections": {
     "announcement_bar": {

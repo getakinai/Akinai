@@ -1,6 +1,6 @@
-import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { cpSync, existsSync } from 'node:fs'
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import app from '@adonisjs/core/services/app'
 import drive from '@adonisjs/drive/services/main'
 import { THEME_DRIVE_FOLDER } from '#constants/themes'
@@ -66,4 +66,58 @@ export async function readThemeFile(dir: string, path: string): Promise<Buffer |
   const target = join(dir, ...path.split('/'))
   if (!target.startsWith(dir + '/') || !existsSync(target)) return null
   return readFile(target)
+}
+
+export function themeEditorOverlayDir(theme: Theme): string {
+  return app.makePath('tmp', 'themes', `${theme.packageHash}-editor-${theme.id}`)
+}
+
+async function writeThemeFileInDir(dir: string, path: string, content: string | Uint8Array) {
+  const target = join(dir, ...path.split('/'))
+  if (!target.startsWith(dir + '/')) return
+  await mkdir(dirname(target), { recursive: true })
+  await writeFile(target, content)
+}
+
+/** Editor preview: base package plus draft file overrides (does not mutate the shared hash cache). */
+export async function ensureThemeExtractedForEditor(
+  theme: Theme,
+  drafts: Record<string, string>
+): Promise<string> {
+  const base = await ensureThemeExtracted(theme)
+  const dir = themeEditorOverlayDir(theme)
+  const marker = join(dir, '.akinai-base-hash')
+  let synced = false
+  if (!existsSync(join(dir, 'theme.json'))) synced = true
+  else {
+    try {
+      if ((await readFile(marker, 'utf8')) !== theme.packageHash) synced = true
+    } catch {
+      synced = true
+    }
+  }
+  if (synced) {
+    await rm(dir, { recursive: true, force: true })
+    cpSync(base, dir, { recursive: true })
+    await writeFile(marker, theme.packageHash, 'utf8')
+  }
+  for (const [path, content] of Object.entries(drafts)) {
+    await writeThemeFileInDir(dir, path, content)
+  }
+  return dir
+}
+
+export async function writeThemeEditorOverlayFile(
+  theme: Theme,
+  path: string,
+  content: string,
+  drafts: Record<string, string>
+): Promise<string> {
+  const dir = await ensureThemeExtractedForEditor(theme, { ...drafts, [path]: content })
+  await writeThemeFileInDir(dir, path, content)
+  return dir
+}
+
+export async function removeThemeEditorOverlay(theme: Theme): Promise<void> {
+  await rm(themeEditorOverlayDir(theme), { recursive: true, force: true })
 }

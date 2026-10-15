@@ -120,6 +120,27 @@ function templateCode(source: string): { code: string[]; tags: string[] } {
   return { code, tags }
 }
 
+const MAX_EDITOR_SOURCE_BYTES = 512 * 1024
+
+/** Validates a single theme template file before saving an editor draft. */
+export function validateThemeSourceFile(path: string, content: string): string[] {
+  const problems: string[] = []
+  const bytes = new TextEncoder().encode(content)
+  if (bytes.length > MAX_EDITOR_SOURCE_BYTES) {
+    problems.push(`${path}: file is too large (max ${MAX_EDITOR_SOURCE_BYTES / 1024} KB)`)
+  }
+  const ext = extension(path)
+  if (ext === 'edge') problems.push(...templateProblems(path, content))
+  if (ext === 'json') {
+    try {
+      JSON.parse(content)
+    } catch {
+      problems.push(`${path} is not valid JSON`)
+    }
+  }
+  return problems
+}
+
 function templateProblems(path: string, source: string): string[] {
   const problems: string[] = []
   const { code, tags } = templateCode(source)
@@ -311,10 +332,14 @@ export async function packThemeFolder(root: string): Promise<Uint8Array> {
 export function repackTheme(
   pkg: ThemePackage,
   settingsData: ThemeSettingsData,
-  templates: Record<string, ThemeTemplateData>
+  templates: Record<string, ThemeTemplateData>,
+  fileOverrides: Record<string, string> = {}
 ): Uint8Array {
   const encode = (value: unknown) => new TextEncoder().encode(JSON.stringify(value, null, 2))
   const files: ThemeFiles = { ...pkg.files }
+  for (const [path, content] of Object.entries(fileOverrides)) {
+    files[path] = new TextEncoder().encode(content)
+  }
   files['config/settings_data.json'] = encode({
     current: settingsData.current,
     sections: Object.fromEntries(

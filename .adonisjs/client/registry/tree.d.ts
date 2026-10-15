@@ -614,6 +614,9 @@ export interface ApiDefinition {
       editor: {
         home: typeof routes['admin.themes.editor.home']
         data: typeof routes['admin.themes.editor.data']
+        source: typeof routes['admin.themes.editor.source'] & {
+          update: typeof routes['admin.themes.editor.source.update']
+        }
         exit: typeof routes['admin.themes.editor.exit']
         settings: typeof routes['admin.themes.editor.settings']
         template: typeof routes['admin.themes.editor.template']

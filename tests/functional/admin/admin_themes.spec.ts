@@ -365,6 +365,269 @@ test.group('Storefront themes: preview', (group) => {
     assert.notInclude(html, '<html')
   })
 
+  test('editor custom CSS is injected into the themed page head', async ({ client, assert }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+    await publish(theme)
+
+    const editorData = await client
+      .get(`/admin/themes/${theme.id}/editor/data`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+    editorData.assertStatus(200)
+    const published = editorData.body().data.settings.published as {
+      current: Record<string, unknown>
+      sections: Record<string, unknown>
+    }
+
+    const css = '.akinai-css-test { display: none; }'
+    const save = await client
+      .put(`/admin/themes/${theme.id}/editor/settings`)
+      .json({
+        current: { ...published.current, custom_css: css },
+        sections: published.sections,
+      })
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+    save.assertStatus(204)
+
+    const page = await client
+      .get('/')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({ [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } })
+
+    page.assertStatus(200)
+    assert.include(page.text(), '.akinai-css-test')
+    assert.match(page.text(), /<style nonce="[^"]+">[\s\S]*\.akinai-css-test/)
+  })
+
+  test('editor source returns section templates for the open editor session', async ({
+    client,
+    assert,
+  }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+
+    const response = await client
+      .get(
+        `/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent('sections/image_banner.edge')}`
+      )
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({ [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } })
+
+    response.assertStatus(200)
+    assert.include(response.body().data.content, 'banner__heading')
+  })
+
+  test('editor source rejects unsafe paths and mismatched editor session', async ({ client }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+
+    const traversal = await client
+      .get(
+        `/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent('../../../etc/passwd')}`
+      )
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({ [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } })
+    traversal.assertStatus(404)
+
+    const noSession = await client
+      .get(
+        `/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent('sections/image_banner.edge')}`
+      )
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+    noSession.assertStatus(403)
+
+    const wrongTheme = await client
+      .get(
+        `/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent('sections/image_banner.edge')}`
+      )
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession({
+        [THEME_EDITOR_SESSION_KEY]: { themeId: '00000000-0000-0000-0000-000000000000' },
+      })
+    wrongTheme.assertStatus(403)
+  })
+
+  test('editor source PUT saves a draft and Save publishes it', async ({ client, assert }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+    await publish(theme)
+    const path = 'sections/image_banner.edge'
+    const session = { [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } }
+
+    const original = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    original.assertStatus(200)
+    const content = original.body().data.content as string
+    const marker = 'akinai-editor-source-save-marker'
+    const edited = `${content}\n<p class="${marker}"></p>\n`
+
+    const putDraft = await client
+      .put(`/admin/themes/${theme.id}/editor/source`)
+      .json({ path, content: edited })
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    putDraft.assertStatus(204)
+
+    const draft = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    assert.include(draft.body().data.content, marker)
+
+    const preview = await client
+      .get('/')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    assert.include(preview.text(), marker)
+
+    const saveTheme = await client
+      .post(`/admin/themes/${theme.id}/editor/save`)
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    saveTheme.assertStatus(204)
+
+    const live = await client.get('/')
+    assert.include(live.text(), marker)
+  })
+
+  test('editor source PUT accepts empty content (JSON empty string)', async ({ client, assert }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+    const path = 'sections/image_banner.edge'
+    const session = { [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } }
+
+    const original = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    original.assertStatus(200)
+    const content = original.body().data.content as string
+
+    const empty = await client
+      .put(`/admin/themes/${theme.id}/editor/source`)
+      .json({ path, content: '' })
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    empty.assertStatus(204)
+
+    const draft = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    assert.equal(draft.body().data.content, '')
+
+    await client
+      .put(`/admin/themes/${theme.id}/editor/source`)
+      .json({ path, content })
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+  })
+
+  test('editor source PUT rejects banned template patterns', async ({ client }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+    const path = 'sections/image_banner.edge'
+    const session = { [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } }
+
+    const original = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    const content = original.body().data.content as string
+
+    const response = await client
+      .put(`/admin/themes/${theme.id}/editor/source`)
+      .json({ path, content: `${content}\n@inject('bad')\n` })
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    response.assertStatus(422)
+  })
+
+  test('editor discard clears source drafts', async ({ client, assert }) => {
+    const user = await createAdminUser(['themes.edit'])
+    const theme = await dawnLite()
+    await publish(theme)
+    const path = 'sections/image_banner.edge'
+    const session = { [THEME_EDITOR_SESSION_KEY]: { themeId: theme.id } }
+
+    const original = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    const content = original.body().data.content as string
+
+    const putDraft = await client
+      .put(`/admin/themes/${theme.id}/editor/source`)
+      .json({ path, content: `${content}\n<p class="akinai-discard-marker"></p>\n` })
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    putDraft.assertStatus(204)
+
+    const discard = await client
+      .post(`/admin/themes/${theme.id}/editor/discard`)
+      .accept('json')
+      .withCsrfToken()
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    discard.assertStatus(204)
+
+    const after = await client
+      .get(`/admin/themes/${theme.id}/editor/source?path=${encodeURIComponent(path)}`)
+      .accept('json')
+      .withGuard('web')
+      .loginAs(user)
+      .withSession(session)
+    assert.notInclude(after.body().data.content, 'akinai-discard-marker')
+  })
+
   test('editor data lists installed plugin app blocks', async ({ client, assert }) => {
     const user = await createAdminUser(['themes.edit'])
     const theme = await dawnLite()

@@ -18,7 +18,13 @@ import ThemeRepository from '#repositories/theme_repository'
 import type { SeoMeta } from '#services/storefront_seo_service'
 import { hasPermission } from '#abilities/main'
 import ThemeSettingsResolver from '#theme_host/settings_resolver'
-import { ensureThemeExtracted } from '#theme_host/storage'
+import { buildThemeCustomCssHtml } from '#theme_host/theme_custom_css'
+import { ensureThemeExtracted, ensureThemeExtractedForEditor } from '#theme_host/storage'
+import {
+  getThemeEngine,
+  invalidateThemeEngine,
+  registerThemeEngine,
+} from '#theme_host/theme_engine_cache'
 import { imageUrl } from '#utils/image_url'
 import { formatMoney } from '#utils/money'
 
@@ -50,16 +56,17 @@ export type ThemePageInput = {
 
 type Json = Record<string, any>
 
-const engines = new Map<string, Edge>()
 const locales = new Map<string, Json>()
+
+export { invalidateThemeEngine }
 
 /** One Edge instance per package, rooted at its extracted folder and nothing else. */
 function engineFor(hash: string, dir: string): Edge {
-  let engine = engines.get(hash)
+  let engine = getThemeEngine(hash) as Edge | undefined
   if (!engine) {
     engine = Edge.create({ cache: app.inProduction })
     engine.mount(dir)
-    engines.set(hash, engine)
+    registerThemeEngine(hash, engine)
   }
   return engine
 }
@@ -188,8 +195,12 @@ export default class ThemeRenderer {
   ): Promise<string> {
     const raw = await input.data()
     const data = (raw ? await ctx.serialize.withoutWrapping(raw) : {}) as Json
-    const dir = await ensureThemeExtracted(theme)
-    const edge = engineFor(theme.packageHash, dir)
+    const editorDrafts = editor ? await this.themeRepository.sourceDraftMap(theme) : {}
+    const dir = editor
+      ? await ensureThemeExtractedForEditor(theme, editorDrafts)
+      : await ensureThemeExtracted(theme)
+    const engineKey = editor ? `${theme.packageHash}:${theme.id}` : theme.packageHash
+    const edge = engineFor(engineKey, dir)
     const [settingsRow, locale, resolver] = await Promise.all([
       this.themeRepository.settings(theme),
       localeFor(theme.packageHash, dir),
@@ -340,10 +351,16 @@ export default class ThemeRenderer {
       return renderSection(type, { type, settings: {}, blocks: {}, blockOrder: [] })
     }
 
+    const nonce = ctx.response.nonce ?? ''
+    const themeCustomCss = nonce
+      ? buildThemeCustomCssHtml(theme.settingsSchema, settingsData.current, nonce)
+      : ''
+
     const akinaiHead = await ctx.view.render('themes/head', {
       seo: input.seo,
       robots: preview || editor ? 'noindex, nofollow' : null,
       designMode: editor,
+      themeCustomCss,
     })
 
     const page = await edge.render('layout/theme', {

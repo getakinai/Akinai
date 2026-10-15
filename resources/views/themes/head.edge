@@ -33,6 +33,9 @@
 @end
 @viteReactRefresh({ nonce: cspNonce })
 @vite(['inertia/islands.tsx'])
+@if(themeCustomCss)
+  {{{ themeCustomCss }}}
+@end
 @if(designMode)
   @include('themes/editor_bridge')
 @end

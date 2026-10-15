@@ -325,6 +325,8 @@ export type ScannedRoutes = {
     'admin.themes.unpublish': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.home': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.data': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.source': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.source.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.exit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.settings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.template': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'name': ParamValue} }
@@ -679,6 +681,7 @@ export type ScannedRoutes = {
     'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.home': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.data': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.source': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.exit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
@@ -949,6 +952,7 @@ export type ScannedRoutes = {
     'admin.themes.download': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.home': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.data': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.source': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.exit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.markets.home': { paramsTuple?: []; params?: {} }
     'admin.markets.list': { paramsTuple?: []; params?: {} }
@@ -1264,6 +1268,7 @@ export type ScannedRoutes = {
     'admin.storefront_promo_banners.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.storefront_features.update': { paramsTuple?: []; params?: {} }
     'admin.themes.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'admin.themes.editor.source.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.settings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.themes.editor.template': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'name': ParamValue} }
     'admin.markets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

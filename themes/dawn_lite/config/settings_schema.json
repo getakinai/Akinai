@@ -64,5 +64,16 @@
         "default": 8
       }
     ]
+  },
+  {
+    "name": "Custom CSS",
+    "settings": [
+      {
+        "type": "css",
+        "id": "custom_css",
+        "label": "Custom CSS",
+        "info": "Added after the theme stylesheet on every page."
+      }
+    ]
   }
 ]

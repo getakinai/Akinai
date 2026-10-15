@@ -1,4 +1,47 @@
-import type { ThemeEditorData, ThemeSectionData, ThemeTemplateData } from './_editor_types'
+import type {
+  ThemeEditorData,
+  ThemeSectionData,
+  ThemeSettingsData,
+  ThemeTemplateData,
+} from './_editor_types'
+
+/** Accept Shopify-style `block_order` in pasted template JSON. */
+export function normalizeTemplateJsonPayload(data: {
+  sections: Record<string, Record<string, unknown>>
+  order: string[]
+}) {
+  return {
+    order: data.order,
+    sections: Object.fromEntries(
+      Object.entries(data.sections).map(([id, section]) => [
+        id,
+        {
+          ...section,
+          blockOrder: (section.blockOrder ?? section.block_order ?? []) as string[],
+        },
+      ])
+    ),
+  }
+}
+
+export function editorCodePaths(
+  settings: ThemeSettingsData,
+  template: ThemeTemplateData,
+  templateName: string
+): string[] {
+  const paths = new Set<string>([
+    'layout/theme.edge',
+    'assets/base.css',
+    `templates/${templateName}.json`,
+  ])
+  for (const section of Object.values(settings.sections)) {
+    paths.add(`sections/${section.type}.edge`)
+  }
+  for (const section of Object.values(template.sections)) {
+    paths.add(`sections/${section.type}.edge`)
+  }
+  return [...paths].sort()
+}
 
 export function newSectionId(prefix = 'section') {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`
@@ -6,6 +49,10 @@ export function newSectionId(prefix = 'section') {
 
 export function newBlockId() {
   return `block_${Math.random().toString(36).slice(2, 10)}`
+}
+
+export function sectionThemeSourcePath(sectionType: string): string {
+  return `sections/${sectionType}.edge`
 }
 
 export function sectionTypesForTemplate(

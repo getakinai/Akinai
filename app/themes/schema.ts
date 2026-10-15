@@ -1,3 +1,4 @@
+import { themeCssValueProblem } from '#theme_host/theme_css'
 import {
   MAX_THEME_BLOCKS_PER_SECTION,
   MAX_THEME_SECTIONS_PER_TEMPLATE,
@@ -398,6 +399,8 @@ export function settingValueProblem(setting: ThemeSettingDefinition, value: Json
       return typeof value === 'string' && /^(\/(?!\/)|https?:\/\/|mailto:|tel:|#)/.test(value)
         ? null
         : 'must be a path, http(s) URL, mailto: or tel: link'
+    case 'css':
+      return themeCssValueProblem(value)
     case 'header':
     case 'paragraph':
       return null

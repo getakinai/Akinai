@@ -9,6 +9,41 @@ import {
 
 export const themeEditorKeys = {
   data: (id: string) => ['admin', 'themes', id, 'editor'] as const,
+  source: (id: string, path: string) => ['admin', 'themes', id, 'editor', 'source', path] as const,
+}
+
+const ThemeEditorSourceSchema = z.object({
+  path: z.string(),
+  content: z.string(),
+})
+
+export function useSaveThemeEditorSource(themeId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ path, content }: { path: string; content: string }) =>
+      http(`/admin/themes/${encodeURIComponent(themeId)}/editor/source`, {
+        method: 'PUT',
+        body: { path, content },
+        schema: z.unknown(),
+      }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: themeEditorKeys.source(themeId, variables.path),
+      })
+    },
+  })
+}
+
+export function useThemeEditorSource(themeId: string, path: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: themeEditorKeys.source(themeId, path ?? ''),
+    enabled: enabled && Boolean(path),
+    queryFn: () =>
+      http(
+        `/admin/themes/${encodeURIComponent(themeId)}/editor/source?path=${encodeURIComponent(path!)}`,
+        { schema: z.object({ data: ThemeEditorSourceSchema }) }
+      ).then((response) => response.data),
+  })
 }
 
 export function useThemeEditorData(themeId: string) {

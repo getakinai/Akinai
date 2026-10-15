@@ -44,6 +44,20 @@ export const adminThemeDraftSettingsValidator = vine.create({
   sections: vine.record(draftSection),
 })
 
+export const adminThemeEditorSourceValidator = vine.create({
+  path: vine.string().trim().minLength(1).maxLength(512),
+})
+
+export const adminThemeEditorSourceWriteValidator = vine.create({
+  params: vine.object({ id: vine.string().uuid() }),
+  path: vine.string().trim().minLength(1).maxLength(512),
+  /** Body parser turns JSON `""` into `null`; theme files may legitimately be empty. */
+  content: vine
+    .string()
+    .maxLength(512 * 1024)
+    .nullable(),
+})
+
 export const adminThemeDraftTemplateValidator = vine.create({
   params: vine.object({
     id: vine.string().uuid(),

@@ -3859,6 +3859,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_editor_data_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'admin.themes.editor.source': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/themes/:id/editor/source'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeIdValidator)>|InferInput<(typeof import('#validators/admin_theme_validators').adminThemeEditorSourceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_editor_source_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_editor_source_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.themes.editor.source.update': {
+    methods: ["PUT"]
+    pattern: '/admin/themes/:id/editor/source'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeEditorSourceWriteValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin_theme_validators').adminThemeEditorSourceWriteValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_editor_source_update_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/admin_themes_editor_source_update_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'admin.themes.editor.exit': {
     methods: ["GET","HEAD"]
     pattern: '/admin/themes/:id/editor/exit'

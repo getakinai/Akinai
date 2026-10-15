@@ -3,6 +3,7 @@ import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import Theme from '#models/theme'
 import ThemeSetting from '#models/theme_setting'
+import ThemeSourceDraft from '#models/theme_source_draft'
 import ThemeTemplate from '#models/theme_template'
 import type {
   ThemeManifest,
@@ -207,6 +208,34 @@ export default class ThemeRepository {
     return row
   }
 
+  async sourceDrafts(theme: Theme): Promise<ThemeSourceDraft[]> {
+    return ThemeSourceDraft.query().where('theme_id', theme.id)
+  }
+
+  async sourceDraftMap(theme: Theme): Promise<Record<string, string>> {
+    const rows = await this.sourceDrafts(theme)
+    return Object.fromEntries(rows.map((row) => [row.path, row.content]))
+  }
+
+  async upsertSourceDraft(theme: Theme, path: string, content: string): Promise<ThemeSourceDraft> {
+    const existing = await ThemeSourceDraft.query()
+      .where('theme_id', theme.id)
+      .where('path', path)
+      .first()
+    if (existing) {
+      existing.content = content
+      await existing.save()
+      return existing
+    }
+    return ThemeSourceDraft.create({ themeId: theme.id, path, content })
+  }
+
+  async deleteSourceDrafts(theme: Theme, trx?: TransactionClientContract): Promise<void> {
+    const query = ThemeSourceDraft.query()
+    if (trx) query.useTransaction(trx)
+    await query.where('theme_id', theme.id).delete()
+  }
+
   async updateTemplateDraft(
     theme: Theme,
     name: string,
@@ -267,6 +296,7 @@ export default class ThemeRepository {
         template.draftData = null
         await template.save()
       }
+      await this.deleteSourceDrafts(theme, trx)
     })
   }
 }

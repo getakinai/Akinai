@@ -1932,6 +1932,18 @@ const routes = {
     tokens: [{"old":"/admin/themes/:id/editor/data","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/data","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/data","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/data","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/data","type":0,"val":"data","end":""}],
     types: placeholder as Registry['admin.themes.editor.data']['types'],
   },
+  'admin.themes.editor.source': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/themes/:id/editor/source',
+    tokens: [{"old":"/admin/themes/:id/editor/source","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/source","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/source","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/source","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/source","type":0,"val":"source","end":""}],
+    types: placeholder as Registry['admin.themes.editor.source']['types'],
+  },
+  'admin.themes.editor.source.update': {
+    methods: ["PUT"],
+    pattern: '/admin/themes/:id/editor/source',
+    tokens: [{"old":"/admin/themes/:id/editor/source","type":0,"val":"admin","end":""},{"old":"/admin/themes/:id/editor/source","type":0,"val":"themes","end":""},{"old":"/admin/themes/:id/editor/source","type":1,"val":"id","end":""},{"old":"/admin/themes/:id/editor/source","type":0,"val":"editor","end":""},{"old":"/admin/themes/:id/editor/source","type":0,"val":"source","end":""}],
+    types: placeholder as Registry['admin.themes.editor.source.update']['types'],
+  },
   'admin.themes.editor.exit': {
     methods: ["GET","HEAD"],
     pattern: '/admin/themes/:id/editor/exit',

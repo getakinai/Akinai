@@ -159,6 +159,7 @@ Inside the section, `section.settings` holds the resolved values (defaults fille
 | `select`, `radio` | the chosen `value` from `options` |
 | `color` | hex string such as `#121212` |
 | `image_picker` | `{ key, url }` or null. Values starting with `assets/` point at the theme's own files |
+| `css` | staff custom stylesheet; **not** passed into `settings` in Edge. Akinai injects every `css` setting from theme `current` into `akinaiHead` as a nonce `<style>` tag (sanitized on save). Layouts do not need to print it |
 | `product` | the product (same shape as the product page), looked up by slug |
 | `collection` | the collection plus its first page of `products` |
 | `page` | the content page |
@@ -166,6 +167,10 @@ Inside the section, `section.settings` holds the resolved values (defaults fille
 | `header`, `paragraph` | editor labels only; no value |
 
 Values in `settings_data.json` and templates are checked against these types on upload.
+
+`css` values may not contain `@import`, `<script`, `javascript:` URLs or CSS `expression()`. The server strips patterns that could break out of the injected `<style>` tag.
+
+When editing **Theme settings → Custom CSS** in the theme editor, open **Markup → View output** (read-only HTML) to find selectors such as `#akinai-section-{id}` and `.akinai-section--{type}`. Use **Theme code** to edit `.edge`, layout, and CSS files; use **Template JSON** for the page structure. Edits are **drafts** until you click **Save** in the editor header, then they are baked into the theme package (and included when you download the theme). Switch to **Preview** for a visual check.
 
 ## Variables and helpers
 

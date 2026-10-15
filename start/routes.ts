@@ -1367,6 +1367,12 @@ router
               .get('themes/:id/editor/data', [controllers.admin.AdminThemesEditorData])
               .as('admin.themes.editor.data')
             router
+              .get('themes/:id/editor/source', [controllers.admin.AdminThemesEditorSource])
+              .as('admin.themes.editor.source')
+            router
+              .put('themes/:id/editor/source', [controllers.admin.AdminThemesEditorSourceUpdate])
+              .as('admin.themes.editor.source.update')
+            router
               .get('themes/:id/editor/exit', [controllers.admin.AdminThemesEditorExit])
               .as('admin.themes.editor.exit')
             router

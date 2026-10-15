@@ -1,11 +1,6 @@
 import { useState } from 'react'
-import {
-  FormCheckbox,
-  FormInput,
-  FormRichtextEditor,
-  FormSelect,
-  FormTextarea,
-} from '~/components/form'
+import { FormCheckbox, FormInput, FormRichtextEditor, FormSelect } from '~/components/form'
+import { cn, field } from '~/lib/styles'
 import type { ThemeSettingDefinition } from './_editor_types'
 import { MediaPickerDialog } from './_media_picker_dialog'
 
@@ -16,6 +11,12 @@ type Props = {
   /** Remount rich text when another section or field is selected. */
   editorKey?: string
 }
+
+/** Visible field surface on the theme editor’s grey sidebar (matches rich text). */
+const themeEditorFieldShell = cn(
+  'overflow-hidden rounded-lg border border-line-2 bg-field shadow-[0_1px_1px_rgba(10,10,11,0.03)]',
+  'transition-[border-color,box-shadow] duration-150 focus-within:border-ink focus-within:ring-3 focus-within:ring-ring'
+)
 
 export function ThemeSettingField({ setting, value, onChange, editorKey }: Props) {
   const [mediaOpen, setMediaOpen] = useState(false)
@@ -41,12 +42,42 @@ export function ThemeSettingField({ setting, value, onChange, editorKey }: Props
       )
     case 'textarea':
       return (
-        <FormTextarea
-          name={fieldName}
-          label={setting.label ?? setting.id}
-          value={typeof value === 'string' ? value : ''}
-          onChange={(event) => onChange(event.target.value)}
-        />
+        <div className={field.wrapper}>
+          <label className={field.label} htmlFor={fieldName}>
+            {setting.label ?? setting.id}
+          </label>
+          <div className={themeEditorFieldShell}>
+            <textarea
+              id={fieldName}
+              name={fieldName}
+              rows={5}
+              value={typeof value === 'string' ? value : ''}
+              onChange={(event) => onChange(event.target.value)}
+              className="block min-h-[120px] w-full resize-y border-0 bg-field px-3 py-2.5 text-[14px] leading-[1.5] text-ink placeholder:text-subtle focus:outline-none"
+            />
+          </div>
+        </div>
+      )
+    case 'css':
+      return (
+        <div className={field.wrapper}>
+          <label className={field.label} htmlFor={fieldName}>
+            {setting.label ?? setting.id}
+          </label>
+          <div className={themeEditorFieldShell}>
+            <textarea
+              id={fieldName}
+              name={fieldName}
+              rows={14}
+              spellCheck={false}
+              value={typeof value === 'string' ? value : ''}
+              onChange={(event) => onChange(event.target.value)}
+              placeholder="/* Custom CSS */"
+              className="block min-h-[280px] w-full resize-y border-0 bg-field px-3 py-2.5 font-mono text-[13px] leading-[1.5] text-ink placeholder:text-subtle focus:outline-none"
+            />
+          </div>
+          {setting.info && <p className="text-[12px] text-muted">{setting.info}</p>}
+        </div>
       )
     case 'richtext':
       return (

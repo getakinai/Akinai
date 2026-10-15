@@ -293,7 +293,12 @@ declare module '@adonisjs/inertia/types' {
     'admin/taxes/_tax_rate_dialog': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/_tax_rate_dialog.tsx'))['default']>
     'admin/taxes/_types': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/_types.ts'))['default']>
     'admin/taxes/home': ExtractProps<(typeof import('../../inertia/pages/admin/taxes/home.tsx'))['default']>
+    'admin/themes/_editor_code_mirror': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_code_mirror.tsx'))['default']>
     'admin/themes/_editor_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_hooks.ts'))['default']>
+    'admin/themes/_editor_markup_code': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_markup_code.tsx'))['default']>
+    'admin/themes/_editor_markup_panel': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_markup_panel.tsx'))['default']>
+    'admin/themes/_editor_source_code_field': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_source_code_field.tsx'))['default']>
+    'admin/themes/_editor_template_json_field': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_template_json_field.tsx'))['default']>
     'admin/themes/_editor_types': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_types.ts'))['default']>
     'admin/themes/_editor_utils': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_editor_utils.ts'))['default']>
     'admin/themes/_hooks': ExtractProps<(typeof import('../../inertia/pages/admin/themes/_hooks.ts'))['default']>

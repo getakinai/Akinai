@@ -37,6 +37,7 @@ export const THEME_SETTING_TYPES = [
   'radio',
   'color',
   'image_picker',
+  'css',
   'product',
   'collection',
   'page',

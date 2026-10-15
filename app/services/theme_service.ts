@@ -21,8 +21,24 @@ import type { MediaUsage } from '#repositories/media_repository'
 import ThemeRepository from '#repositories/theme_repository'
 import PluginService from '#services/plugin_service'
 import { mediaUsagesFromThemeRows } from '#theme_host/media_usages'
-import { packThemeFolder, readThemePackage, repackTheme } from '#theme_host/package'
-import { deleteThemeZip, loadThemePackage, storeThemeZip } from '#theme_host/storage'
+import {
+  packThemeFolder,
+  readThemePackage,
+  repackTheme,
+  validateThemeSourceFile,
+} from '#theme_host/package'
+import { normalizeEditorSourcePath } from '#theme_host/editor_source'
+import { invalidateThemeEngine } from '#theme_host/theme_engine_cache'
+import ThemeSourceDraft from '#models/theme_source_draft'
+import {
+  deleteThemeZip,
+  ensureThemeExtracted,
+  loadThemePackage,
+  readThemeFile,
+  removeThemeEditorOverlay,
+  storeThemeZip,
+  writeThemeEditorOverlayFile,
+} from '#theme_host/storage'
 
 /**
  * The theme library: uploading, duplicating, publishing and removing
@@ -152,6 +168,39 @@ export default class ThemeService {
     }
   }
 
+  async readEditorSource(
+    themeId: string,
+    rawPath: string
+  ): Promise<{ path: string; content: string } | null> {
+    const path = normalizeEditorSourcePath(rawPath)
+    if (!path) return null
+    const theme = await this.themeRepository.findOrFail(themeId)
+    const draft = await ThemeSourceDraft.query()
+      .where('theme_id', theme.id)
+      .where('path', path)
+      .first()
+    if (draft) return { path, content: draft.content }
+    const dir = await ensureThemeExtracted(theme)
+    const file = await readThemeFile(dir, path)
+    if (!file) return null
+    return { path, content: file.toString('utf8') }
+  }
+
+  async writeEditorSource(themeId: string, rawPath: string, content: string): Promise<void> {
+    const path = normalizeEditorSourcePath(rawPath)
+    if (!path) throw new ThemePackageException(['This file path is not allowed'])
+    const problems = validateThemeSourceFile(path, content)
+    if (problems.length > 0) throw new ThemePackageException(problems)
+    const theme = await this.themeRepository.findOrFail(themeId)
+    const dir = await ensureThemeExtracted(theme)
+    const existing = await readThemeFile(dir, path)
+    if (!existing) throw new ThemePackageException([`This theme has no "${path}" file`])
+    await this.themeRepository.upsertSourceDraft(theme, path, content)
+    const drafts = await this.themeRepository.sourceDraftMap(theme)
+    await writeThemeEditorOverlayFile(theme, path, content, drafts)
+    invalidateThemeEngine(`${theme.packageHash}:${theme.id}`)
+  }
+
   async editorPayload(id: string) {
     const theme = await this.themeRepository.findOrFail(id)
     const [settings, templates] = await Promise.all([
@@ -213,12 +262,41 @@ export default class ThemeService {
   async saveDraft(id: string) {
     const theme = await this.themeRepository.findOrFail(id)
     await this.themeRepository.commitDrafts(theme)
-    return theme
+    const sourceDrafts = await this.themeRepository.sourceDraftMap(theme)
+    if (Object.keys(sourceDrafts).length === 0) return theme
+
+    const [pkg, settings, templates] = await Promise.all([
+      loadThemePackage(theme),
+      this.themeRepository.settings(theme),
+      this.themeRepository.templates(theme),
+    ])
+    const templateMap = Object.fromEntries(templates.map((row) => [row.name, row.data]))
+    const zip = repackTheme(pkg, settings?.data ?? pkg.settingsData, templateMap, sourceDrafts)
+    const next = readThemePackage(zip)
+    const oldDriveKey = theme.driveKey
+    const oldHash = theme.packageHash
+    await this.themeRepository.updatePackage([theme], {
+      manifest: next.manifest,
+      driveKey: await storeThemeZip(next.hash, zip),
+      packageHash: next.hash,
+      settingsSchema: next.settingsSchema,
+      sectionSchemas: next.sectionSchemas,
+      templates: next.templates,
+    })
+    if (!(await this.themeRepository.isDriveKeyUsed(oldDriveKey))) {
+      await deleteThemeZip(oldDriveKey)
+    }
+    invalidateThemeEngine(`${oldHash}:${theme.id}`)
+    await removeThemeEditorOverlay(theme)
+    await this.themeRepository.deleteSourceDrafts(theme)
+    return this.themeRepository.findOrFail(id)
   }
 
   async discardDraft(id: string) {
     const theme = await this.themeRepository.findOrFail(id)
     await this.themeRepository.discardDrafts(theme)
+    invalidateThemeEngine(`${theme.packageHash}:${theme.id}`)
+    await removeThemeEditorOverlay(theme)
     return theme
   }
 
