@@ -140,18 +140,36 @@ export default class StorefrontPrefetchService {
     return Promise.all(
       installed.map(async (entry) => {
         const plugin = findPlugin(entry.key)
-        const raw =
+        const data =
           installedKeys.includes(entry.key) && plugin?.prefetch?.home
-            ? await plugin.prefetch.home(ctx)
+            ? await this.pluginHomeData(ctx, entry.key, plugin.prefetch.home)
             : undefined
-        const data = raw !== undefined ? await ctx.serialize.withoutWrapping(raw) : undefined
         return {
           key: entry.key,
           slots: entry.slots,
-          ...(data !== undefined ? { data: data as Json } : {}),
+          ...(data !== undefined ? { data } : {}),
         }
       })
     )
+  }
+
+  /**
+   * A plugin whose prefetch fails is left out of the payload, so its
+   * component fetches its own data and the page still renders.
+   */
+  protected async pluginHomeData(
+    ctx: HttpContext,
+    key: string,
+    home: (ctx: HttpContext) => Promise<unknown>
+  ): Promise<Json | undefined> {
+    try {
+      const raw = await home(ctx)
+      if (raw === undefined) return undefined
+      return (await ctx.serialize.withoutWrapping(raw)) as Json
+    } catch (error) {
+      ctx.logger.error({ err: error, plugin: key }, 'Plugin home prefetch failed')
+      return undefined
+    }
   }
 
   /** What the storefront header and footer show on every page. */

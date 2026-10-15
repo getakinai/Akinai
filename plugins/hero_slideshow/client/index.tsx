@@ -18,6 +18,7 @@ function HeroSlideshowPlugin({ fallback }: PluginSlotProps) {
 export default {
   slot: 'home.hero' as const,
   Component: HeroSlideshowPlugin,
+  Skeleton: HeroSliderSkeleton,
   seedQueries(queryClient: QueryClient, data: unknown) {
     const parsed = HeroSlidesPrefetchSchema.safeParse(data)
     if (parsed.success) {

@@ -5,6 +5,9 @@ export default class PluginProvider {
   constructor(protected app: ApplicationService) {}
 
   async boot() {
-    await loadPlugins()
+    const logger = await this.app.container.make('logger')
+    await loadPlugins((folder, error) => {
+      logger.error({ err: error, plugin: folder }, `Plugin "${folder}" failed to load; skipping it`)
+    })
   }
 }

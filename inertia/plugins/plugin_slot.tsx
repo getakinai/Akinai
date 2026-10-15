@@ -7,7 +7,10 @@ type PluginSlotComponentProps = {
   name: PluginSlotName
   /** Shown when no installed plugin fills the slot. */
   fallback?: ReactNode
-  /** Shown while the installed plugins load, which only happens on Inertia visits. */
+  /**
+   * Shown while the installed plugins load, which only happens on Inertia
+   * visits. Defaults to the first registered plugin's `Skeleton`.
+   */
   loading?: ReactNode
 }
 
@@ -17,14 +20,19 @@ type PluginSlotComponentProps = {
  */
 export default function PluginSlot({ name, fallback, loading }: PluginSlotComponentProps) {
   const { data: installed, isLoading } = useStorefrontPlugins()
-  if (isLoading) return <>{loading}</>
+  const candidates = Object.entries(pluginRegistry).filter(([, entry]) => entry.slot === name)
+  if (candidates.length === 0) return <>{fallback}</>
+
+  if (isLoading) {
+    if (loading !== undefined) return <>{loading}</>
+    const Skeleton = candidates.find(([, entry]) => entry.Skeleton)?.[1].Skeleton
+    return Skeleton ? <Skeleton /> : null
+  }
 
   const installedKeys = new Set(
     (installed ?? []).filter((plugin) => plugin.slots.includes(name)).map((plugin) => plugin.key)
   )
-  const entries = Object.entries(pluginRegistry).filter(
-    ([key, entry]) => entry.slot === name && installedKeys.has(key)
-  )
+  const entries = candidates.filter(([key]) => installedKeys.has(key))
   if (entries.length === 0) return <>{fallback}</>
 
   return (

@@ -58,24 +58,21 @@ export default class MediaRepository {
 
   /** Records whose image column points at `key`. */
   async usages(key: string): Promise<MediaUsage[]> {
-    const [vendors, collections, themes, heroSlides, promoBanners, covers, gallery] =
-      await Promise.all([
-        db.from('vendors').where('image', key).select('name'),
-        db.from('collections').where('image', key).select('title'),
-        db.from('storefront_themes').where('logo_image', key).select('id'),
-        db.from('storefront_hero_slides').where('image', key).select('heading'),
-        db.from('storefront_promo_banners').where('image', key).select('title'),
-        db.from('products').where('cover_image', key).select('title'),
-        db
-          .from('product_images')
-          .join('products', 'products.id', 'product_images.product_id')
-          .where('product_images.path', key)
-          .select('products.title'),
-      ])
+    const [vendors, collections, themes, promoBanners, covers, gallery] = await Promise.all([
+      db.from('vendors').where('image', key).select('name'),
+      db.from('collections').where('image', key).select('title'),
+      db.from('storefront_themes').where('logo_image', key).select('id'),
+      db.from('storefront_promo_banners').where('image', key).select('title'),
+      db.from('products').where('cover_image', key).select('title'),
+      db
+        .from('product_images')
+        .join('products', 'products.id', 'product_images.product_id')
+        .where('product_images.path', key)
+        .select('products.title'),
+    ])
 
     return [
       ...themes.map(() => ({ type: 'storefront_logo', label: 'Storefront logo' })),
-      ...heroSlides.map((row) => ({ type: 'hero_slide', label: `Hero slide: ${row.heading}` })),
       ...promoBanners.map((row) => ({ type: 'promo_banner', label: `Promo banner: ${row.title}` })),
       ...collections.map((row) => ({ type: 'collection', label: `Collection: ${row.title}` })),
       ...vendors.map((row) => ({ type: 'vendor', label: `Vendor: ${row.name}` })),

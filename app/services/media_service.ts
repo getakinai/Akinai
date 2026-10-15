@@ -2,6 +2,7 @@ import { inject } from '@adonisjs/core'
 import type { MultipartFile } from '@adonisjs/core/bodyparser'
 import { MEDIA_FOLDER } from '#constants/media'
 import type Media from '#models/media'
+import { registeredPlugins } from '#plugin_host/registry'
 import MediaRepository, {
   type MediaUsage,
   type PaginateMediaData,
@@ -46,8 +47,16 @@ export default class MediaService {
     return keys
   }
 
+  /**
+   * Includes plugins that are uninstalled but still keep records, so an
+   * image they show again on reinstall is not deleted.
+   */
   async usages(media: Media): Promise<MediaUsage[]> {
-    return this.mediaRepository.usages(media.key)
+    const [core, ...fromPlugins] = await Promise.all([
+      this.mediaRepository.usages(media.key),
+      ...registeredPlugins().map((plugin) => plugin.mediaUsages?.(media.key) ?? []),
+    ])
+    return [...core, ...fromPlugins.flat()]
   }
 
   /** Throws `MediaInUseError` while a record still shows the image. */

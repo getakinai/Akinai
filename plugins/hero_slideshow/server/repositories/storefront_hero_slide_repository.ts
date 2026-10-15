@@ -42,6 +42,10 @@ export default class StorefrontHeroSlideRepository {
       .orderBy('created_at', 'asc')
   }
 
+  async withImage(key: string): Promise<StorefrontHeroSlide[]> {
+    return StorefrontHeroSlide.query().where('image', key).select('id', 'heading')
+  }
+
   async count(): Promise<number> {
     const result = await StorefrontHeroSlide.query().count('* as total').first()
     return Number(result?.$extras.total ?? 0)

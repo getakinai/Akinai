@@ -18,6 +18,7 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('collections')
         .onDelete('SET NULL')
+      table.uuid('page_id').nullable().references('id').inTable('pages').onDelete('SET NULL')
       table.string('url', 500).nullable()
       table.string('image', 500).nullable()
       table.integer('position').notNullable().defaultTo(0)
@@ -27,6 +28,7 @@ export default class extends BaseSchema {
       table.timestamp('updated_at').nullable()
 
       table.index(['collection_id'])
+      table.index(['page_id'])
       table.index(['position'])
       table.index(['is_visible', 'position'])
     })

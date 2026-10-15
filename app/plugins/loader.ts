@@ -17,8 +17,14 @@ function validateManifest(plugin: PluginDefinition, folderName: string) {
   }
 }
 
-/** Imports every plugins/<key>/plugin.ts and registers it before routes load. */
-export async function loadPlugins() {
+export type PluginLoadFailure = (folder: string, error: unknown) => void
+
+/**
+ * Imports every plugins/<key>/plugin.ts and registers it before routes load.
+ * A plugin that fails to load is reported through `onFailure` and skipped, so
+ * the rest of the app still boots.
+ */
+export async function loadPlugins(onFailure: PluginLoadFailure) {
   const root = app.makePath('plugins')
   if (!existsSync(root)) return
 
@@ -31,10 +37,14 @@ export async function loadPlugins() {
     const entry = join(root, folder, 'plugin.ts')
     if (!existsSync(entry)) continue
 
-    const module = (await import(pathToFileURL(entry).href)) as { default: PluginDefinition }
-    const plugin = module.default
-    validateManifest(plugin, folder)
-    registerPlugin(plugin, folder)
-    await plugin.onBoot?.()
+    try {
+      const module = (await import(pathToFileURL(entry).href)) as { default: PluginDefinition }
+      const plugin = module.default
+      validateManifest(plugin, folder)
+      registerPlugin(plugin, folder)
+      await plugin.onBoot?.()
+    } catch (error) {
+      onFailure(folder, error)
+    }
   }
 }

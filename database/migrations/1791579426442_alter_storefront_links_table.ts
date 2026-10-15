@@ -1,10 +1,6 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
-const LINK_TABLES = [
-  'storefront_menu_items',
-  'storefront_hero_slides',
-  'storefront_promo_banners',
-] as const
+const LINK_TABLES = ['storefront_menu_items', 'storefront_promo_banners'] as const
 
 export default class extends BaseSchema {
   async up() {

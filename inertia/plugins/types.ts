@@ -20,6 +20,8 @@ export type PluginAdminNavItem = {
 export type PluginClientEntry = {
   slot: PluginSlotName
   Component: ComponentType<PluginSlotProps>
+  /** Shown in the slot while the installed plugins load. */
+  Skeleton?: ComponentType
   seedQueries?: (queryClient: QueryClient, data: unknown) => void
   adminNav?: {
     parentRoute: NavRoute

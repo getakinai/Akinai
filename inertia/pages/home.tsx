@@ -21,7 +21,6 @@ import { collectionRailId } from '~/lib/collection_link'
 import type { MoneyFormat } from '~/lib/money'
 import { cn, storefront } from '~/lib/styles'
 import { PluginSlot } from '~/plugins'
-import { HeroSliderSkeleton } from '@plugins/hero_slideshow/client/hero_slider'
 import {
   useStoreMoney,
   useStorefrontHome,
@@ -191,11 +190,7 @@ export default function Home(_props: StorefrontPrefetchProps) {
     <>
       <Head title={theme?.footerTagline ?? ''} />
       <div className={storefront.container}>
-        <PluginSlot
-          name="home.hero"
-          fallback={<StaticHero href={firstHref} />}
-          loading={<HeroSliderSkeleton />}
-        />
+        <PluginSlot name="home.hero" fallback={<StaticHero href={firstHref} />} />
 
         {isLoading && <RailSkeleton />}
 

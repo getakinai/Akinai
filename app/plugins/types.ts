@@ -8,6 +8,9 @@ export type PluginMiddleware = typeof middleware
 
 export type PluginRoutesRegistrar = (router: PluginRouter, middleware: PluginMiddleware) => void
 
+/** A record that still shows a media gallery image, so it can't be deleted. */
+export type PluginMediaUsage = { type: string; label: string }
+
 export type PluginDefinition = {
   manifest: PluginManifest
   routes?: {
@@ -17,6 +20,8 @@ export type PluginDefinition = {
   prefetch?: {
     home?: (ctx: HttpContext) => Promise<unknown>
   }
+  /** Records of this plugin whose image column points at the Drive `key`. */
+  mediaUsages?: (key: string) => Promise<PluginMediaUsage[]>
   onBoot?: () => Promise<void>
 }
 

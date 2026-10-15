@@ -1,7 +1,11 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 import { v7 as uuidv7 } from 'uuid'
 
-/** Columns that already hold Drive keys, indexed so existing uploads show in the gallery. */
+/**
+ * Columns that already hold Drive keys, indexed so existing uploads show in
+ * the gallery. Tables owned by a plugin may not exist yet: plugin migrations
+ * run after every core migration.
+ */
 const IMAGE_COLUMNS = [
   { table: 'vendors', column: 'image' },
   { table: 'collections', column: 'image' },
@@ -45,6 +49,7 @@ export default class extends BaseSchema {
     this.defer(async (db) => {
       const keys = new Set<string>()
       for (const { table, column } of IMAGE_COLUMNS) {
+        if (!(await db.schema.hasTable(table))) continue
         const rows: Record<string, string>[] = await db
           .from(table)
           .whereNotNull(column)

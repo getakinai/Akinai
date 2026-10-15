@@ -9,9 +9,16 @@ const modules = import.meta.glob<{ default: PluginClientEntry }>(
  * Storefront components of bundled plugins, keyed by folder name. Must match
  * each plugin manifest key in plugins/<key>/manifest.ts.
  */
+function pluginKeyFromClientPath(path: string): string {
+  const match = path.match(/\/plugins\/([^/]+)\/client\/index\.tsx$/)
+  if (!match) {
+    throw new Error(`Unexpected plugin client path: ${path}`)
+  }
+  return match[1]
+}
+
 export const pluginRegistry: Record<string, PluginClientEntry> = Object.fromEntries(
   Object.entries(modules).map(([path, module]) => {
-    const key = path.split('/')[2]
-    return [key, module.default]
+    return [pluginKeyFromClientPath(path), module.default]
   })
 )

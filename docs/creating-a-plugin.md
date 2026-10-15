@@ -29,11 +29,11 @@ The example below adds a made-up `trust_badges` plugin that shows payment and de
 ```
 plugins/trust_badges/
   manifest.ts            key, name, description, category, slots, defaultInstalled, adminRoute
-  plugin.ts              definePlugin({ manifest, routes?, prefetch? })
+  plugin.ts              definePlugin({ manifest, routes?, prefetch?, mediaUsages? })
   server/                models, services, controllers, validators, routes.ts, …
   migrations/            Lucid migrations for this plugin only
   client/
-    index.tsx            default export: { slot, Component, seedQueries?, adminNav? }
+    index.tsx            default export: { slot, Component, Skeleton?, seedQueries?, adminNav? }
     …                      storefront UI and hooks
     pages/admin/         Inertia admin pages (rendered as plugins/trust_badges/admin/…)
   tests/
@@ -42,6 +42,8 @@ plugins/trust_badges/
 ```
 
 **Imports:** Plugin server code may import from core (`#services/*`, `#models/*`, shared validators). Core must not import a plugin except through the loader (`#plugin_host/registry`). Within a plugin, prefer relative imports under `server/` and `client/`.
+
+Core must also never name a plugin's tables, in queries or in core migrations. Plugin migrations run after every core migration, so a core migration that touches a plugin table fails on a fresh database.
 
 After adding migrations, run `node ace migration:run` (or `migration:fresh` in development). Lucid records migrations by path, so moving a migration between core and a plugin requires a fresh migrate in dev.
 
@@ -151,7 +153,18 @@ export default {
 
 The client registry picks this up automatically; do not edit `inertia/plugins/registry.ts` by hand.
 
-If the plugin needs data on first paint, add `prefetch.home(ctx)` on the server entry and `seedQueries(queryClient, data)` on the client entry (see hero slideshow). Prefetched plugin payloads appear on `prefetch.plugins[].data` for the matching `key`.
+If the plugin needs data on first paint, add `prefetch.home(ctx)` on the server entry and `seedQueries(queryClient, data)` on the client entry (see hero slideshow). Prefetched plugin payloads appear on `prefetch.plugins[].data` for the matching `key`. A prefetch that throws is logged and left out, so the component must still be able to fetch its own data.
+
+Export a `Skeleton` component to show in the slot while installed plugins load on client-side navigation.
+
+If the plugin stores media gallery images, add `mediaUsages(key)` to the server entry so the gallery refuses to delete an image a plugin record still shows:
+
+```ts
+async mediaUsages(key) {
+  const rows = await db.from('trust_badges').where('image', key).select('label')
+  return rows.map((row) => ({ type: 'trust_badge', label: `Trust badge: ${row.label}` }))
+},
+```
 
 Optional sidebar links under **Storefront content** (or another section):
 
@@ -181,6 +194,12 @@ For gated routes, assert 404 after uninstall (see `tests/functional/admin/admin_
 3. **Install** / **Uninstall** and confirm the storefront slot updates.
 
 Uninstalling does not delete plugin data; reinstalling restores behavior.
+
+## Removing a plugin
+
+Delete its folder and restart (or rebuild). Its routes, marketplace card, sidebar links and slot component disappear, and the slot shows its fallback. Its tables, rows and `plugin_installations` row stay in the database and are ignored. Don't roll back its migrations after deleting the folder; Lucid needs the files to do that.
+
+A plugin folder that fails to load (syntax error, bad manifest, duplicate key) is logged at error level and skipped; the rest of the app boots normally.
 
 ## 7. Before opening a PR
 
