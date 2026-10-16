@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Production deployment — Akinai docs</title>
+    <link rel="stylesheet" href="assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html">Docs</a>
+        <span class="sep">/</span>
+        <span>Deployment</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="index.html">Overview</a>
+            <a href="getting-started.html">Getting started</a>
+            <a class="is-active" href="deployment.html">Deployment</a>
+            <a href="architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="themes/index.html">Themes</a>
+            <a class="docs-nav-child" href="themes/architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="themes/creating.html">Creating</a>
+            <a class="docs-nav-child" href="themes/helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="plugins/index.html">Plugins</a>
+            <a class="docs-nav-child" href="plugins/creating.html">Creating</a>
+            <a class="docs-nav-child" href="plugins/slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Production deployment</h1>
+        <p class="lead">
+          Ship Akinai yourself with the standard AdonisJS production build, or get a
+          consult if you want help designing and running production.
+        </p>
+
+        <h2 id="diy">DIY production build</h2>
+        <p>
+          Follow the official AdonisJS deployment guide for the standalone build, how to
+          run it, migrations, static files, logging, and Docker:
+        </p>
+        <p>
+          <a href="https://docs.adonisjs.com/deployment" rel="noopener noreferrer"
+            >https://docs.adonisjs.com/deployment</a
+          >
+        </p>
+        <p>In short, from the Akinai repo:</p>
+        <pre><code>yarn build
+cd build
+yarn install --production
+node bin/server.js</code></pre>
+        <p>
+          On each release, run migrations with
+          <code>node ace migration:run --force</code> (from the build that includes Ace).
+          Configure environment variables on the host—do not ship <code>.env</code> inside
+          the build artifact.
+        </p>
+
+        <h3>Akinai production requirements</h3>
+        <p>
+          With <code>NODE_ENV=production</code> the app refuses to boot unless:
+        </p>
+        <ul>
+          <li><code>SESSION_DRIVER=database</code></li>
+          <li>
+            <code>LIMITER_STORE=redis</code>, with <code>REDIS_HOST</code> /
+            <code>REDIS_PASSWORD</code> pointing at Redis
+          </li>
+          <li>
+            S3 (or S3-compatible) storage is configured:
+            <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>,
+            <code>AWS_REGION</code>, <code>S3_BUCKET</code> (and
+            <code>S3_ENDPOINT</code> when needed)
+          </li>
+        </ul>
+        <p>
+          See also first admin setup, Typesense search, and trusted proxies in the project
+          <code>README.md</code> under Deployment.
+        </p>
+
+        <h2 id="consult">Production build consult</h2>
+        <p>
+          Prefer not to DIY hosting, TLS, S3, Redis, search, and release process? Email
+          the Akinai Team for a quote on a production build consult:
+        </p>
+        <p>
+          <a href="mailto:hello@jsdecena">hello@jsdecena</a>
+        </p>
+        <div class="note-box">
+          <p>
+            Include your target host (VM, container platform, PaaS), expected traffic, and
+            whether you already have Postgres, Redis, S3, and a domain/TLS.
+          </p>
+        </div>
+
+        <footer class="docs-footer">
+          Related: <a href="getting-started.html">Run locally</a> ·
+          <a href="architecture/index.html">Architecture</a> ·
+          <a
+            href="https://docs.adonisjs.com/deployment"
+            rel="noopener noreferrer"
+            >AdonisJS deployment</a
+          >
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
