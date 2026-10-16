@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Storefront HTML samples — Akinai docs</title>
+    <link rel="stylesheet" href="../../assets/docs.css" />
+  </head>
+  <body class="docs-sample-viewer">
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../../index.html">Docs</a>
+        <span class="sep">/</span>
+        <a href="../index.html">Samples</a>
+        <span class="sep">/</span>
+        <span>Storefront</span>
+      </nav>
+      <a
+        class="docs-topbar-github"
+        href="https://github.com/getakinai/storefront"
+        rel="noopener noreferrer"
+      >
+        <svg class="docs-topbar-github-icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+          />
+        </svg>
+        <span class="docs-topbar-github-label">View on GitHub</span>
+      </a>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../../index.html">Overview</a>
+            <a href="../../getting-started.html">Getting started</a>
+            <a href="../../deployment.html">Deployment</a>
+            <a href="../../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Samples</span>
+            <a class="" href="../index.html">HTML samples</a>
+            <a class="docs-nav-child is-active" href="index.html">Storefront</a>
+            <a class="docs-nav-child " href="../admin/index.html">Admin</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <div class="sample-viewer">
+          <div class="sample-viewer-toolbar">
+            <div class="sample-viewer-heading">
+              <h1>Storefront</h1>
+              <p class="lead">Static SSR markup from the public sitemap (no client hydrate). Keep the app running for CSS and images.</p>
+            </div>
+            <label class="sample-viewer-picker">
+              <span>Page</span>
+              <select id="sample-page" aria-label="Sample page">
+            <option value="collections/accessories.html">collections/accessories</option>
+            <option value="collections/airpods-and-audio.html">collections/airpods-and-audio</option>
+            <option value="collections/ipad.html">collections/ipad</option>
+            <option value="collections/iphone.html">collections/iphone</option>
+            <option value="collections/mac.html">collections/mac</option>
+            <option value="home.html" selected>home</option>
+            <option value="pages/about-us.html">pages/about-us</option>
+            <option value="products/airpods-4.html">products/airpods-4</option>
+            <option value="products/airpods-max-silver.html">products/airpods-max-silver</option>
+            <option value="products/airpods-max-sky-blue.html">products/airpods-max-sky-blue</option>
+            <option value="products/airpods-max-space-gray.html">products/airpods-max-space-gray</option>
+            <option value="products/airpods-pro-2-usb-c.html">products/airpods-pro-2-usb-c</option>
+            <option value="products/ipad-mini-a17-pro-blue.html">products/ipad-mini-a17-pro-blue</option>
+            <option value="products/ipad-mini-a17-pro-starlight.html">products/ipad-mini-a17-pro-starlight</option>
+            <option value="products/ipad-pro-11-inch-m4-silver.html">products/ipad-pro-11-inch-m4-silver</option>
+            <option value="products/ipad-pro-11-inch-m4-space-black.html">products/ipad-pro-11-inch-m4-space-black</option>
+            <option value="products/ipad-pro-13-inch-m4-space-black.html">products/ipad-pro-13-inch-m4-space-black</option>
+            <option value="products/iphone-15-128gb-black.html">products/iphone-15-128gb-black</option>
+            <option value="products/iphone-15-256gb-blue.html">products/iphone-15-256gb-blue</option>
+            <option value="products/iphone-15-pro-256gb-natural-titanium.html">products/iphone-15-pro-256gb-natural-titanium</option>
+            <option value="products/iphone-15-pro-max-512gb-white-titanium.html">products/iphone-15-pro-max-512gb-white-titanium</option>
+            <option value="products/iphone-16-128gb-ultramarine.html">products/iphone-16-128gb-ultramarine</option>
+            <option value="products/iphone-16-pro-256gb-desert-titanium.html">products/iphone-16-pro-256gb-desert-titanium</option>
+            <option value="products/iphone-16-silicone-case-with-magsafe.html">products/iphone-16-silicone-case-with-magsafe</option>
+            <option value="products/macbook-air-15-inch-m3-silver.html">products/macbook-air-15-inch-m3-silver</option>
+            <option value="products/macbook-air-15-inch-m3-space-gray.html">products/macbook-air-15-inch-m3-space-gray</option>
+            <option value="products/macbook-pro-14-inch-m1-pro-space-gray.html">products/macbook-pro-14-inch-m1-pro-space-gray</option>
+            <option value="products/macbook-pro-14-inch-m3-pro-space-black.html">products/macbook-pro-14-inch-m3-pro-space-black</option>
+            <option value="products/macbook-pro-16-inch-m1-pro-silver.html">products/macbook-pro-16-inch-m1-pro-silver</option>
+            <option value="products/magic-keyboard-with-touch-id-usb-c-silver.html">products/magic-keyboard-with-touch-id-usb-c-silver</option>
+            <option value="products/magic-mouse-usb-c-black.html">products/magic-mouse-usb-c-black</option>
+            <option value="products/magic-mouse-usb-c-white.html">products/magic-mouse-usb-c-white</option>
+            <option value="products/magsafe-charger.html">products/magsafe-charger</option>
+              </select>
+            </label>
+          </div>
+          <iframe
+            id="sample-frame"
+            class="sample-viewer-frame"
+            title="Storefront sample"
+            src="home.html"
+          ></iframe>
+        </div>
+        <script>
+          (function () {
+            var select = document.getElementById('sample-page')
+            var frame = document.getElementById('sample-frame')
+            if (!select || !frame) return
+            select.addEventListener('change', function () {
+              frame.src = select.value
+            })
+          })()
+        </script>
+
+      </main>
+    </div>
+  </body>
+</html>

@@ -616,3 +616,117 @@ tr:last-child td {
     gap: 0.5rem;
   }
 }
+
+/* Sample HTML viewers (iframe previews) */
+
+.docs-sample-viewer .docs-shell {
+  align-items: stretch;
+}
+
+.docs-sample-viewer .docs-main {
+  max-width: none;
+  width: 100%;
+  padding-bottom: 1.5rem;
+}
+
+.docs-sample-viewer .docs-main > *:first-child {
+  margin-top: 0;
+}
+
+.sample-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: calc(100vh - 7rem);
+}
+
+.sample-viewer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sample-viewer-heading h1 {
+  margin: 0 0 0.25rem;
+}
+
+.sample-viewer-heading .lead {
+  margin: 0;
+  max-width: 36rem;
+}
+
+.sample-viewer-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  min-width: min(100%, 18rem);
+}
+
+.sample-viewer-picker select {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.65rem;
+}
+
+.sample-viewer-frame,
+.sample-hub-frame {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.sample-viewer-frame {
+  flex: 1;
+  min-height: 70vh;
+  height: calc(100vh - 12rem);
+}
+
+.sample-hub-previews {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.sample-hub-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sample-hub-preview-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sample-hub-preview-bar h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.sample-hub-frame {
+  height: 28rem;
+}
+
+@media (min-width: 960px) {
+  .sample-hub-previews {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sample-hub-frame {
+    height: 32rem;
+  }
+}
