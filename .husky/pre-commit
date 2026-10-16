@@ -1,3 +1,6 @@
+# Yarn Classic still calls url.parse(); hush Node's DEP0169 until Yarn is upgraded.
+export NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--disable-warning=DEP0169"
+
 yarn lint-staged
 yarn lint:check
 yarn format:check
