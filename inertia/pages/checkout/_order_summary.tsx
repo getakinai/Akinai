@@ -9,6 +9,7 @@ export type OrderSummaryLine = {
   subtitle?: string | null
   quantity: number
   lineTotal: string
+  imageUrl?: string | null
 }
 
 type OrderSummaryProps = {
@@ -59,7 +60,18 @@ export default function OrderSummary({
           <li key={line.key} className="flex min-w-0 items-center gap-3">
             <div className="relative flex-none">
               <div className="size-16 overflow-hidden rounded-lg border border-sf-line bg-sf-surface">
-                <ImagePlaceholder className="h-full" iconSize={16} />
+                {line.imageUrl ? (
+                  <img
+                    src={line.imageUrl}
+                    alt=""
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    className="size-full bg-sf-text/5 object-cover"
+                  />
+                ) : (
+                  <ImagePlaceholder className="h-full" iconSize={16} />
+                )}
               </div>
               <span className="absolute -top-2 -right-2 grid h-5 min-w-5 place-items-center rounded-full bg-sf-text px-1 text-[11px] font-semibold text-sf-surface tabular-nums">
                 {line.quantity}

@@ -436,6 +436,7 @@ export default function CheckoutHome() {
       typeof line.product.metadata?.vendor === 'string' ? line.product.metadata.vendor : null,
     quantity: line.quantity,
     lineTotal: format(quotedTotals.get(line.variantId) ?? line.product.price * line.quantity),
+    imageUrl: line.product.imageUrl ?? null,
   }))
   const selectedRate = rates.find((rate) => rate.id === quote.data?.shippingRateId)
   const showTax = quote.data?.taxCalculated && quote.data.taxTotal > 0
