@@ -130,10 +130,10 @@ export const TIMEZONE_OPTIONS = Intl.supportedValuesOf('timeZone')
   .map(({ value, label, searchText }) => ({ value, label, searchText }))
 
 /** Checkout delivery text shown when staff haven't set their own. */
-export const DEFAULT_CHECKOUT_DELIVERY_HEADING = 'Your family’s delivery address in the Philippines'
+export const DEFAULT_CHECKOUT_DELIVERY_HEADING = 'Your delivery address'
 
 export const DEFAULT_CHECKOUT_DELIVERY_NOTE =
-  'Enter the address and recipient details of the family member receiving this order.'
+  'Enter the address and recipient details for this order.'
 
 export const MAX_CHECKOUT_DELIVERY_HEADING = 120
 

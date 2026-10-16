@@ -323,12 +323,14 @@ export default function CheckoutHome() {
     else setAddressChoice(NEW_ADDRESS)
   }
 
-  if (
-    addressChoice === NEW_ADDRESS &&
-    form.countryCode === '' &&
-    shippingCountryCodes.length === 1
-  ) {
-    changeCountry(shippingCountryCodes[0])
+  if (addressChoice === NEW_ADDRESS && form.countryCode === '') {
+    const customerCountry =
+      customer?.countryCode && shippingCountryCodes.includes(customer.countryCode)
+        ? customer.countryCode
+        : null
+    const soleCountry = shippingCountryCodes.length === 1 ? shippingCountryCodes[0] : null
+    const nextCountry = customerCountry ?? soleCountry
+    if (nextCountry) changeCountry(nextCountry)
   }
 
   const usingSavedAddress = hasSavedAddresses && addressChoice !== NEW_ADDRESS
