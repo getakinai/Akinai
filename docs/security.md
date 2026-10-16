@@ -1,8 +1,10 @@
 # Security
 
-This guide lists the protections built into the app, where each one lives, and how to keep them in place when you add a feature. It is internal: it names exact limits and lifetimes, so keep it out of public copies of the repo. To report a vulnerability, see [SECURITY.md](../SECURITY.md).
+This guide explains the protections built into Akinai, where each one lives in the code, and how to keep them in place when you add a feature. Limits and lifetimes below match the current defaults in source; treat them as documentation of the shipped hardening, not as a substitute for keeping dependencies and `main` up to date.
 
-The rules the Cursor agent follows are the source of truth: `owasp-security.mdc`, `customer-resource-ownership.mdc`, `public-form-recaptcha.mdc`, `validator-strict-types.mdc` and `inertia-no-direct-injection.mdc` in `.cursor/rules/`. This page explains them for humans.
+To **report a vulnerability**, see [SECURITY.md](../SECURITY.md) (private disclosure only).
+
+Contributor conventions that reinforce these rules also live in `.cursor/rules/` (`owasp-security.mdc`, `customer-resource-ownership.mdc`, `public-form-recaptcha.mdc`, `validator-strict-types.mdc`, `inertia-no-direct-injection.mdc`).
 
 ## Accounts and sessions
 
@@ -194,6 +196,7 @@ sequenceDiagram
 
 - `yarn` only, with `yarn.lock` committed.
 - `yarn security:audit` (`scripts/security-audit.sh`) fails on high or critical advisories in production dependencies. Run it after any dependency change.
+- CI runs **gitleaks** (`Secret scan` job in `.github/workflows/ci.yml`, config `.gitleaks.toml`) over full git history so committed secrets fail the build. Real env files stay out of git via `.gitignore` (`.env`, `.env.*` except `.env.example` and `.env.test`).
 - Dependabot opens weekly update PRs for npm packages and GitHub Actions (`.github/dependabot.yml`).
 - GitHub Actions are pinned to commit SHAs.
 - Husky runs lint on every commit.

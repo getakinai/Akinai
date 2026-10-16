@@ -1,0 +1,18 @@
+# Gitleaks config for the Akinai storefront.
+# Extends the default rule set; allow known fake fixtures used in tests.
+title = "Akinai"
+
+[extend]
+useDefault = true
+
+# Fake Stripe sandbox strings in unit/functional payment tests (also marked
+# with `// gitleaks:allow` on the line). Kept here so renamed copies still pass.
+[[allowlists]]
+description = "Test-only Stripe placeholder keys"
+paths = [
+  '''tests/.*\.spec\.ts$''',
+]
+regexes = [
+  '''pk_test_abc123''',
+  '''sk_test_abc1234567''',
+]

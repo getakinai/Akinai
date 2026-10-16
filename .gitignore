@@ -4,11 +4,11 @@ build
 tmp/*
 !tmp/.gitkeep
 
-# Secrets
+# Secrets — never commit real env files (CI and docs use .env.example / .env.test)
 .env
-.env.local
-.env.production.local
-.env.development.local
+.env.*
+!.env.example
+!.env.test
 
 # Frontend assets compiled code
 public/assets
