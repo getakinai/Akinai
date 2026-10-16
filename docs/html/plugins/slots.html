@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plugin slots — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <a href="index.html">Plugins</a>
+        <span class="sep">/</span>
+        <span>Slots</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a href="../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="../themes/index.html">Themes</a>
+            <a class="docs-nav-child" href="../themes/architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="../themes/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../themes/helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="index.html">Plugins</a>
+            <a class="docs-nav-child" href="creating.html">Creating</a>
+            <a class="docs-nav-child is-active" href="slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Plugin slots</h1>
+        <p class="lead">
+          A slot is a named placeholder in a storefront template. When an installed plugin
+          declares that slot, it renders there; otherwise the template shows a fallback or
+          nothing.
+        </p>
+
+        <h2 id="available">Available slots</h2>
+        <p>
+          Slots are listed in <code>PLUGIN_SLOTS</code> in
+          <code>app/constants/plugins.ts</code>:
+        </p>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Slot</th>
+                <th>Where it renders</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>home.hero</code></td>
+                <td>Top of the home page</td>
+              </tr>
+              <tr>
+                <td><code>home.after_first_rail</code></td>
+                <td>Home page, below the first product rail</td>
+              </tr>
+              <tr>
+                <td><code>home.footer</code></td>
+                <td>Home page, below the bottom promo banners</td>
+              </tr>
+              <tr>
+                <td><code>layout.footer</code></td>
+                <td>Every storefront page, at the top of the site footer</td>
+              </tr>
+              <tr>
+                <td><code>checkout.payment</code></td>
+                <td>Reserved for payment plugins; not placed in a template yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="add-slot">Adding a new slot</h2>
+        <ol>
+          <li>
+            Add the name to <code>PLUGIN_SLOTS</code> in
+            <code>app/constants/plugins.ts</code>.
+          </li>
+          <li>
+            Add it to <code>PluginSlotName</code> in
+            <code>inertia/plugins/types.ts</code>. The two lists must match.
+          </li>
+          <li>Place it in the built-in React template:</li>
+        </ol>
+        <pre><code>&lt;PluginSlot name="home.after_first_rail" /&gt;</code></pre>
+        <p>
+          <code>PluginSlot</code> accepts optional <code>fallback</code> (when no installed
+          plugin fills the slot) and <code>loading</code> (while installed plugins load on
+          client navigation).
+        </p>
+
+        <h2 id="themes">Slots in Edge themes</h2>
+        <p>
+          Uploaded themes place slots with the Edge
+          <code>pluginSlot</code> helper, or with Dawn Lite’s
+          <code>plugin_slot</code> section so staff can choose a slot from the template
+          editor:
+        </p>
+        <pre><code>{{{ pluginSlot('home.hero', fallbackHtml) }}}</code></pre>
+        <p>In a JSON template:</p>
+        <pre><code>"hero_plugin": {
+  "type": "plugin_slot",
+  "settings": { "slot": "home.hero" }
+}</code></pre>
+        <p>
+          See <a href="../themes/helpers.html#islands">theme helpers and islands</a> and
+          <a href="../themes/architecture.html#templates">theme templates</a> for the full
+          Edge context.
+        </p>
+
+        <h2 id="built-in">Built-in vs theme storefront</h2>
+        <ul>
+          <li>
+            <strong>Built-in theme</strong> (React): slots are placed with
+            <code>&lt;PluginSlot /&gt;</code> in Inertia pages such as
+            <code>inertia/pages/home.tsx</code>.
+          </li>
+          <li>
+            <strong>Uploaded Edge theme</strong>: slots are placed with
+            <code>pluginSlot()</code> or the <code>plugin_slot</code> section. The same
+            plugin key and slot name apply; install state still comes from
+            <code>plugin_installations</code>.
+          </li>
+        </ul>
+        <div class="note-box">
+          <p>
+            A plugin only shows when it is installed on the server
+            <em>and</em> registered in the client glob. See
+            <a href="index.html#how-it-fits">how plugins load</a>.
+          </p>
+        </div>
+
+        <footer class="docs-footer">
+          Next: <a href="creating.html">Create a plugin</a> ·
+          <a href="../themes/index.html">Themes</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

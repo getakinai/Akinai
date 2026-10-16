@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Theme helpers and islands — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <a href="index.html">Themes</a>
+        <span class="sep">/</span>
+        <span>Helpers</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a href="../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="index.html">Themes</a>
+            <a class="docs-nav-child" href="architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="creating.html">Creating</a>
+            <a class="docs-nav-child is-active" href="helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="../plugins/index.html">Plugins</a>
+            <a class="docs-nav-child" href="../plugins/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../plugins/slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Helpers and islands</h1>
+        <p class="lead">
+          Variables and helpers available in every Edge template, plus React islands and
+          plugin slots for interactive pieces.
+        </p>
+
+        <h2 id="variables">Variables</h2>
+        <p>Every template sees:</p>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>What it is</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>settings</code></td>
+                <td>theme settings from <code>config/settings_schema.json</code></td>
+              </tr>
+              <tr>
+                <td><code>store</code></td>
+                <td>store settings: <code>storeName</code>, <code>locale</code>, currency, logo, …</td>
+              </tr>
+              <tr>
+                <td><code>menu</code>, <code>policies</code>, <code>market</code>, <code>plugins</code></td>
+                <td>storefront navigation, policy links, the current market, installed plugins</td>
+              </tr>
+              <tr>
+                <td><code>template</code></td>
+                <td><code>{ name, type, suffix }</code></td>
+              </tr>
+              <tr>
+                <td><code>request</code></td>
+                <td><code>{ path, url }</code></td>
+              </tr>
+              <tr>
+                <td><code>currentYear</code></td>
+                <td>the current year</td>
+              </tr>
+              <tr>
+                <td><code>home</code></td>
+                <td>home page only: <code>{ collections: [{ title, slug, products }], vendors }</code></td>
+              </tr>
+              <tr>
+                <td><code>product</code></td>
+                <td>
+                  product page only:
+                  <code>{ id, title, slug, vendor, description, images, options, variants }</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>collection</code>, <code>collectionProducts</code></td>
+                <td>
+                  collection page only. Products are in
+                  <code>collectionProducts.data</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>page</code></td>
+                <td>content page only: <code>{ title, body }</code></td>
+              </tr>
+              <tr>
+                <td><code>section</code></td>
+                <td>inside a section: <code>{ id, type, settings, blocks }</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Product cards (in <code>home</code>, collections and
+          <code>collectionProducts</code>) have <code>id</code>, <code>title</code>,
+          <code>slug</code>, <code>imageUrl</code>, <code>variantId</code>,
+          <code>vendor</code>, <code>label</code>, <code>price</code> and
+          <code>compareAtPrice</code>. Prices are numbers; format them with
+          <code>money()</code>.
+        </p>
+
+        <h2 id="helpers">Helpers</h2>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Helper</th>
+                <th>Use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>assetUrl('base.css')</code></td>
+                <td>
+                  URL of a file in <code>assets/</code> (cached forever; the URL changes
+                  with each upload)
+                </td>
+              </tr>
+              <tr>
+                <td><code>imageUrl(value)</code></td>
+                <td>URL for an <code>image_picker</code> value or a stored image key</td>
+              </tr>
+              <tr>
+                <td><code>money(amount)</code></td>
+                <td>price in the shopper’s market currency</td>
+              </tr>
+              <tr>
+                <td><code>t('header.cart', { count: 2 })</code></td>
+                <td>
+                  string from <code>locales/en.default.json</code>;
+                  <code>{{ count }}</code> placeholders are filled in
+                </td>
+              </tr>
+              <tr>
+                <td><code>route('storefront.products.show', { slug })</code></td>
+                <td>URL of an app route</td>
+              </tr>
+              <tr>
+                <td><code>renderSection('header')</code></td>
+                <td>
+                  renders a static section from <code>settings_data.json</code> (layout
+                  only; <code>await</code> it)
+                </td>
+              </tr>
+              <tr>
+                <td><code>pluginSlot('home.hero', fallbackHtml)</code></td>
+                <td>a plugin slot; see below</td>
+              </tr>
+              <tr>
+                <td><code>island('cart_button', props, fallbackHtml)</code></td>
+                <td>a React island; see below</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="islands">Plugins and islands</h2>
+        <p>
+          Themes are server-rendered HTML, so interactive parts are
+          <strong>islands</strong>: small React components mounted into placeholders after
+          the page loads. The theme prints the placeholder; the fallback HTML shows until
+          React takes over (and if JavaScript is off).
+        </p>
+        <p>
+          <code>pluginSlot(name)</code> places a plugin slot, such as
+          <code>home.hero</code> for the hero slideshow. If the plugin is installed it
+          renders there; if not, the fallback (or nothing) shows. Dawn Lite has a
+          <code>plugin_slot</code> section so staff can place slots from the template. See
+          the <a href="../plugins/slots.html">slots reference</a>.
+        </p>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Island</th>
+                <th>Props</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>cart_button</code></td>
+                <td>
+                  <code>label</code>. Opens the cart drawer; shows the item count in
+                  <code>.akinai-cart-count</code>
+                </td>
+              </tr>
+              <tr>
+                <td><code>add_to_cart</code></td>
+                <td>
+                  <code>variantId</code>, <code>price</code>, <code>title</code>,
+                  <code>imageUrl</code>, <code>slug</code>, <code>vendor</code>,
+                  <code>productId</code>, <code>label</code>, <code>soldOutLabel</code>,
+                  <code>available</code>, <code>class</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Build the props with <code>@let</code> so the object literal stays out of the
+          mustache:
+        </p>
+        <pre><code>@let(cartProps = { variantId: variant.id, price: variant.price, title: product.title, label: t('products.add_to_cart') })
+{{{ island('add_to_cart', cartProps) }}}</code></pre>
+        <p>
+          Checkout, account and the other app pages always use the built-in theme.
+        </p>
+
+        <footer class="docs-footer">
+          Related: <a href="../plugins/index.html">Plugins</a> ·
+          <a href="creating.html">Create and publish</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

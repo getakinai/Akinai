@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Run locally and seed demo — Akinai docs</title>
+    <link rel="stylesheet" href="assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html">Docs</a>
+        <span class="sep">/</span>
+        <span>Getting started</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="index.html">Overview</a>
+            <a class="is-active" href="getting-started.html">Getting started</a>
+            <a href="architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="themes/index.html">Themes</a>
+            <a class="docs-nav-child" href="themes/architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="themes/creating.html">Creating</a>
+            <a class="docs-nav-child" href="themes/helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="plugins/index.html">Plugins</a>
+            <a class="docs-nav-child" href="plugins/creating.html">Creating</a>
+            <a class="docs-nav-child" href="plugins/slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Run locally and seed demo</h1>
+        <p class="lead">
+          Get Akinai running on your machine, then optionally fill the store with demo
+          catalog data so you can click around the storefront and back office.
+        </p>
+
+        <h2 id="quick-start">Quick start</h2>
+        <p>With Node 24+, Yarn and Docker installed:</p>
+        <pre><code>yarn setup   # install, create .env, start Docker, migrate, seed (clean or demo)
+yarn dev     # http://localhost:3333</code></pre>
+        <p>
+          Then open
+          <a href="http://localhost:3333/admin/setup">http://localhost:3333/admin/setup</a>
+          to create your admin account. <code>yarn setup</code> prints the setup token the
+          form asks for (it is also <code>SETUP_TOKEN</code> in <code>.env</code>).
+        </p>
+        <div class="note-box">
+          <p>
+            At the seed step, <code>yarn setup</code> asks whether you want a clean store
+            (<code>yarn db:seed</code>) or one with demo products
+            (<code>yarn db:seed:demo</code>). Without an interactive terminal it seeds a
+            clean store. Safe to re-run.
+          </p>
+        </div>
+
+        <h2 id="prerequisites">Prerequisites</h2>
+        <ul>
+          <li>Node.js 24 or newer</li>
+          <li>Yarn classic (<code>npm i -g yarn</code>)</li>
+          <li>Docker (for PostgreSQL, Mailpit, Typesense, Redis)</li>
+        </ul>
+
+        <h2 id="manual">Manual setup</h2>
+        <p>
+          Use these when you need to run one step on its own. From the
+          <code>getakinai.com</code> repo root:
+        </p>
+
+        <h3>1. Install and configure</h3>
+        <pre><code>yarn install
+cp .env.example .env
+node ace generate:key</code></pre>
+        <p>
+          Set <code>SETUP_TOKEN</code> to 32 or more random characters (for example
+          <code>openssl rand -hex 32</code>). Default database credentials in
+          <code>.env.example</code> match the Docker containers.
+        </p>
+
+        <h3>2. Start Docker services</h3>
+        <pre><code>yarn docker:up</code></pre>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PostgreSQL (app)</td>
+                <td><code>127.0.0.1:5432</code></td>
+              </tr>
+              <tr>
+                <td>PostgreSQL (tests)</td>
+                <td><code>127.0.0.1:5433</code></td>
+              </tr>
+              <tr>
+                <td>Mailpit SMTP</td>
+                <td><code>127.0.0.1:2525</code></td>
+              </tr>
+              <tr>
+                <td>Mailpit inbox UI</td>
+                <td><a href="http://localhost:8025">http://localhost:8025</a></td>
+              </tr>
+              <tr>
+                <td>Typesense</td>
+                <td><a href="http://localhost:8108">http://localhost:8108</a></td>
+              </tr>
+              <tr>
+                <td>Redis</td>
+                <td><code>127.0.0.1:6379</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Use <code>yarn docker:ps</code>, <code>yarn docker:logs</code> and
+          <code>yarn docker:down</code> to manage them.
+        </p>
+
+        <h3>3. Migrate and seed</h3>
+        <pre><code>yarn db:migrate
+yarn db:seed</code></pre>
+        <p>
+          <code>yarn db:seed</code> is the minimal setup. It creates store settings, the
+          built-in roles (<code>admin</code>, <code>manager</code>, <code>staff</code>), a
+          default stock location, help center guides, and (in development) a small starter
+          catalog. It does not create staff users.
+        </p>
+
+        <h3 id="demo">4. Seed the demo store (optional)</h3>
+        <p>
+          For a fuller catalog to click around in, run the demo seeder after the base seed:
+        </p>
+        <pre><code>yarn db:seed:demo</code></pre>
+        <p>
+          That runs <code>db:seed</code> then <code>node ace seed:demo-store</code>. It adds
+          roughly 100 demo products across collections (Akinai Gadgets), sample product
+          types, vendors, Size/Color options, hero slides, menu links, and related storefront
+          content. Both seeds are safe to re-run; existing records are skipped.
+        </p>
+        <p>Sync product search after seeding (or whenever the index drifts):</p>
+        <pre><code>yarn search:sync</code></pre>
+
+        <h3>5. Start the dev server</h3>
+        <pre><code>yarn dev</code></pre>
+        <ul>
+          <li>App: <a href="http://localhost:3333">http://localhost:3333</a></li>
+          <li>Back office: <a href="http://localhost:3333/admin/login">http://localhost:3333/admin/login</a></li>
+          <li>Storefront signup: <a href="http://localhost:3333/signup">http://localhost:3333/signup</a></li>
+        </ul>
+
+        <h3>6. Create the first admin</h3>
+        <p>
+          While there are no staff users,
+          <a href="http://localhost:3333/admin/login">/admin/login</a> redirects to
+          <code>/admin/setup</code>. Enter the <code>SETUP_TOKEN</code> from
+          <code>.env</code>, the country your store delivers to, and your name, email and
+          password. That creates an <code>admin</code> account and signs you in.
+        </p>
+        <p>Add more staff later from the back office, or:</p>
+        <pre><code>node ace create:admin-user</code></pre>
+
+        <h2 id="commands">Useful commands</h2>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Command</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Full local bootstrap</td>
+                <td><code>yarn setup</code></td>
+              </tr>
+              <tr>
+                <td>Dev server</td>
+                <td><code>yarn dev</code></td>
+              </tr>
+              <tr>
+                <td>Clean store seed</td>
+                <td><code>yarn db:seed</code></td>
+              </tr>
+              <tr>
+                <td>Demo catalog (after migrate)</td>
+                <td><code>yarn db:seed:demo</code></td>
+              </tr>
+              <tr>
+                <td>Rebuild DB and seed</td>
+                <td><code>node ace migration:fresh --seed</code></td>
+              </tr>
+              <tr>
+                <td>Index products in Typesense</td>
+                <td><code>yarn search:sync</code></td>
+              </tr>
+              <tr>
+                <td>Create a staff user</td>
+                <td><code>node ace create:admin-user</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="docs-footer">
+          Next: <a href="architecture/index.html">Architecture</a> ·
+          <a href="themes/index.html">Themes</a> ·
+          <a href="plugins/index.html">Plugins</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

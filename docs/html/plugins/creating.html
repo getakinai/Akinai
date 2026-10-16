@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create a plugin — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <a href="index.html">Plugins</a>
+        <span class="sep">/</span>
+        <span>Creating</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a href="../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="../themes/index.html">Themes</a>
+            <a class="docs-nav-child" href="../themes/architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="../themes/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../themes/helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="index.html">Plugins</a>
+            <a class="docs-nav-child is-active" href="creating.html">Creating</a>
+            <a class="docs-nav-child" href="slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Create a plugin</h1>
+        <p class="lead">
+          Walkthrough for a made-up <code>trust_badges</code> plugin that shows payment and
+          delivery badges below the first product rail on the home page. Use
+          <code>plugins/hero_slideshow/</code> as the real reference.
+        </p>
+
+        <h2 id="folder">Folder layout</h2>
+        <pre><code>plugins/trust_badges/
+  manifest.ts            key, name, description, category, slots, defaultInstalled, adminRoute
+  plugin.ts              definePlugin({ manifest, routes?, prefetch?, mediaUsages? })
+  server/                models, services, controllers, validators, routes.ts, …
+  migrations/            Lucid migrations for this plugin only
+  client/
+    index.tsx            default export: { slot, Component, Skeleton?, seedQueries?, adminNav? }
+    …                      storefront UI and hooks
+    pages/admin/         Inertia admin pages (rendered as plugins/trust_badges/admin/…)
+  tests/
+    unit/
+    functional/</code></pre>
+        <p>
+          <strong>Imports:</strong> Plugin server code may import from core
+          (<code>#services/*</code>, <code>#models/*</code>, shared validators). Core must
+          not import a plugin except through the loader
+          (<code>#plugin_host/registry</code>). Within a plugin, prefer relative imports
+          under <code>server/</code> and <code>client/</code>.
+        </p>
+        <p>
+          Core must also never name a plugin’s tables, in queries or in core migrations.
+          Plugin migrations run after every core migration. After adding migrations, run
+          <code>node ace migration:run</code> (or <code>migration:fresh</code> in
+          development).
+        </p>
+
+        <h2 id="slot">1. Pick a slot</h2>
+        <p>
+          Available slots are listed in <code>PLUGIN_SLOTS</code>—see the
+          <a href="slots.html">slots reference</a>. To add a new slot, update
+          <code>PLUGIN_SLOTS</code> and <code>PluginSlotName</code>, then place
+          <code>&lt;PluginSlot name="…" /&gt;</code> in the template.
+        </p>
+
+        <h2 id="manifest">2. Manifest and server entry</h2>
+        <p>Create <code>plugins/trust_badges/manifest.ts</code>:</p>
+        <pre><code>import type { PluginManifest } from '#constants/plugins'
+
+const manifest = {
+  key: 'trust_badges',
+  name: 'Trust badges',
+  description: 'Payment and delivery badges below the first product rail.',
+  category: 'storefront',
+  slots: ['home.after_first_rail'],
+  defaultInstalled: false,
+  adminRoute: null,
+} satisfies PluginManifest
+
+export default manifest</code></pre>
+        <p>The folder name must match <code>manifest.key</code>.</p>
+        <p>Create <code>plugins/trust_badges/plugin.ts</code>:</p>
+        <pre><code>import { definePlugin } from '#plugin_host/types'
+import manifest from './manifest.js'
+import { admin, storefront } from './server/routes.js'
+
+export default definePlugin({
+  manifest,
+  routes: { admin, storefront },
+})</code></pre>
+        <p>
+          Register routes in <code>server/routes.ts</code> the same way as core routes,
+          using lazy controller imports and
+          <code>middleware.plugin({ key: 'trust_badges' })</code> on every admin and
+          storefront route that belongs to the plugin.
+        </p>
+        <p>
+          Render plugin admin pages with
+          <code>pluginPage('trust_badges', 'admin/hero')</code> from
+          <code>#plugin_host/pages</code> (returns
+          <code>plugins/trust_badges/admin/hero</code> for Inertia).
+        </p>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Manifest field</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>key</code></td>
+                <td>Unique, snake_case, permanent (stored in the database)</td>
+              </tr>
+              <tr>
+                <td><code>category</code></td>
+                <td>One of <code>PLUGIN_CATEGORIES</code></td>
+              </tr>
+              <tr>
+                <td><code>slots</code></td>
+                <td>Slots this plugin fills</td>
+              </tr>
+              <tr>
+                <td><code>defaultInstalled</code></td>
+                <td>Installed until staff uninstall; use <code>false</code> for new plugins</td>
+              </tr>
+              <tr>
+                <td><code>adminRoute</code></td>
+                <td>Route name for <strong>Configure</strong> in the marketplace, or <code>null</code></td>
+              </tr>
+              <tr>
+                <td><code>adminPermission</code></td>
+                <td>Optional permission staff need to see the plugin’s sidebar link</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          To ship default-installed on existing stores, add a migration under
+          <code>plugins/&lt;key&gt;/migrations/</code> that inserts into
+          <code>plugin_installations</code> (see
+          <code>plugins/hero_slideshow/migrations/*_seed_hero_slideshow_installation.ts</code>).
+        </p>
+
+        <h2 id="client">3. Storefront component</h2>
+        <pre><code>import type { PluginSlotProps } from '~/plugins/types'
+import TrustBadges from './trust_badges'
+
+export default {
+  slot: 'home.after_first_rail' as const,
+  Component: function TrustBadgesPlugin(_props: PluginSlotProps) {
+    return &lt;TrustBadges /&gt;
+  },
+}</code></pre>
+        <p>
+          The client registry picks this up automatically; do not edit
+          <code>inertia/plugins/registry.ts</code> by hand.
+        </p>
+        <ul>
+          <li>
+            For first-paint data, add <code>prefetch.home(ctx)</code> on the server entry and
+            <code>seedQueries(queryClient, data)</code> on the client entry (see hero
+            slideshow). Prefetched payloads appear on
+            <code>prefetch.plugins[].data</code> for the matching <code>key</code>.
+          </li>
+          <li>
+            Export a <code>Skeleton</code> component to show while installed plugins load on
+            client-side navigation.
+          </li>
+          <li>
+            If the plugin stores media gallery images, add <code>mediaUsages(key)</code> to
+            the server entry so the gallery refuses to delete an image still in use.
+          </li>
+          <li>
+            Installed <code>marketing</code> plugins with an <code>adminRoute</code> get a
+            link in the <strong>Marketing</strong> sidebar automatically. Set
+            <code>navIcon</code> on the client entry to replace the default puzzle icon.
+          </li>
+          <li>
+            For the maintenance page, add <code>client/maintenance.tsx</code> and list
+            routes in <code>EXCLUDED_PATHS</code> in
+            <code>app/middleware/maintenance_middleware.ts</code>.
+          </li>
+        </ul>
+        <p>Optional sidebar links under Storefront content:</p>
+        <pre><code>adminNav: {
+  parentRoute: 'admin.storefront_content.home',
+  items: [{ label: 'Trust badges', route: 'admin.trust_badges.home', permission: 'storefront.view' }],
+},</code></pre>
+
+        <h2 id="admin">4. Admin pages</h2>
+        <p>
+          Put Inertia pages under <code>plugins/trust_badges/client/pages/admin/</code>.
+          They resolve as <code>plugins/trust_badges/admin/&lt;file&gt;</code> without
+          listing them in <code>adonisrc</code> <code>indexPages</code> (the glob in
+          <code>inertia/app.tsx</code> handles it).
+        </p>
+        <p>
+          Shared storefront link helpers stay in core
+          (<code>inertia/pages/admin/storefront/_link.ts</code>, etc.) and are imported with
+          <code>~/pages/admin/storefront/...</code>.
+        </p>
+
+        <h2 id="tests">5. Tests</h2>
+        <p>
+          Add specs under <code>plugins/trust_badges/tests/unit/</code> and
+          <code>plugins/trust_badges/tests/functional/</code>. They are included
+          automatically via <code>adonisrc.ts</code> test suites.
+        </p>
+        <p>
+          For gated routes, assert 404 after uninstall (see
+          <code>tests/functional/admin/admin_plugins.spec.ts</code>).
+        </p>
+
+        <h2 id="install">6. Install it</h2>
+        <ol>
+          <li>Run <code>yarn dev</code> and sign in with <code>plugins.edit</code>.</li>
+          <li>Open <strong>Plugins</strong> (<code>/admin/plugins</code>).</li>
+          <li>
+            <strong>Install</strong> / <strong>Uninstall</strong> and confirm the storefront
+            slot updates.
+          </li>
+        </ol>
+        <p>
+          Uninstalling does not delete plugin data; reinstalling restores behavior.
+        </p>
+
+        <h2 id="removing">Removing a plugin</h2>
+        <p>
+          Delete its folder and restart (or rebuild). Its routes, marketplace card, sidebar
+          links and slot component disappear, and the slot shows its fallback. Its tables,
+          rows and <code>plugin_installations</code> row stay in the database and are
+          ignored. Don’t roll back its migrations after deleting the folder; Lucid needs
+          the files to do that.
+        </p>
+        <p>
+          A plugin folder that fails to load (syntax error, bad manifest, duplicate key) is
+          logged at error level and skipped; the rest of the app boots normally.
+        </p>
+
+        <h2 id="payments">Payment plugins</h2>
+        <p>
+          Bank transfer, Stripe and POLi ship as <code>payments</code> plugins
+          (<code>plugins/bank_transfer</code>, <code>plugins/stripe</code>,
+          <code>plugins/poli</code>). Their folders hold only a manifest; the gateway code
+          still lives in core.
+        </p>
+        <ul>
+          <li>
+            The plugin key must equal the payment method code, and the code must be listed
+            in <code>PLUGIN_PAYMENT_METHOD_CODES</code>
+            (<code>app/constants/payment_methods.ts</code>).
+          </li>
+          <li>
+            While a payment plugin is uninstalled, its method is left out of
+            <code>/admin/payments</code> and checkout, and its admin setup routes return 404.
+          </li>
+          <li>
+            Webhooks and return pages stay open, so payments already in progress still
+            settle after an uninstall.
+          </li>
+          <li>
+            Removing a payment plugin’s folder also removes the method, because it no longer
+            counts as installed.
+          </li>
+        </ul>
+
+        <h2 id="newsletter">Newsletter plugin</h2>
+        <p>
+          The storefront newsletter signup ships as the <code>newsletter</code> plugin
+          (<code>plugins/newsletter</code>, category <code>marketing</code>). It fills the
+          <code>layout.footer</code> slot, adds the maintenance page form, and links
+          <strong>Newsletter</strong> in the Marketing sidebar. While uninstalled, the
+          footer band and maintenance form disappear and its routes return 404.
+        </p>
+        <p>
+          Its <code>newsletter_subscribers</code> migration stays in core
+          (<code>database/migrations</code>). Customer marketing consent, the
+          <code>newsletter_subscribers.*</code> permissions and the reCAPTCHA actions also
+          stay in core.
+        </p>
+
+        <h2 id="pr">Before opening a PR</h2>
+        <pre><code>yarn typecheck
+yarn lint:check
+yarn test</code></pre>
+        <p>
+          Install and uninstall from <code>/admin/plugins</code> and check the storefront at
+          320px, 390px, and 720px wide.
+        </p>
+
+        <footer class="docs-footer">
+          Next: <a href="slots.html">Slots reference</a> ·
+          <a href="../themes/helpers.html#islands">Theme pluginSlot helper</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

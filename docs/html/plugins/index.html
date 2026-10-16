@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plugins — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <span>Plugins</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a href="../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="../themes/index.html">Themes</a>
+            <a class="docs-nav-child" href="../themes/architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="../themes/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../themes/helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a class="is-active" href="index.html">Plugins</a>
+            <a class="docs-nav-child" href="creating.html">Creating</a>
+            <a class="docs-nav-child" href="slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Plugins</h1>
+        <p class="lead">
+          Plugins are optional storefront features—such as the home hero slideshow—that
+          staff turn on and off from <strong>Plugins</strong> (<code>/admin/plugins</code>).
+          They ship with the app: a plugin is a folder under <code>plugins/</code>, not a
+          package downloaded at runtime.
+        </p>
+
+        <p>
+          Drop a folder into <code>plugins/&lt;key&gt;/</code> and the app discovers it
+          automatically (server routes, migrations, tests, storefront component, admin
+          pages, sidebar links). You should not need to edit core files.
+        </p>
+
+        <p>
+          A plugin fills one or more <strong>slots</strong>. A slot is a named placeholder
+          in a storefront template, for example <code>home.hero</code>. When the plugin is
+          installed it renders in that slot. When it is not, the template shows the slot’s
+          fallback, or nothing.
+        </p>
+
+        <div class="note-box">
+          <p>
+            Use the <strong>Hero slideshow</strong> plugin as the reference:
+            <code>plugins/hero_slideshow/</code>.
+          </p>
+        </div>
+
+        <h2>Where to go next</h2>
+        <div class="hub-cards">
+          <a class="hub-card" href="creating.html">
+            <h3>Create a plugin</h3>
+            <p>Folder layout, manifest, server entry, client component, tests, install.</p>
+          </a>
+          <a class="hub-card" href="slots.html">
+            <h3>Slots reference</h3>
+            <p>Available slots and how themes place them with <code>plugin_slot</code>.</p>
+          </a>
+          <a class="hub-card" href="../themes/helpers.html#islands">
+            <h3>Theme helpers</h3>
+            <p>Edge <code>pluginSlot</code> helper and React islands.</p>
+          </a>
+        </div>
+
+        <h2 id="how-it-fits">How it fits together</h2>
+        <div class="flow-diagram">
+          <div class="flow-graph">
+            <div class="node">plugins/*/plugin.ts</div>
+            <div class="edge">↓</div>
+            <div class="node">app/plugins/loader.ts</div>
+            <div class="edge">↓</div>
+            <div class="node">app/plugins/registry.ts</div>
+            <div class="edge">↓ routes · PluginService · migrations</div>
+            <div class="node">start/routes.ts · plugin_installations · config/database.ts</div>
+            <div class="edge" style="margin-top: 0.75rem">Client (parallel)</div>
+            <div class="node">import.meta.glob plugins/*/client/index.tsx</div>
+            <div class="edge">↓</div>
+            <div class="node">PluginSlot · inertia/app.tsx · admin_nav</div>
+          </div>
+          <p class="note">
+            The server decides <strong>whether</strong> a plugin is installed. The client
+            registry decides <strong>what</strong> it renders. A plugin only shows on the
+            storefront when it is in both.
+          </p>
+        </div>
+
+        <h2>Code reference</h2>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Folder layout</td>
+                <td><code>plugins/hero_slideshow/</code></td>
+              </tr>
+              <tr>
+                <td>Server entry</td>
+                <td><code>plugins/hero_slideshow/plugin.ts</code></td>
+              </tr>
+              <tr>
+                <td>Shared manifest</td>
+                <td><code>plugins/hero_slideshow/manifest.ts</code></td>
+              </tr>
+              <tr>
+                <td>Slot names (core)</td>
+                <td><code>app/constants/plugins.ts</code> (<code>PLUGIN_SLOTS</code>)</td>
+              </tr>
+              <tr>
+                <td>Loader and registry</td>
+                <td><code>app/plugins/loader.ts</code>, <code>app/plugins/registry.ts</code></td>
+              </tr>
+              <tr>
+                <td>Installed state</td>
+                <td>
+                  <code>app/services/plugin_service.ts</code>, table
+                  <code>plugin_installations</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Route gating</td>
+                <td><code>app/middleware/plugin_installed_middleware.ts</code></td>
+              </tr>
+              <tr>
+                <td>Client registry</td>
+                <td>
+                  <code>inertia/plugins/registry.ts</code>
+                  (<code>import.meta.glob</code> on <code>plugins/*/client/index.tsx</code>)
+                </td>
+              </tr>
+              <tr>
+                <td>Slot placeholder</td>
+                <td>
+                  <code>inertia/plugins/plugin_slot.tsx</code>, used in
+                  <code>inertia/pages/home.tsx</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Marketplace page</td>
+                <td><code>inertia/pages/admin/plugins/home.tsx</code></td>
+              </tr>
+              <tr>
+                <td>Tests</td>
+                <td>
+                  <code>plugins/hero_slideshow/tests/</code>,
+                  <code>tests/unit/plugin_service.spec.ts</code>,
+                  <code>tests/functional/admin/admin_plugins.spec.ts</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="docs-footer">
+          Related: <a href="../architecture/index.html">App architecture</a> ·
+          <a href="../themes/index.html">Themes</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

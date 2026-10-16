@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <span>Architecture</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a class="is-active" href="index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="../themes/index.html">Themes</a>
+            <a class="docs-nav-child" href="../themes/architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="../themes/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../themes/helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="../plugins/index.html">Plugins</a>
+            <a class="docs-nav-child" href="../plugins/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../plugins/slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Architecture</h1>
+        <p class="lead">
+          How a request moves through the app and where each kind of code lives.
+          Read this once before your first change.
+        </p>
+
+        <h2 id="big-picture">The big picture</h2>
+        <p>The app is a monolith. One AdonisJS server does two jobs:</p>
+        <ol>
+          <li>
+            <strong>Renders page shells</strong> through Inertia.js. A shell is a
+            React page with no data, only route ids such as <code>{ id }</code>.
+          </li>
+          <li>
+            <strong>Serves a JSON API</strong> that those pages call with TanStack Query.
+          </li>
+        </ol>
+
+        <div class="flow-diagram">
+          <p><strong>Typical admin list flow</strong></p>
+          <ol class="flow-steps">
+            <li>Browser → AdonisJS: <code>GET /admin/locations</code></li>
+            <li>AdonisJS → Browser: Inertia shell (<code>admin/locations/home</code>, props <code>{}</code>)</li>
+            <li>Browser → AdonisJS: <code>GET /admin/locations/list?page=1</code> (TanStack Query)</li>
+            <li>AdonisJS → PostgreSQL: query via repository → rows</li>
+            <li>AdonisJS → Browser: <code>{ data: [...], meta: {...} }</code></li>
+            <li>Browser → AdonisJS: <code>POST /admin/locations</code> → <code>201 { data: {...} }</code></li>
+          </ol>
+          <p class="note">
+            After a mutation, <code>invalidateQueries</code> refetches the list—no full page reload.
+          </p>
+        </div>
+
+        <div class="note-box">
+          <p>
+            Records are <strong>never</strong> passed as Inertia props. This keeps every
+            page refreshable through <code>invalidateQueries</code> after a mutation.
+          </p>
+        </div>
+
+        <h2 id="two-areas">Two areas, two account types</h2>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Back office</th>
+                <th>Storefront</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Who</td>
+                <td>Staff (<code>User</code>, <code>#models/user</code>)</td>
+                <td>Shoppers (<code>Customer</code>, <code>#models/customer</code>)</td>
+              </tr>
+              <tr>
+                <td>URLs</td>
+                <td><code>/admin/*</code></td>
+                <td><code>/</code>, <code>/account/*</code></td>
+              </tr>
+              <tr>
+                <td>Session guard</td>
+                <td><code>web</code></td>
+                <td><code>customer</code></td>
+              </tr>
+              <tr>
+                <td>Login page</td>
+                <td><code>/admin/login</code></td>
+                <td><code>/login</code></td>
+              </tr>
+              <tr>
+                <td>Signup</td>
+                <td>None. Use <code>node ace create:admin-user</code> or <code>/admin/users/create</code></td>
+                <td><code>/signup</code></td>
+              </tr>
+              <tr>
+                <td>Pages</td>
+                <td><code>inertia/pages/admin/</code></td>
+                <td><code>inertia/pages/customers/</code></td>
+              </tr>
+              <tr>
+                <td>Controllers</td>
+                <td><code>app/controllers/admin/</code></td>
+                <td><code>app/controllers/customers/</code></td>
+              </tr>
+              <tr>
+                <td>Current account</td>
+                <td><code>useAdminMe()</code> → <code>GET /admin/me</code></td>
+                <td><code>useCustomerMe()</code> → <code>GET /account/me</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Always name the guard explicitly:
+          <code>middleware.auth({ guards: ['web'] })</code>,
+          <code>auth.use('customer')</code>. Never rely on the default guard.
+          A Customer must never reach <code>/admin/*</code>.
+        </p>
+
+        <h2 id="backend">Backend request flow</h2>
+        <pre><code>Route (start/routes.ts)
+  → middleware (auth, can, UUID param check)
+  → Controller   app/controllers/     validate input, call one service
+  → Service      app/services/        business logic
+  → Repository   app/repositories/    every database query and transaction
+  → Model        app/models/          Lucid model
+  ← Transformer  app/transformers/    shape the JSON response</code></pre>
+
+        <h3>Layers</h3>
+        <ul>
+          <li>
+            <strong>Validators</strong> (<code>app/validators/</code>, VineJS): one per file.
+            Every mutation and every list endpoint that reads query strings validates its input.
+            Example: <code>admin_location_store_validator.ts</code>.
+          </li>
+          <li>
+            <strong>Controllers</strong>: single-action classes with a <code>handle()</code> method,
+            one per route. They validate, call a service and serialize. No database access.
+            Example: <code>admin_locations_store_controller.ts</code>.
+          </li>
+          <li>
+            <strong>Services</strong>: business logic and defaults. Injected into controllers with
+            <code>@inject()</code>. Example: <code>location_service.ts</code>.
+          </li>
+          <li>
+            <strong>Repositories</strong>: the only place that touches Lucid models or
+            <code>db</code>. Example: <code>location_repository.ts</code>.
+          </li>
+          <li>
+            <strong>Transformers</strong>: extend <code>BaseTransformer</code> and pick the fields
+            to expose. Controllers return
+            <code>ctx.serialize(XTransformer.transform(record))</code> (wraps in
+            <code>{ data }</code>) or <code>XTransformer.paginate(rows, meta)</code> (adds
+            <code>meta</code>).
+          </li>
+          <li>
+            <strong>Policies</strong> (<code>app/policies/</code>): record-level rules, such as
+            “the default location can’t be archived”.
+          </li>
+        </ul>
+
+        <h3>Routes and controllers</h3>
+        <p>
+          Controllers are referenced through a generated barrel, which the dev server
+          regenerates whenever you add a controller file:
+        </p>
+        <pre><code>router.get('locations', [controllers.admin.AdminLocationsHome]).as('admin.locations.home')</code></pre>
+        <p>
+          Route names follow <code>resource.action</code>. GET routes use
+          <code>home</code>, <code>list</code>, <code>create</code>, <code>edit</code>,
+          <code>view</code>. Mutations use <code>store</code>, <code>update</code>,
+          <code>delete</code>, <code>archive</code>, <code>unarchive</code>.
+        </p>
+
+        <h3>Middleware</h3>
+        <p>Registered in <code>start/kernel.ts</code>:</p>
+        <ul>
+          <li><code>silent_auth_middleware</code>: loads the signed-in account when there is one.</li>
+          <li>
+            <code>uuid_route_param_middleware</code>: rejects a malformed
+            <code>:id</code> route param before the controller runs.
+          </li>
+          <li>
+            <code>initialize_bouncer_middleware</code>: preloads the staff User’s role and permissions.
+          </li>
+          <li>Named: <code>auth</code>, <code>guest</code>, and <code>can</code> (permission check).</li>
+        </ul>
+
+        <h3>Models and the database</h3>
+        <ul>
+          <li>
+            Every model extends <code>BaseAppModel</code>, which generates a UUID v7
+            <code>id</code> and declares <code>id</code>, <code>createdAt</code> and
+            <code>updatedAt</code>.
+          </li>
+          <li>Schema generation is off, so declare columns by hand with <code>@column()</code>.</li>
+          <li>
+            Migrations use <code>table.uuid('id').primary()</code> and must be reversible
+            (no raw SQL). Create them with <code>node ace make:migration &lt;name&gt;</code>.
+          </li>
+        </ul>
+
+        <h2 id="authorization">Authorization (staff only)</h2>
+        <p>
+          Staff permissions are stored in the database and edited at
+          <strong>Team &amp; Permissions</strong> (<code>/admin/roles</code>).
+        </p>
+        <ul>
+          <li>
+            <strong>Catalog</strong>: <code>app/abilities/permissions.ts</code> lists every
+            resource and action. Keys look like <code>locations.archive</code>.
+          </li>
+          <li>
+            <strong>Roles</strong>: <code>admin</code> is locked and has every permission.
+            <code>staff</code> is the default role for new Users. Seeded by
+            <code>database/seeders/role_seeder.ts</code>.
+          </li>
+          <li>
+            <strong>Route guard</strong>:
+            <code>.use(middleware.can({ permission: 'locations.view' }))</code> on every admin route.
+          </li>
+          <li>
+            <strong>Record rules</strong>:
+            <code>await ctx.bouncer.with(LocationPolicy).authorize('archive', location)</code>.
+            Business-rule denials return <code>AuthorizationResponse.deny(message, 422)</code>.
+          </li>
+          <li>
+            <strong>Frontend</strong>: <code>useCan('locations.create')</code> hides buttons, and
+            <code>permission</code> on an <code>admin_nav.ts</code> item hides the nav link.
+            This is cosmetic. The server always enforces.
+          </li>
+        </ul>
+
+        <h2 id="frontend">Frontend</h2>
+        <pre><code>inertia/
+  app.tsx            Client entry, QueryClientProvider
+  layouts/           AdminLayout and storefront layout
+  components/
+    form/            FormInput, FormInputNumber, FormSelect, FormButton, ...
+    data_table/      DataTable, InfiniteDataTable, DataTableToolbar, DataTableLoadMore
+    page.tsx         &lt;Page&gt; shell: eyebrow, title, actions
+    admin/admin_nav.ts   Back-office navigation
+  lib/
+    http.ts          http() fetch helper
+    form.ts          zodFieldErrors, handleMutationError, emptyToNull
+    styles.ts        Shared Tailwind class tokens
+  pages/
+    admin/&lt;feature&gt;/     home.tsx, edit.tsx, _hooks.ts, _types.ts
+    customers/...</code></pre>
+
+        <h3>Per-feature files</h3>
+        <p>Each page folder has:</p>
+        <ul>
+          <li>
+            <code>_types.ts</code>: Zod schemas and the types inferred from them. Schemas are
+            never defined inline in components.
+          </li>
+          <li>
+            <code>_hooks.ts</code>: fetch functions and TanStack Query hooks, plus a query key
+            factory such as <code>adminLocationsKeys</code>.
+          </li>
+          <li>
+            <code>home.tsx</code>, <code>create.tsx</code>, <code>edit.tsx</code>: the pages.
+            Files starting with <code>_</code> (for example <code>_location_dialog.tsx</code>)
+            are private to the folder.
+          </li>
+        </ul>
+
+        <h3>The <code>http()</code> helper</h3>
+        <p>
+          <code>http(url, { method, body, schema })</code> in
+          <code>inertia/lib/http.ts</code>:
+        </p>
+        <ul>
+          <li>
+            Sends the Shield <code>X-XSRF-TOKEN</code> header on mutations (required, or Shield
+            rejects the request).
+          </li>
+          <li>Parses the response with the Zod schema you pass in.</li>
+          <li>
+            Throws <code>HttpError</code>. For VineJS 422 responses,
+            <code>error.fieldErrors</code> maps field names to messages, ready for the form.
+          </li>
+        </ul>
+
+        <h3>UI rules</h3>
+        <ul>
+          <li>
+            Use the components in <code>inertia/components/form/</code> instead of raw
+            <code>&lt;input&gt;</code> and <code>&lt;button&gt;</code>. Numbers always use
+            <code>&lt;FormInputNumber /&gt;</code>.
+          </li>
+          <li>
+            Pages are mobile-first and must work down to 320px wide. List pages use
+            <code>DataTableToolbar</code> + <code>InfiniteDataTable</code>.
+          </li>
+          <li>
+            Create, edit and detail pages link back to their parent list through
+            <code>&lt;Page eyebrow={&lt;Link route="..."&gt;} /&gt;</code>.
+          </li>
+        </ul>
+
+        <h2 id="tests">Tests</h2>
+        <ul>
+          <li><strong>Unit</strong> (<code>tests/unit/</code>): services and pure logic.</li>
+          <li>
+            <strong>Functional</strong> (<code>tests/functional/</code>): real HTTP calls against
+            the test database. Wrap each test in a transaction with
+            <code>group.each.setup(() =&gt; testUtils.db().withGlobalTransaction())</code>, and
+            sign in with <code>client.get(...).withGuard('web').loginAs(user)</code>.
+          </li>
+          <li>
+            <code>tests/helpers/admin.ts</code> → <code>createAdminUser('admin')</code> or
+            <code>createAdminUser(['locations.view'])</code> creates a staff User with exactly
+            those permissions.
+          </li>
+        </ul>
+        <p>
+          See <code>tests/functional/admin/admin_locations.spec.ts</code> for a complete example.
+        </p>
+
+        <footer class="docs-footer">
+          Next:
+          <a href="../getting-started.html">Getting started</a>
+          ·
+          <a href="../themes/index.html">Themes</a>
+          ·
+          <a href="../plugins/index.html">Plugins</a>
+          ·
+          <a href="../index.html">Overview</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

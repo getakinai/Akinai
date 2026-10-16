@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Build and customize Akinai — Docs</title>
+    <link rel="stylesheet" href="assets/docs.css" />
+  </head>
+  <body class="docs-hub">
+    <header class="docs-topbar">
+      <a class="docs-brand" href="index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <span>Docs</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <main class="docs-main">
+        <h1>Build and customize Akinai</h1>
+        <p class="lead">
+          Akinai is an AdonisJS commerce monolith: a staff back office, a shopper
+          storefront, and optional Edge themes and plugins that change what buyers see.
+          Run it locally first, then read architecture, themes, and plugins.
+        </p>
+
+        <div class="hub-cta-row">
+          <a class="hub-cta" href="getting-started.html">
+            <strong>Run locally</strong>
+            <span>yarn setup, yarn dev, and seed a clean or demo store.</span>
+          </a>
+          <a class="hub-cta" href="architecture/index.html">
+            <strong>Understand the architecture</strong>
+            <span>How requests move through controllers, services, and Inertia shells.</span>
+          </a>
+          <a class="hub-cta" href="themes/index.html">
+            <strong>Build a theme</strong>
+            <span>Upload Edge sections and templates that render the storefront.</span>
+          </a>
+          <a class="hub-cta" href="plugins/index.html">
+            <strong>Add a plugin</strong>
+            <span>Ship optional features that fill named slots on the storefront.</span>
+          </a>
+        </div>
+
+        <section class="hub-section">
+          <p class="hub-kicker">Local setup</p>
+          <h2>Get the app running</h2>
+          <p>
+            Bootstrap with Docker, migrate, seed, and open the back office. Optionally load
+            the Akinai Gadgets demo catalog for a fuller storefront.
+          </p>
+          <div class="hub-cards">
+            <a class="hub-card" href="getting-started.html">
+              <h3>Quick start</h3>
+              <p><code>yarn setup</code> then <code>yarn dev</code> at localhost:3333.</p>
+            </a>
+            <a class="hub-card" href="getting-started.html#demo">
+              <h3>Seed demo data</h3>
+              <p><code>yarn db:seed:demo</code> for ~100 products and collections.</p>
+            </a>
+            <a class="hub-card" href="getting-started.html#manual">
+              <h3>Manual steps</h3>
+              <p>Install, Docker, migrate, search sync, and first admin setup.</p>
+            </a>
+          </div>
+        </section>
+
+        <section class="hub-section">
+          <p class="hub-kicker">Architecture</p>
+          <h2>How the app is put together</h2>
+          <p>
+            One AdonisJS server renders Inertia page shells and serves a JSON API.
+            Staff and shoppers use separate accounts, URLs, and session guards.
+          </p>
+          <div class="hub-cards">
+            <a class="hub-card" href="architecture/index.html">
+              <h3>Architecture guide</h3>
+              <p>Request flow, layers, auth, frontend conventions, and tests.</p>
+            </a>
+            <a class="hub-card" href="architecture/index.html#two-areas">
+              <h3>Two areas, two accounts</h3>
+              <p>Back office (<code>web</code>) vs storefront (<code>customer</code>).</p>
+            </a>
+            <a class="hub-card" href="architecture/index.html#backend">
+              <h3>Backend layers</h3>
+              <p>Route → controller → service → repository → transformer.</p>
+            </a>
+          </div>
+        </section>
+
+        <section class="hub-section">
+          <p class="hub-kicker">Themes</p>
+          <h2>Build your first theme</h2>
+          <p>
+            A theme is a zip of Edge layouts, JSON templates, and sections—similar to
+            Shopify themes. Staff manage the library from Online Store → Themes.
+            When no theme is live, the built-in React storefront is used.
+          </p>
+          <div class="hub-cards">
+            <a class="hub-card" href="themes/creating.html">
+              <h3>Create a theme</h3>
+              <p>Package Dawn Lite, upload, preview, publish, and test.</p>
+            </a>
+            <a class="hub-card" href="themes/architecture.html">
+              <h3>Theme architecture</h3>
+              <p>Layouts, templates, sections, blocks, schemas, and setting types.</p>
+            </a>
+            <a class="hub-card" href="themes/helpers.html">
+              <h3>Helpers and islands</h3>
+              <p>Edge variables, <code>money</code>, <code>pluginSlot</code>, and React islands.</p>
+            </a>
+          </div>
+        </section>
+
+        <section class="hub-section">
+          <p class="hub-kicker">Plugins</p>
+          <h2>Extend the storefront with plugins</h2>
+          <p>
+            Plugins ship as folders under <code>plugins/</code>. They fill named slots
+            (for example <code>home.hero</code>), register routes and migrations, and
+            can add admin pages—without editing core files by hand.
+          </p>
+          <div class="hub-cards">
+            <a class="hub-card" href="plugins/creating.html">
+              <h3>Create a plugin</h3>
+              <p>Manifest, server entry, client slot component, tests, and install.</p>
+            </a>
+            <a class="hub-card" href="plugins/slots.html">
+              <h3>Slots reference</h3>
+              <p>Where each slot renders and how themes place them.</p>
+            </a>
+            <a class="hub-card" href="plugins/index.html">
+              <h3>How plugins load</h3>
+              <p>Loader, registry, install state, and client glob discovery.</p>
+            </a>
+          </div>
+        </section>
+
+        <footer class="docs-footer">
+          Source markdown lives in <code>docs/</code>. Open these HTML files locally or
+          serve the <code>docs/html</code> folder with any static file server.
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

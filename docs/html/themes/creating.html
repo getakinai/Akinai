@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create a theme — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <a href="index.html">Themes</a>
+        <span class="sep">/</span>
+        <span>Creating</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a href="../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a href="index.html">Themes</a>
+            <a class="docs-nav-child" href="architecture.html">Architecture</a>
+            <a class="docs-nav-child is-active" href="creating.html">Creating</a>
+            <a class="docs-nav-child" href="helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="../plugins/index.html">Plugins</a>
+            <a class="docs-nav-child" href="../plugins/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../plugins/slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Create and publish a theme</h1>
+        <p class="lead">
+          Start from Dawn Lite, package a zip, upload it to the theme library, then
+          preview and publish when it is ready.
+        </p>
+
+        <h2 id="start">Start from Dawn Lite</h2>
+        <p>
+          Copy <code>themes/dawn_lite/</code> as a starting point. Change
+          <code>theme.json</code> <code>key</code> and <code>name</code>, then edit
+          sections, templates, and assets. See
+          <a href="architecture.html">theme architecture</a> for the required package
+          layout.
+        </p>
+        <ol>
+          <li>Edit Edge sections and JSON templates under your theme folder.</li>
+          <li>Zip the folder (or its contents) and upload from <code>/admin/themes</code>.</li>
+          <li>Preview in your session, then publish when ready.</li>
+        </ol>
+        <p>
+          Uploading needs the <code>themes.upload</code> permission; give it only to people
+          you would trust with code on the server.
+        </p>
+
+        <h2 id="preview">Preview and publishing</h2>
+        <ul>
+          <li>
+            <strong>Preview</strong> opens the storefront with the theme for your browser
+            session only; a bar at the top shows what you are previewing. Customers keep
+            seeing the live theme.
+          </li>
+          <li>
+            <strong>Share preview</strong> makes a link anyone can open for 14 days, without
+            a back-office login.
+          </li>
+          <li>
+            <strong>Publish</strong> makes the theme live. The previous live theme stays in
+            the library.
+          </li>
+          <li>
+            <strong>Switch back to the built-in theme</strong> unpublishes the live theme.
+          </li>
+        </ul>
+        <p>
+          If a live theme fails to render a page, the error is logged and that request falls
+          back to the built-in theme. In preview, errors are shown instead, so problems are
+          caught before publishing. A section that fails is left out (live) or replaced with
+          an HTML comment (preview).
+        </p>
+
+        <h2 id="editor">Theme editor drafts</h2>
+        <p>
+          When editing <strong>Theme settings → Custom CSS</strong> in the theme editor,
+          open <strong>Markup → View output</strong> (read-only HTML) to find selectors such
+          as <code>#akinai-section-{id}</code> and
+          <code>.akinai-section--{type}</code>. Use <strong>Theme code</strong> to edit
+          <code>.edge</code>, layout, and CSS files; use <strong>Template JSON</strong> for
+          the page structure. Edits are <strong>drafts</strong> until you click
+          <strong>Save</strong> in the editor header, then they are baked into the theme
+          package (and included when you download the theme). Switch to
+          <strong>Preview</strong> for a visual check.
+        </p>
+
+        <h2 id="storage">How it is stored</h2>
+        <p>
+          Uploaded zips go to the private Drive disk under
+          <code>themes/&lt;sha256&gt;.zip</code>. Each server unpacks a theme on first use
+          into <code>tmp/themes/&lt;sha256&gt;/</code> and reuses it. The folder name is the
+          zip’s hash, so several servers never need to coordinate, and an upload never
+          changes an existing folder. Duplicates share the zip; the zip is deleted with the
+          last theme that uses it.
+        </p>
+
+        <h2 id="rules">Rules and limits</h2>
+        <p>
+          Edge templates run on the server, so uploads are checked before they are stored.
+        </p>
+        <ul>
+          <li>
+            Zips may be up to 10 MB, unpack to 30 MB, and hold 500 files. A theme may have 40
+            sections and 50 blocks per section.
+          </li>
+          <li>
+            File names use letters, digits, <code>.</code>, <code>-</code> and
+            <code>_</code>. Each folder only allows its own file types. JavaScript is never
+            allowed; use <a href="helpers.html#islands">islands</a>.
+          </li>
+          <li>
+            Templates may use these tags: <code>@if</code>, <code>@elseif</code>,
+            <code>@else</code>, <code>@unless</code>, <code>@each</code>, <code>@let</code>,
+            <code>@assign</code>, <code>@include</code>, <code>@includeIf</code>,
+            <code>@component</code>, <code>@slot</code> and <code>@end</code>.
+          </li>
+          <li>
+            Template code may not mention dangerous APIs such as <code>constructor</code>,
+            <code>eval</code>, <code>require</code>, or contain <code>../</code>. Plain text
+            and escaped output (<code>@{{ }}</code>) are not checked.
+          </li>
+          <li>
+            Each theme renders in its own Edge instance rooted at its own folder, so
+            <code>@include</code> can only reach the theme’s files.
+          </li>
+          <li>
+            Theme pages do not get the CSP nonce, so inline <code>&lt;script&gt;</code> tags
+            are blocked. Inline <code>style</code> attributes work.
+          </li>
+        </ul>
+        <p>
+          Every problem in a package is listed at once on upload, for example
+          <code>sections/hero.edge: the @inject tag isn't allowed in themes</code>.
+        </p>
+
+        <h2 id="testing">Testing a theme</h2>
+        <p>
+          Add a bundled theme to <code>themes/&lt;key&gt;/</code> (the folder name must
+          match <code>key</code>). The unit test pattern in
+          <code>tests/unit/theme_package.spec.ts</code> shows how to check that it passes
+          validation:
+        </p>
+        <pre><code>const pkg = readThemePackage(await packThemeFolder(app.makePath('themes', 'my_theme')))</code></pre>
+        <p>
+          <code>tests/functional/admin/admin_themes.spec.ts</code> covers upload, publish,
+          rendering, preview and share links.
+        </p>
+
+        <footer class="docs-footer">
+          See also: <a href="architecture.html">Theme architecture</a> ·
+          <a href="helpers.html">Helpers and islands</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

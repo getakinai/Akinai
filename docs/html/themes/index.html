@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Themes — Akinai docs</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+  </head>
+  <body>
+    <header class="docs-topbar">
+      <a class="docs-brand" href="../index.html">Akinai docs</a>
+      <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Docs</a>
+        <span class="sep">/</span>
+        <span>Themes</span>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <nav aria-label="Docs">
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Start</span>
+            <a href="../index.html">Overview</a>
+            <a href="../getting-started.html">Getting started</a>
+            <a href="../architecture/index.html">Architecture</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Themes</span>
+            <a class="is-active" href="index.html">Themes</a>
+            <a class="docs-nav-child" href="architecture.html">Architecture</a>
+            <a class="docs-nav-child" href="creating.html">Creating</a>
+            <a class="docs-nav-child" href="helpers.html">Helpers</a>
+          </div>
+          <div class="docs-nav-group">
+            <span class="docs-nav-label">Plugins</span>
+            <a href="../plugins/index.html">Plugins</a>
+            <a class="docs-nav-child" href="../plugins/creating.html">Creating</a>
+            <a class="docs-nav-child" href="../plugins/slots.html">Slots</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <h1>Themes</h1>
+        <p class="lead">
+          Themes change how the storefront looks. Staff manage them from
+          <strong>Online Store → Themes</strong> (<code>/admin/themes</code>). A theme is a
+          zip file that staff upload; the app stores it, validates it, and renders storefront
+          pages with it once it is published. Themes never affect the back office.
+        </p>
+
+        <p>
+          Themes follow Shopify’s model: a layout wraps every page, each page type has a JSON
+          template listing its <strong>sections</strong>, and sections can hold
+          <strong>blocks</strong>. Section and block settings are declared in a schema.
+          Templates are written in
+          <a href="https://edgejs.dev" rel="noopener noreferrer">Edge</a>.
+        </p>
+
+        <p>
+          The store keeps a <strong>library</strong> of themes. Exactly one is
+          <strong>live</strong>; the others are unpublished and can be previewed, shared,
+          duplicated, renamed, downloaded or deleted. When no uploaded theme is live, the
+          storefront uses the <strong>built-in theme</strong>—the React storefront configured
+          from <strong>Online Store → Built-in theme</strong>.
+        </p>
+
+        <div class="note-box">
+          <p>
+            Use <strong>Dawn Lite</strong> as the reference:
+            <code>themes/dawn_lite/</code>. Folders in <code>themes/</code> are added to the
+            library automatically the first time the Themes page loads.
+          </p>
+        </div>
+
+        <h2>Where to go next</h2>
+        <div class="hub-cards">
+          <a class="hub-card" href="architecture.html">
+            <h3>Theme architecture</h3>
+            <p>Package layout, theme.json, layout, templates, sections, and setting types.</p>
+          </a>
+          <a class="hub-card" href="creating.html">
+            <h3>Create and publish</h3>
+            <p>Preview, share, publish, storage, and how to test a bundled theme.</p>
+          </a>
+          <a class="hub-card" href="helpers.html">
+            <h3>Helpers and islands</h3>
+            <p>Edge variables, helpers, React islands, and plugin slots.</p>
+          </a>
+          <a class="hub-card" href="../plugins/slots.html">
+            <h3>Plugin slots</h3>
+            <p>How themes place plugins with the <code>plugin_slot</code> section.</p>
+          </a>
+        </div>
+
+        <h2>Code reference</h2>
+        <div class="docs-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Reference theme</td>
+                <td><code>themes/dawn_lite/</code></td>
+              </tr>
+              <tr>
+                <td>Package reader and validator</td>
+                <td><code>app/themes/package.ts</code>, <code>app/themes/schema.ts</code></td>
+              </tr>
+              <tr>
+                <td>Limits, setting types, banned code</td>
+                <td><code>app/constants/themes.ts</code></td>
+              </tr>
+              <tr>
+                <td>Storage and extraction cache</td>
+                <td><code>app/themes/storage.ts</code></td>
+              </tr>
+              <tr>
+                <td>Rendering</td>
+                <td>
+                  <code>app/themes/renderer.ts</code>,
+                  <code>app/themes/settings_resolver.ts</code>,
+                  <code>resources/views/themes/</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Library, upload, publish</td>
+                <td>
+                  <code>app/services/theme_service.ts</code>,
+                  <code>app/repositories/theme_repository.ts</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Tables</td>
+                <td><code>themes</code>, <code>theme_settings</code>, <code>theme_templates</code></td>
+              </tr>
+              <tr>
+                <td>React islands</td>
+                <td><code>inertia/islands.tsx</code>, <code>inertia/islands/registry.tsx</code></td>
+              </tr>
+              <tr>
+                <td>Admin page</td>
+                <td><code>inertia/pages/admin/themes/home.tsx</code></td>
+              </tr>
+              <tr>
+                <td>Tests</td>
+                <td>
+                  <code>tests/unit/theme_package.spec.ts</code>,
+                  <code>tests/functional/admin/admin_themes.spec.ts</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="docs-footer">
+          Related: <a href="../architecture/index.html">App architecture</a> ·
+          <a href="../plugins/index.html">Plugins</a>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
