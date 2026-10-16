@@ -83,7 +83,7 @@ export default class SupportTicketRepository {
   /** Saves the ticket and its first message together, with the next ticket number. */
   async create(data: SupportTicketCreateData, body: string): Promise<SupportTicket> {
     return db.transaction(async (trx) => {
-      await trx.rawQuery('select pg_advisory_xact_lock(?)', [NUMBER_LOCK_KEY])
+      await trx.rawQuery('SELECT pg_advisory_xact_lock(?)', [NUMBER_LOCK_KEY])
       const now = DateTime.now()
       const ticket = await SupportTicket.create(
         {

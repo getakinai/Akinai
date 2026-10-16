@@ -65,34 +65,27 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    # Official images from the ECR Public mirror of Docker Hub, so no login is
-    # needed and the Docker Hub anonymous pull rate limit does not apply.
-    services:
-      postgres:
-        image: public.ecr.aws/docker/library/postgres:18
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-      redis:
-        image: public.ecr.aws/docker/library/redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    # Apt PostgreSQL on the runner — avoids Docker Hub / ECR pull rate limits
+    # ("toomanyrequests"). Redis is unused in tests (LIMITER_STORE=memory).
+    env:
+      # Override .env.test (which targets local Docker on 5433).
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_DATABASE: test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Install and start PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
+          sudo systemctl start postgresql
+          sudo -u postgres createuser -s test 2>/dev/null || true
+          sudo -u postgres psql -c "ALTER USER test WITH PASSWORD 'test';"
+          sudo -u postgres psql -c "SELECT 1 FROM pg_database WHERE datname = 'test'" | grep -q 1 \
+            || sudo -u postgres createdb -O test test
       - uses: ./.github/actions/setup-app
       - run: yarn test

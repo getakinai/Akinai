@@ -871,7 +871,7 @@ export default class OrderRepository {
   }
 
   protected async lockNumbers(trx: TransactionClientContract) {
-    await trx.rawQuery('select pg_advisory_xact_lock(?)', [NUMBER_LOCK_KEY])
+    await trx.rawQuery('SELECT pg_advisory_xact_lock(?)', [NUMBER_LOCK_KEY])
   }
 
   protected async maxNumber(
