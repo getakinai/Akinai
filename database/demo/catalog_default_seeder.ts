@@ -3,29 +3,9 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import ProductTypeService from '#services/product_type_service'
 import VendorService from '#services/vendor_service'
 
-const PRODUCT_TYPES = [
-  'Gift box',
-  'Snacks',
-  'Dried fruit',
-  'Cakes and pastries',
-  'Delicacies',
-  'Beverages',
-  'Grocery',
-  'Personal care',
-  'Household essentials',
-  'Flowers',
-]
+const PRODUCT_TYPES = ['Smartphone', 'Laptop', 'Tablet', 'Audio', 'Accessory']
 
-const VENDORS = [
-  'Akinai',
-  'Goldilocks',
-  'Red Ribbon',
-  'Jack n Jill',
-  'Monde',
-  '7D',
-  'Purefoods',
-  'Nestle',
-]
+const VENDORS = ['Apple', 'Beats', 'Akinai Gadgets']
 
 /**
  * Sample product types and vendors for the product form dropdowns. Part of

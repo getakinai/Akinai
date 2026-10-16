@@ -3,13 +3,13 @@ import OptionDefinition from '#models/option_definition'
 import OptionDefinitionValue from '#models/option_definition_value'
 
 /**
- * Sample Size and Color options. Part of the demo store
+ * Sample Storage and Color options for the tech demo store
  * (`node ace seed:demo-store`). Safe to re-run.
  */
 export default class OptionDefinitionSeeder extends BaseSeeder {
   async run() {
-    const size = await OptionDefinition.firstOrCreate(
-      { name: 'Size' },
+    const storage = await OptionDefinition.firstOrCreate(
+      { name: 'Storage' },
       { position: 0, isActive: true }
     )
     const color = await OptionDefinition.firstOrCreate(
@@ -18,8 +18,23 @@ export default class OptionDefinitionSeeder extends BaseSeeder {
     )
 
     for (const [definition, values] of [
-      [size, ['S', 'M', 'L']],
-      [color, ['Red', 'Blue', 'Black']],
+      [storage, ['128GB', '256GB', '512GB', '1TB']],
+      [
+        color,
+        [
+          'Black',
+          'Blue',
+          'Ultramarine',
+          'Natural Titanium',
+          'White Titanium',
+          'Desert Titanium',
+          'Space Gray',
+          'Space Black',
+          'Silver',
+          'Starlight',
+          'White',
+        ],
+      ],
     ] as const) {
       for (const [position, value] of values.entries()) {
         await OptionDefinitionValue.firstOrCreate(

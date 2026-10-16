@@ -4,7 +4,7 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
 export default class SeedDemoStore extends BaseCommand {
   static commandName = 'seed:demo-store'
   static description =
-    'Fill the store with demo products, collections, options and menu links (run after db:seed)'
+    'Fill the store with Akinai Gadgets demo products, collections, About us page, hero slides and menu links (run after db:seed)'
 
   static options: CommandOptions = {
     startApp: true,
@@ -36,9 +36,9 @@ export default class SeedDemoStore extends BaseCommand {
     const seeder = new DemoStoreSeeder(db.connection())
     await seeder.run()
 
-    const { products, collections, menuItems } = seeder.summary
+    const { products, collections, menuItems, pages, heroSlides } = seeder.summary
     this.logger.success(
-      `Demo store ready: ${products} products, ${collections} collections and ${menuItems} menu links added`
+      `Demo store ready: ${products} products, ${collections} collections, ${pages} pages, ${heroSlides} hero slides and ${menuItems} menu links added`
     )
 
     if (!searchReady) return
