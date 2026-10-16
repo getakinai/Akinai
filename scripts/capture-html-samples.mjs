@@ -3,12 +3,18 @@
  * Capture SSR/Inertia HTML snapshots from a running local Akinai app into
  * docs/html/sample/{storefront,admin}.
  *
+ * Storefront uses HTTP SSR. Admin is client-rendered, so those pages are
+ * captured with Playwright (system Chrome) after React hydrates.
+ *
  * Usage:
  *   ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/capture-html-samples.mjs
  *
  * Optional:
  *   BASE_URL=http://localhost:3333
  *   OUT_DIR=docs/html/sample
+ *   INDEX_ONLY=1 | SANITIZE_ONLY=1 | ADMIN_ONLY=1 | STOREFRONT_ONLY=1
+ *
+ * Requires: yarn add -D playwright (uses channel: chrome, no browser download)
  */
 
 import { mkdir, writeFile, readdir, readFile, stat } from 'node:fs/promises'
@@ -408,79 +414,162 @@ function adminUrlToRel(urlPath) {
   return join('admin', `${p}.html`)
 }
 
-async function adminLogin() {
-  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-    throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD to capture admin pages')
-  }
-  console.log('\n=== Admin login ===')
-  await request('/admin/login')
-  const { res, text } = await request('/admin/login', {
-    method: 'POST',
-    body: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
-    expectJson: true,
-    headers: { Accept: 'application/json' },
-  })
-  if (!res.ok) {
-    throw new Error(`Admin login failed HTTP ${res.status}: ${text.slice(0, 300)}`)
-  }
-  let data
+async function loadPlaywright() {
   try {
-    data = JSON.parse(text)
+    return await import('playwright')
   } catch {
-    throw new Error(`Admin login returned non-JSON: ${text.slice(0, 200)}`)
+    throw new Error(
+      'playwright is required for admin snapshots. Run: yarn add -D playwright'
+    )
   }
-  if (data?.data?.mfaRequired) {
-    throw new Error('Admin account requires MFA; disable MFA for the capture user or extend the script')
+}
+
+/** Wait until Inertia has painted into #app (admin has no SSR). */
+async function waitForHydratedApp(page) {
+  await page.waitForFunction(
+    () => {
+      const app = document.getElementById('app')
+      return Boolean(app && app.children.length > 0)
+    },
+    { timeout: 20000 }
+  )
+  // Let lists/queries settle briefly
+  await new Promise((r) => setTimeout(r, 500))
+}
+
+async function gotoAdminPath(page, urlPath) {
+  const target = urlPath.split('?')[0]
+  try {
+    const res = await page.goto(`${BASE_URL}${urlPath}`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    })
+    if (res && res.status() >= 400) {
+      throw new Error(`HTTP ${res.status()}`)
+    }
+  } catch (navErr) {
+    // Inertia / Vite sometimes abort the document request; URL may still update.
+    if (!/ERR_ABORTED|Navigation interrupted/i.test(navErr.message)) throw navErr
   }
-  console.log(`  logged in as ${ADMIN_EMAIL}`)
+  // Ensure we landed on the requested path (not a stale SPA screen).
+  await page.waitForFunction(
+    (path) => {
+      const here = window.location.pathname.replace(/\/$/, '') || '/'
+      const want = path.replace(/\/$/, '') || '/'
+      return here === want
+    },
+    target,
+    { timeout: 15000 }
+  )
+  await waitForHydratedApp(page)
+}
+
+async function captureAdminPage(page, urlPath, written) {
+  const rel = adminUrlToRel(urlPath).replace(/\\/g, '/')
+  try {
+    await gotoAdminPath(page, urlPath)
+    const here = new URL(page.url())
+    if (here.pathname.includes('/login')) {
+      console.warn(`  skip ${urlPath} → redirected to login`)
+      return
+    }
+    const html = await page.content()
+    await writeHtml(rel, html)
+    console.log(`  ok   ${urlPath} → ${rel} (${html.length} bytes)`)
+    written.push(rel)
+  } catch (err) {
+    console.warn(`  skip ${urlPath} → ${err.message.split('\n')[0]}`)
+  }
 }
 
 async function captureAdmin() {
-  console.log('\n=== Admin (guest) ===')
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD to capture admin pages')
+  }
+
+  const { chromium } = await loadPlaywright()
+  console.log('\n=== Admin (Playwright hydrate) ===')
+  const browser = await chromium.launch({ channel: 'chrome', headless: true })
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  const page = await context.newPage()
   const written = []
-  const loginWritten = await captureGet('/admin/login', adminUrlToRel('/admin/login'))
-  if (loginWritten) written.push(loginWritten)
 
-  await adminLogin()
-  console.log('\n=== Admin shells ===')
-  for (const path of ADMIN_SHELLS) {
-    const rel = adminUrlToRel(path)
-    const w = await captureGet(path, rel)
-    if (w) written.push(w)
-  }
+  try {
+    // Capture the guest login screen first.
+    await page.goto(`${BASE_URL}/admin/login`, { waitUntil: 'networkidle', timeout: 30000 })
+    await waitForHydratedApp(page)
+    const loginRel = adminUrlToRel('/admin/login').replace(/\\/g, '/')
+    await writeHtml(loginRel, await page.content())
+    written.push(loginRel)
+    console.log('  ok   /admin/login (guest)')
 
-  console.log('\n=== Admin detail samples ===')
-  for (const src of ADMIN_DETAIL_SOURCES) {
-    try {
-      const { res, text } = await request(src.list, {
-        expectJson: true,
-        headers: { Accept: 'application/json' },
-      })
-      if (!res.ok) {
-        console.warn(`  skip list ${src.list} → HTTP ${res.status}`)
-        continue
-      }
-      let payload
-      try {
-        payload = JSON.parse(text)
-      } catch {
-        console.warn(`  skip list ${src.list} → non-JSON`)
-        continue
-      }
-      const id = src.pick(payload)
-      if (!id) {
-        console.warn(`  skip list ${src.list} → no rows`)
-        continue
-      }
-      for (const detailPath of src.details(id)) {
-        const rel = adminUrlToRel(detailPath)
-        const w = await captureGet(detailPath, rel)
-        if (w) written.push(w)
-      }
-    } catch (err) {
-      console.warn(`  skip list ${src.list} → ${err.message}`)
+    // Sign in via the JSON API (same as the SPA). More reliable than clicking the form
+    // under headless Chrome, and reuses the XSRF cookie from the login page visit.
+    const xsrf = (await context.cookies()).find((c) => c.name === 'XSRF-TOKEN')?.value
+    if (!xsrf) throw new Error('Missing XSRF-TOKEN cookie after visiting /admin/login')
+    const loginRes = await context.request.post(`${BASE_URL}/admin/login`, {
+      data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': decodeURIComponent(xsrf),
+      },
+    })
+    const loginBody = await loginRes.json().catch(() => ({}))
+    if (!loginRes.ok()) {
+      throw new Error(`Admin login HTTP ${loginRes.status()}: ${JSON.stringify(loginBody).slice(0, 200)}`)
     }
+    if (loginBody?.data?.mfaRequired) {
+      throw new Error('Admin account requires MFA; disable MFA for the capture user')
+    }
+
+    try {
+      await page.goto(`${BASE_URL}/admin/dashboard`, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+      })
+    } catch (navErr) {
+      if (!/ERR_ABORTED|Navigation interrupted/i.test(navErr.message)) throw navErr
+    }
+    await waitForHydratedApp(page)
+    const afterLogin = new URL(page.url())
+    if (afterLogin.pathname.includes('/login')) {
+      throw new Error('Session missing after API login — still on /admin/login')
+    }
+    console.log(`  logged in as ${ADMIN_EMAIL} → ${afterLogin.pathname}`)
+
+    console.log('\n=== Admin shells ===')
+    for (const path of ADMIN_SHELLS) {
+      await captureAdminPage(page, path, written)
+    }
+
+    console.log('\n=== Admin detail samples ===')
+    for (const src of ADMIN_DETAIL_SOURCES) {
+      try {
+        const res = await page.request.get(`${BASE_URL}${src.list}`, {
+          headers: { Accept: 'application/json' },
+        })
+        if (!res.ok()) {
+          console.warn(`  skip list ${src.list} → HTTP ${res.status()}`)
+          continue
+        }
+        const payload = await res.json()
+        const id = src.pick(payload)
+        if (!id) {
+          console.warn(`  skip list ${src.list} → no rows`)
+          continue
+        }
+        for (const detailPath of src.details(id)) {
+          await captureAdminPage(page, detailPath, written)
+        }
+      } catch (err) {
+        console.warn(`  skip list ${src.list} → ${err.message}`)
+      }
+    }
+  } finally {
+    await browser.close()
   }
+
   return written
 }
 
@@ -714,7 +803,7 @@ async function writeIndexes() {
       active: 'admin',
       bodyHtml: sampleViewerBody({
         title: 'Admin',
-        lead: 'Static shells from the back office (no React hydrate). List pages are empty markup; use the live app for the full UI. Storefront samples include SSR HTML.',
+        lead: 'Hydrated back-office snapshots (Vite scripts stripped). Keep the app running for CSS and images.',
         files: adminFiles,
         defaultSrc: adminDefault,
         iframeTitle: 'Admin sample',
@@ -734,6 +823,12 @@ async function main() {
     await sanitizeExisting()
     await writeIndexes()
   } else if (process.env.INDEX_ONLY === '1') {
+    await writeIndexes()
+  } else if (process.env.ADMIN_ONLY === '1') {
+    await captureAdmin()
+    await writeIndexes()
+  } else if (process.env.STOREFRONT_ONLY === '1') {
+    await captureStorefront()
     await writeIndexes()
   } else {
     await captureStorefront()

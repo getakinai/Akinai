@@ -696,7 +696,7 @@ tr:last-child td {
 .sample-hub-previews {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 1.75rem;
 }
 
 .sample-hub-preview {
@@ -718,15 +718,5 @@ tr:last-child td {
 }
 
 .sample-hub-frame {
-  height: 28rem;
-}
-
-@media (min-width: 960px) {
-  .sample-hub-previews {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .sample-hub-frame {
-    height: 32rem;
-  }
+  height: min(70vh, 36rem);
 }
