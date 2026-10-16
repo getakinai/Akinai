@@ -37,7 +37,7 @@ function hiddenReason(slide: AdminStorefrontHeroSlide) {
   return linkTargetProblem(slide)
 }
 
-/** Hero slides editor for the built-in theme settings page. */
+/** Hero slides editor for the storefront hero admin page. */
 export default function HeroSlidesCard() {
   const { data: slides, isLoading, isError, refetch } = useAdminStorefrontHeroSlides()
   const canCreate = useCan('storefront.create')

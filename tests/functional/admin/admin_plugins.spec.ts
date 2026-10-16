@@ -25,7 +25,7 @@ test.group('Staff plugins: marketplace', (group) => {
       .data.find((plugin: { key: string }) => plugin.key === 'hero_slideshow')
     assert.isTrue(hero.isInstalled)
     assert.deepEqual(hero.slots, ['home.hero'])
-      assert.equal(hero.adminRoute, 'admin.storefront_theme.home')
+      assert.equal(hero.adminRoute, 'admin.storefront_hero.home')
   })
 
   test('lists the payment methods as installed payment plugins', async ({ client, assert }) => {

@@ -28,4 +28,14 @@ export default {
       queryClient.setQueryData(storefrontKeys.heroSlides, parsed.data)
     }
   },
+  adminNav: {
+    parentRoute: 'admin.plugins.home' as const,
+    items: [
+      {
+        label: 'Hero',
+        route: 'admin.storefront_hero.home' as const,
+        permission: 'storefront.view',
+      },
+    ],
+  },
 }
