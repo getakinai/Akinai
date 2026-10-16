@@ -14,6 +14,18 @@
         <span class="sep">/</span>
         <span>Getting started</span>
       </nav>
+      <a
+        class="docs-topbar-github"
+        href="https://github.com/getakinai/storefront"
+        rel="noopener noreferrer"
+      >
+        <svg class="docs-topbar-github-icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+          />
+        </svg>
+        <span class="docs-topbar-github-label">View on GitHub</span>
+      </a>
     </header>
 
     <div class="docs-shell">
@@ -49,8 +61,28 @@
           catalog data so you can click around the storefront and back office.
         </p>
 
+        <h2 id="source">Get the code</h2>
+        <p>
+          The source repository is on GitHub:
+          <a href="https://github.com/getakinai/storefront" rel="noopener noreferrer"
+            >https://github.com/getakinai/storefront</a
+          >.
+        </p>
+        <pre><code>git clone https://github.com/getakinai/storefront.git
+cd storefront</code></pre>
+        <p>
+          Then follow the steps below from the repo root (the app package is this
+          repository).
+        </p>
+
         <h2 id="quick-start">Quick start</h2>
-        <p>With Node 24+, Yarn and Docker installed:</p>
+        <p>
+          With Node 24+, Yarn, and
+          <a href="https://docs.docker.com/get-docker/" rel="noopener noreferrer"
+            >Docker</a
+          >
+          installed:
+        </p>
         <pre><code>yarn setup   # install, create .env, start Docker, migrate, seed (clean or demo)
 yarn dev     # http://localhost:3333</code></pre>
         <p>
@@ -72,13 +104,21 @@ yarn dev     # http://localhost:3333</code></pre>
         <ul>
           <li>Node.js 24 or newer</li>
           <li>Yarn classic (<code>npm i -g yarn</code>)</li>
-          <li>Docker (for PostgreSQL, Mailpit, Typesense, Redis)</li>
+          <li>
+            Docker (for PostgreSQL, Mailpit, Typesense, Redis) —
+            <a href="https://docs.docker.com/get-docker/" rel="noopener noreferrer"
+              >download Docker</a
+            >
+          </li>
         </ul>
 
         <h2 id="manual">Manual setup</h2>
         <p>
-          Use these when you need to run one step on its own. From the
-          <code>getakinai.com</code> repo root:
+          Use these when you need to run one step on its own. From the cloned
+          <a href="https://github.com/getakinai/storefront" rel="noopener noreferrer"
+            >storefront</a
+          >
+          repo root:
         </p>
 
         <h3>1. Install and configure</h3>
