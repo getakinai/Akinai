@@ -14,10 +14,13 @@
  *   OUT_DIR=docs/html/sample
  *   INDEX_ONLY=1 | SANITIZE_ONLY=1 | ADMIN_ONLY=1 | STOREFRONT_ONLY=1
  *
+ * SANITIZE_ONLY rewrites snapshots and vendors CSS/fonts/images into
+ * docs/html/sample/media/ (needs the app at BASE_URL for Vite-compiled CSS).
+ *
  * Requires: yarn add -D playwright (uses channel: chrome, no browser download)
  */
 
-import { mkdir, writeFile, readdir, readFile, stat } from 'node:fs/promises'
+import { access, copyFile, constants as fsConstants, mkdir, writeFile, readdir, readFile, stat } from 'node:fs/promises'
 import { dirname, join, relative, posix as pathPosix } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -28,6 +31,11 @@ const BASE_URL = (process.env.BASE_URL || 'http://localhost:3333').replace(/\/$/
 const OUT_DIR = join(ROOT, process.env.OUT_DIR || 'docs/html/sample')
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || ''
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
+
+/** Shared static files for samples (never localhost — that triggers Chrome LNA). */
+const MEDIA_PREFIX = 'media'
+/** appPath (`/inertia/css/app.css`) → path under OUT_DIR (`media/inertia/css/app.css`). */
+const mediaCache = new Map()
 
 /** Cookie jar: name -> value (raw, as stored in Set-Cookie). */
 const cookies = new Map()
@@ -153,24 +161,183 @@ function stripAppOrigins(html) {
   return out
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+async function pathExists(filePath) {
+  try {
+    await access(filePath, fsConstants.F_OK)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Root-relative app paths that should be vendored into sample/media/. */
+function isAssetPath(pathname) {
+  if (!pathname.startsWith('/')) return false
+  if (pathname.startsWith('/@') || pathname.includes('/@vite/')) return false
+  if (pathname === '/brand/manifest.json') return false
+  if (pathname.startsWith('/uploads/')) return true
+  if (pathname.startsWith('/inertia/css/')) return true
+  if (pathname.startsWith('/brand/favicons/')) return true
+  return /\.(css|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot)(\?|$)/i.test(pathname)
+}
+
+function toRelative(fromRelPath, targetRelPath) {
+  const fromDir = pathPosix.dirname(fromRelPath.replace(/\\/g, '/'))
+  let rel = pathPosix.relative(fromDir, targetRelPath.replace(/\\/g, '/'))
+  if (!rel.startsWith('.')) rel = `./${rel}`
+  return rel
+}
+
+/**
+ * Copy or fetch one app asset into sample/media/, rewrite CSS url() deps.
+ * Returns the path under OUT_DIR (posix), e.g. media/inertia/css/app.css.
+ */
+async function ensureMedia(appPath) {
+  let path = appPath.split('?')[0].split('#')[0]
+  if (!path.startsWith('/')) path = `/${path}`
+  if (mediaCache.has(path)) return mediaCache.get(path)
+
+  const relOut = `${MEDIA_PREFIX}${path}`
+  const dest = join(OUT_DIR, ...relOut.split('/'))
+  // Reserve the cache entry before recursion (CSS → fonts) so we don't loop.
+  mediaCache.set(path, relOut)
+  await mkdir(dirname(dest), { recursive: true })
+
+  let wrote = false
+  // Vite must compile /inertia/css/* — never copy the Tailwind source.
+  if (!path.startsWith('/inertia/')) {
+    if (path.startsWith('/uploads/')) {
+      const disk = join(ROOT, 'storage', path.slice('/uploads/'.length))
+      if (await pathExists(disk)) {
+        await copyFile(disk, dest)
+        wrote = true
+      }
+    } else {
+      const disk = join(ROOT, path.slice(1))
+      if (await pathExists(disk)) {
+        await copyFile(disk, dest)
+        wrote = true
+      }
+    }
+  }
+
+  if (!wrote) {
+    const needsDirect = path.endsWith('.css') || path.startsWith('/inertia/')
+    const fetchUrl = needsDirect ? `${BASE_URL}${path}?direct` : `${BASE_URL}${path}`
+    const res = await fetch(fetchUrl)
+    if (!res.ok) {
+      mediaCache.delete(path)
+      throw new Error(`${fetchUrl} → HTTP ${res.status}`)
+    }
+    const ct = res.headers.get('content-type') || ''
+    if (path.endsWith('.css') && ct.includes('javascript')) {
+      mediaCache.delete(path)
+      throw new Error(`${fetchUrl} returned JS; expected CSS (?direct)`)
+    }
+    await writeFile(dest, Buffer.from(await res.arrayBuffer()))
+    wrote = true
+  }
+
+  if (path.endsWith('.css')) {
+    const css = await readFile(dest, 'utf8')
+    await writeFile(dest, await rewriteCssAssetUrls(css, relOut), 'utf8')
+  }
+
+  return relOut
+}
+
+/** Vendor url(...) targets inside a CSS file and rewrite them relatively. */
+async function rewriteCssAssetUrls(css, cssMediaRel) {
+  const cssDir = pathPosix.dirname(cssMediaRel)
+  const found = new Set()
+  for (const match of css.matchAll(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi)) {
+    let url = match[2].trim()
+    if (!url || url.startsWith('data:') || url.startsWith('#')) continue
+    for (const origin of appOrigins()) {
+      if (url.startsWith(origin)) url = url.slice(origin.length)
+    }
+    if (url.startsWith('/')) found.add(url.split('?')[0].split('#')[0])
+  }
+
+  const replacements = []
+  for (const assetPath of [...found].sort((a, b) => b.length - a.length)) {
+    if (!isAssetPath(assetPath)) continue
+    try {
+      const mediaRel = await ensureMedia(assetPath)
+      let rel = pathPosix.relative(cssDir, mediaRel)
+      if (!rel.startsWith('.')) rel = `./${rel}`
+      replacements.push([assetPath, rel])
+    } catch (error) {
+      console.warn(`  css asset skip ${assetPath}: ${error.message}`)
+    }
+  }
+
+  let out = css
+  for (const [from, to] of replacements) {
+    out = out.replace(new RegExp(escapeRegExp(from), 'g'), to)
+  }
+  return out
+}
+
+/** Collect root-relative asset paths from HTML and point them at sample/media/. */
+async function rewriteHtmlAssets(html, fromRelPath) {
+  const found = new Set()
+  const consider = (raw) => {
+    if (!raw || !raw.startsWith('/')) return
+    const path = raw.split('?')[0].split('#')[0]
+    if (isAssetPath(path)) found.add(path)
+  }
+
+  for (const match of html.matchAll(/\b(?:href|src|poster|content)=(["'])([^"']+)\1/gi)) {
+    consider(match[2])
+  }
+  for (const match of html.matchAll(/\bsrcset=(["'])([^"']+)\1/gi)) {
+    for (const part of match[2].split(',')) {
+      consider(part.trim().split(/\s+/)[0])
+    }
+  }
+  for (const match of html.matchAll(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi)) {
+    consider(match[2].trim())
+  }
+
+  const replacements = []
+  for (const assetPath of [...found].sort((a, b) => b.length - a.length)) {
+    try {
+      const mediaRel = await ensureMedia(assetPath)
+      replacements.push([assetPath, toRelative(fromRelPath, mediaRel)])
+    } catch (error) {
+      console.warn(`  asset skip ${assetPath}: ${error.message}`)
+    }
+  }
+
+  let out = html
+  for (const [from, to] of replacements) {
+    out = out.replace(new RegExp(escapeRegExp(from), 'g'), to)
+  }
+  return out
+}
+
 /**
  * Make a snapshot safe to open under file:// or a static server:
  * - drop Vite / React-refresh / Inertia entry scripts (they break off-origin)
- * - keep asset URLs root-relative (never localhost — that triggers Chrome's
- *   "Access other apps and services on this device" prompt on the public docs)
+ * - vendor CSS/fonts/images into sample/media/ (no localhost — Chrome LNA)
  * - point in-page links at sibling sample HTML (never frame the live app —
  *   Adonis sets frame-ancestors 'none')
  */
-function sanitizeSnapshot(html, fromRelPath) {
+async function sanitizeSnapshot(html, fromRelPath) {
   let out = html
   // Inline + external module scripts (Vite client, react-refresh preamble, inertia entry)
   out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*>[\s\S]*?<\/script>/gi, '')
   out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*\/>/gi, '')
   out = out.replace(/<link\b[^>]*\brel=["']modulepreload["'][^>]*>/gi, '')
 
-  // Older captures pointed assets at localhost so a local `yarn dev` could
-  // style them. Undo that (and leave fresh captures root-relative).
+  // Older captures pointed assets at localhost; normalize before vendoring.
   out = stripAppOrigins(out)
+  out = await rewriteHtmlAssets(out, fromRelPath)
 
   // Anchors: map to sample files or neutralize (avoid framing the live app —
   // Adonis sends CSP frame-ancestors 'none').
@@ -184,7 +351,9 @@ function sanitizeSnapshot(html, fromRelPath) {
       href.startsWith('#') ||
       href.startsWith('mailto:') ||
       href.startsWith('tel:') ||
-      href.startsWith('javascript:')
+      href.startsWith('javascript:') ||
+      href.startsWith('.') ||
+      href.startsWith('media/')
     ) {
       return full
     }
@@ -222,23 +391,25 @@ function pathToFile(urlPath, { homeName = 'home.html' } = {}) {
 async function writeHtml(relPath, html) {
   const out = join(OUT_DIR, relPath)
   await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, sanitizeSnapshot(html, relPath.replace(/\\/g, '/')), 'utf8')
+  await writeFile(out, await sanitizeSnapshot(html, relPath.replace(/\\/g, '/')), 'utf8')
   return relPath
 }
 
-/** Re-sanitize already-captured files (no network). */
+/** Re-sanitize already-captured files and vendor assets into sample/media/. */
 async function sanitizeExisting() {
-  console.log('\n=== Sanitize existing snapshots ===')
+  console.log('\n=== Sanitize existing snapshots (vendor assets) ===')
+  mediaCache.clear()
   for (const section of ['storefront', 'admin']) {
     const files = await listHtmlFiles(join(OUT_DIR, section))
     for (const file of files) {
       const rel = join(section, file).replace(/\\/g, '/')
       const full = join(OUT_DIR, rel)
       const raw = await readFile(full, 'utf8')
-      await writeFile(full, sanitizeSnapshot(raw, rel), 'utf8')
+      await writeFile(full, await sanitizeSnapshot(raw, rel), 'utf8')
       console.log(`  ok   ${rel}`)
     }
   }
+  console.log(`  media files cached: ${mediaCache.size}`)
 }
 
 async function captureGet(urlPath, relOut) {
@@ -735,8 +906,8 @@ async function writeIndexes() {
 
   const hubBody = `        <h1>See Demo</h1>
         <p class="lead">
-          Static SSR snapshots (Vite/Inertia scripts stripped). Markup and
-          layout only — styles and product images are not bundled with the docs.
+          Static SSR snapshots (Vite/Inertia scripts stripped). Styles and
+          images are bundled under <code>sample/media/</code> — no local app required.
         </p>
         <div class="sample-hub-previews">
           <section class="sample-hub-preview">
@@ -791,7 +962,7 @@ async function writeIndexes() {
       active: 'storefront',
       bodyHtml: sampleViewerBody({
         title: 'Storefront',
-        lead: 'Static SSR markup from the public sitemap (no client hydrate). Styles and images are not bundled with the docs.',
+        lead: 'Static SSR markup from the public sitemap (no client hydrate). Styles and images load from sample/media/.',
         files: storefrontFiles,
         defaultSrc: storefrontDefault,
         iframeTitle: 'Storefront sample',
@@ -814,7 +985,7 @@ async function writeIndexes() {
       active: 'admin',
       bodyHtml: sampleViewerBody({
         title: 'Admin',
-        lead: 'Hydrated back-office snapshots (Vite scripts stripped). Styles and images are not bundled with the docs.',
+        lead: 'Hydrated back-office snapshots (Vite scripts stripped). Styles and images load from sample/media/.',
         files: adminFiles,
         defaultSrc: adminDefault,
         iframeTitle: 'Admin sample',
