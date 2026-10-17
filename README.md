@@ -33,6 +33,12 @@ Work through these in order. It takes about an hour.
 6. **Plugins**: optional storefront features staff install from **Plugins** — see [docs/creating-a-plugin.md](docs/creating-a-plugin.md).
 7. **Themes**: uploadable Edge storefront themes (library, editor, live publish) — see [docs/creating-a-theme.md](docs/creating-a-theme.md).
 
+## Contributors
+
+<a href="https://github.com/getakinai/storefront/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=getakinai/storefront" />
+</a>
+
 ## Technology
 
 ### Backend
