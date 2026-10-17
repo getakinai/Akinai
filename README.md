@@ -4,7 +4,9 @@
 [![Fork Status](https://img.shields.io/github/forks/getakinai/storefront.svg)](https://github.com/getakinai/storefront)
 [![Star Status](https://img.shields.io/github/stars/getakinai/storefront.svg)](https://github.com/getakinai/storefront)
 
-[Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office (`/admin`) and a customer storefront (`/`, `/account`). It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
+[Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office and a customer storefront. 
+
+It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
 
 ## Quick start
 
