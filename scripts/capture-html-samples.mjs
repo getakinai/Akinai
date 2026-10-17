@@ -135,9 +135,29 @@ function hrefToSampleRelative(href, fromRelPath) {
 }
 
 /**
+ * Origins the capture app may appear under. Public docs must never keep these
+ * — Chrome treats a request from https://getakinai.com to localhost as
+ * "Apps on device" / loopback access and prompts on first visit.
+ */
+function appOrigins() {
+  return [...new Set([BASE_URL, 'http://localhost:3333', 'http://127.0.0.1:3333'])]
+}
+
+/** Rewrite absolute app URLs back to root-relative paths (`/…`). */
+function stripAppOrigins(html) {
+  let out = html
+  for (const origin of appOrigins()) {
+    const escaped = origin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    out = out.replace(new RegExp(escaped, 'g'), '')
+  }
+  return out
+}
+
+/**
  * Make a snapshot safe to open under file:// or a static server:
  * - drop Vite / React-refresh / Inertia entry scripts (they break off-origin)
- * - keep CSS/images pointing at the running app
+ * - keep asset URLs root-relative (never localhost — that triggers Chrome's
+ *   "Access other apps and services on this device" prompt on the public docs)
  * - point in-page links at sibling sample HTML (never frame the live app —
  *   Adonis sets frame-ancestors 'none')
  */
@@ -148,21 +168,12 @@ function sanitizeSnapshot(html, fromRelPath) {
   out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*\/>/gi, '')
   out = out.replace(/<link\b[^>]*\brel=["']modulepreload["'][^>]*>/gi, '')
 
-  // Asset URLs: root-relative → absolute localhost (styles, images, fonts in attributes)
-  out = out.replace(
-    /\b(src|poster|srcset)=(["'])\/(?!\/)/g,
-    `$1=$2${BASE_URL}/`
-  )
-  out = out.replace(/\burl\(\s*\/(?!\/)/g, `url(${BASE_URL}/`)
-  out = out.replace(/\bcontent=(["'])\/(?!\/)/g, `content=$1${BASE_URL}/`)
+  // Older captures pointed assets at localhost so a local `yarn dev` could
+  // style them. Undo that (and leave fresh captures root-relative).
+  out = stripAppOrigins(out)
 
-  // Stylesheet / icon / preload links keep localhost assets
-  out = out.replace(/<link\b([^>]*)>/gi, (tag) => {
-    return tag.replace(/\bhref=(["'])\/(?!\/)/g, `href=$1${BASE_URL}/`)
-  })
-
-  // Anchors: map to sample files or neutralize (avoid framing localhost —
-  // the live app sends CSP frame-ancestors 'none').
+  // Anchors: map to sample files or neutralize (avoid framing the live app —
+  // Adonis sends CSP frame-ancestors 'none').
   out = out.replace(/<a\b([^>]*)>/gi, (full, attrs) => {
     const hrefMatch = attrs.match(/\bhref=(["'])([^"']*)\1/i)
     if (!hrefMatch) return full
@@ -621,8 +632,8 @@ function docsChrome({ title, breadcrumb, active, bodyHtml, depth, viewer = false
             <a href="${up}architecture/index.html">Architecture</a>
           </div>
           <div class="docs-nav-group">
-            <span class="docs-nav-label">Samples</span>
-            <a class="${active === 'hub' ? 'is-active' : ''}" href="${sampleRoot}index.html">HTML samples</a>
+            <span class="docs-nav-label">Demo</span>
+            <a class="${active === 'hub' ? 'is-active' : ''}" href="${sampleRoot}index.html">See Demo</a>
             <a class="docs-nav-child ${active === 'storefront' ? 'is-active' : ''}" href="${active === 'storefront' ? 'index.html' : `${sampleRoot}storefront/index.html`}">Storefront</a>
             <a class="docs-nav-child ${active === 'admin' ? 'is-active' : ''}" href="${active === 'admin' ? 'index.html' : `${sampleRoot}admin/index.html`}">Admin</a>
           </div>
@@ -722,10 +733,10 @@ async function writeIndexes() {
   const storefrontDefault = pickDefaultPage(storefrontFiles, ['home.html'])
   const adminDefault = pickDefaultPage(adminFiles, ['dashboard.html', 'login.html'])
 
-  const hubBody = `        <h1>HTML samples</h1>
+  const hubBody = `        <h1>See Demo</h1>
         <p class="lead">
-          Static SSR snapshots (Vite/Inertia scripts stripped). Keep
-          <code>${escapeHtml(BASE_URL)}</code> running so CSS and images load.
+          Static SSR snapshots (Vite/Inertia scripts stripped). Markup and
+          layout only — styles and product images are not bundled with the docs.
         </p>
         <div class="sample-hub-previews">
           <section class="sample-hub-preview">
@@ -756,10 +767,10 @@ async function writeIndexes() {
   await writeFile(
     join(OUT_DIR, 'index.html'),
     docsChrome({
-      title: 'HTML samples — Akinai docs',
+      title: 'See Demo — Akinai docs',
       breadcrumb: `<a href="../index.html">Docs</a>
         <span class="sep">/</span>
-        <span>Samples</span>`,
+        <span>See Demo</span>`,
       active: 'hub',
       bodyHtml: hubBody,
       depth: 1,
@@ -771,16 +782,16 @@ async function writeIndexes() {
   await writeFile(
     join(OUT_DIR, 'storefront', 'index.html'),
     docsChrome({
-      title: 'Storefront HTML samples — Akinai docs',
+      title: 'Storefront demo — Akinai docs',
       breadcrumb: `<a href="../../index.html">Docs</a>
         <span class="sep">/</span>
-        <a href="../index.html">Samples</a>
+        <a href="../index.html">See Demo</a>
         <span class="sep">/</span>
         <span>Storefront</span>`,
       active: 'storefront',
       bodyHtml: sampleViewerBody({
         title: 'Storefront',
-        lead: 'Static SSR markup from the public sitemap (no client hydrate). Keep the app running for CSS and images.',
+        lead: 'Static SSR markup from the public sitemap (no client hydrate). Styles and images are not bundled with the docs.',
         files: storefrontFiles,
         defaultSrc: storefrontDefault,
         iframeTitle: 'Storefront sample',
@@ -794,16 +805,16 @@ async function writeIndexes() {
   await writeFile(
     join(OUT_DIR, 'admin', 'index.html'),
     docsChrome({
-      title: 'Admin HTML samples — Akinai docs',
+      title: 'Admin demo — Akinai docs',
       breadcrumb: `<a href="../../index.html">Docs</a>
         <span class="sep">/</span>
-        <a href="../index.html">Samples</a>
+        <a href="../index.html">See Demo</a>
         <span class="sep">/</span>
         <span>Admin</span>`,
       active: 'admin',
       bodyHtml: sampleViewerBody({
         title: 'Admin',
-        lead: 'Hydrated back-office snapshots (Vite scripts stripped). Keep the app running for CSS and images.',
+        lead: 'Hydrated back-office snapshots (Vite scripts stripped). Styles and images are not bundled with the docs.',
         files: adminFiles,
         defaultSrc: adminDefault,
         iframeTitle: 'Admin sample',
