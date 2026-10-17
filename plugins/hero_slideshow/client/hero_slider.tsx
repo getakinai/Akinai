@@ -19,14 +19,14 @@ const AUTOPLAY_MS = 6000
 
 const EVENTS = ['init', 'reInit', 'select'] as const
 
-const shell = 'mt-5 overflow-hidden rounded-card bg-sf-primary text-sf-primary-fg sm:mt-7'
+const shell = 'mt-5 overflow-hidden rounded-card bg-[#fff] text-sf-text sm:mt-7'
 
 const panel = 'grid h-full grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]'
 
 const media = 'min-h-[200px] md:min-h-[340px]'
 
 const arrow =
-  'grid size-9 place-items-center rounded-full bg-sf-primary-fg/15 text-sf-primary-fg transition-[background-color,scale] duration-150 hover:bg-sf-primary-fg/25 active:scale-95 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring'
+  'grid size-9 place-items-center rounded-full bg-sf-text/10 text-sf-text transition-[background-color,scale] duration-150 hover:bg-sf-text/15 active:scale-95 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring'
 
 function prefersReducedMotion() {
   return (
@@ -53,7 +53,7 @@ function SlideContent({
         )}
       >
         {slide.eyebrow && (
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sf-primary-fg/10 px-3 py-1 text-[12.5px] font-medium">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sf-text/5 px-3 py-1 text-[12.5px] font-medium">
             <Leaf size={14} className="text-sf-accent" /> {slide.eyebrow}
           </span>
         )}
@@ -172,7 +172,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                 type="button"
                 className={cn(
                   'h-2 rounded-full transition-[width,background-color] duration-200 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring',
-                  index === selected ? 'w-5 bg-sf-accent' : 'w-2 bg-sf-primary-fg/40'
+                  index === selected ? 'w-5 bg-sf-accent' : 'w-2 bg-sf-text/25'
                 )}
                 onClick={() => api?.scrollTo(index)}
                 aria-label={`Go to slide ${index + 1}`}
@@ -199,10 +199,10 @@ export function HeroSliderSkeleton() {
     <div className={shell} aria-hidden="true">
       <div className={panel}>
         <div className="flex flex-col justify-center gap-4 p-6 sm:p-10">
-          <span className="h-6 w-40 rounded-full bg-sf-primary-fg/10 motion-safe:animate-pulse" />
-          <span className="h-9 w-4/5 rounded bg-sf-primary-fg/15 motion-safe:animate-pulse" />
-          <span className="h-4 w-3/5 rounded bg-sf-primary-fg/10 motion-safe:animate-pulse" />
-          <span className="h-10 w-28 rounded-lg bg-sf-primary-fg/15 motion-safe:animate-pulse" />
+          <span className="h-6 w-40 rounded-full bg-sf-text/5 motion-safe:animate-pulse" />
+          <span className="h-9 w-4/5 rounded bg-sf-text/10 motion-safe:animate-pulse" />
+          <span className="h-4 w-3/5 rounded bg-sf-text/5 motion-safe:animate-pulse" />
+          <span className="h-10 w-28 rounded-lg bg-sf-text/10 motion-safe:animate-pulse" />
         </div>
         <ImagePlaceholder className={media} loading />
       </div>

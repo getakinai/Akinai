@@ -128,9 +128,9 @@ function ProductRail({
  */
 function StaticHero({ href }: { href: string }) {
   return (
-    <section className="mt-5 grid grid-cols-1 overflow-hidden rounded-card bg-sf-primary text-sf-primary-fg sm:mt-7 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+    <section className="mt-5 grid grid-cols-1 overflow-hidden rounded-card bg-[#fff] text-sf-text sm:mt-7 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
       <div className="flex min-w-0 flex-col justify-center gap-4 p-6 sm:p-10">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sf-primary-fg/10 px-3 py-1 text-[12.5px] font-medium">
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sf-text/5 px-3 py-1 text-[12.5px] font-medium">
           <Leaf size={14} className="text-sf-accent" /> 100% fresh, every day
         </span>
         <h1 className="text-[30px] leading-[1.1] font-semibold tracking-[-0.025em] text-balance sm:text-[42px]">
