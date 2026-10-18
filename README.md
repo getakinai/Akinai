@@ -4,9 +4,27 @@
 [![Fork Status](https://img.shields.io/github/forks/getakinai/storefront.svg)](https://github.com/getakinai/storefront)
 [![Star Status](https://img.shields.io/github/stars/getakinai/storefront.svg)](https://github.com/getakinai/storefront)
 
-[Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office and a customer storefront. 
+[Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office and a customer storefront.
 
 It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
+
+## How Akinai compares
+
+Self-hosted, free open source commerce with Shopify-style themes and a modern AdonisJS stack — without SaaS fees or WordPress baggage.
+
+| Capability | Akinai | WooCommerce | Shopify |
+| --- | --- | --- | --- |
+| License & cost | Free & open source | Free plugin; you pay for WordPress hosting | Paid SaaS plans + apps |
+| Platform fees | None | None from WooCommerce | Monthly plan + transaction fees\* |
+| Data & hosting | You own the stack | Self-host on WordPress | Locked to Shopify cloud |
+| Stack | Modern AdonisJS + Inertia | WordPress / PHP plugin | Proprietary hosted platform |
+| Themes | Edge themes (Shopify-like model) | WordPress theme + Woo templates | Liquid themes |
+| Extensibility | First-class plugins & slots | WP plugins (mixed quality) | App Store (often paid) |
+| Admin + storefront | One cohesive commerce app | Plugin bolted onto WordPress | Hosted admin + Online Store |
+| Vendor lock-in | Low — export & self-host | Medium — WordPress ecosystem | High — platform-bound |
+| Source code | Full access on GitHub | Open source plugin | Closed source |
+
+\*Shopify transaction fees can be reduced when using Shopify Payments; plan fees still apply.
 
 ## Quick start
 
