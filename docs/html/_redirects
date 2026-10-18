@@ -1,0 +1,4 @@
+# Canonical host: apex (non-www). Attach both hostnames to the same
+# Cloudflare Pages project so these 301s run for every path.
+https://www.getakinai.com/ https://getakinai.com/ 301
+https://www.getakinai.com/* https://getakinai.com/:splat 301

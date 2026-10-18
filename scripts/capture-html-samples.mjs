@@ -181,7 +181,8 @@ function isAssetPath(pathname) {
   if (pathname === '/brand/manifest.json') return false
   if (pathname.startsWith('/uploads/')) return true
   if (pathname.startsWith('/inertia/css/')) return true
-  if (pathname.startsWith('/brand/favicons/')) return true
+  // Brand favicons are route-served and often 404 in capture; skip them.
+  if (pathname.startsWith('/brand/')) return false
   return /\.(css|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|eot)(\?|$)/i.test(pathname)
 }
 
