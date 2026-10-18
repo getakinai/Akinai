@@ -1,6 +1,12 @@
-# Akinai [![CI](https://github.com/getakinai/storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/getakinai/storefront/actions/workflows/ci.yml)
+# Akinai 
 
-[Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office (`/admin`) and a customer storefront (`/`, `/account`). It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
+[![CI](https://github.com/getakinai/storefront/actions/workflows/ci.yml/badge.svg)](https://github.com/getakinai/storefront/actions/workflows/ci.yml)
+[![Fork Status](https://img.shields.io/github/forks/getakinai/storefront.svg)](https://github.com/getakinai/storefront)
+[![Star Status](https://img.shields.io/github/stars/getakinai/storefront.svg)](https://github.com/getakinai/storefront)
+
+[Akinai](https://getakinai.com) is an open-source e-commerce app with a staff back office and a customer storefront. 
+
+It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
 
 ## Quick start
 
@@ -26,6 +32,12 @@ Work through these in order. It takes about an hour.
 5. **Build something**: use [docs/adding-a-feature.md](docs/adding-a-feature.md) as a checklist for your first change, and check it against [docs/security.md](docs/security.md). 
 6. **Plugins**: optional storefront features staff install from **Plugins** — see [docs/creating-a-plugin.md](docs/creating-a-plugin.md).
 7. **Themes**: uploadable Edge storefront themes (library, editor, live publish) — see [docs/creating-a-theme.md](docs/creating-a-theme.md).
+
+## Contributors
+
+<a href="https://github.com/getakinai/storefront/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=getakinai/storefront" />
+</a>
 
 ## Technology
 
