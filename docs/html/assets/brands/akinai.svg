@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Akinai">
+  <rect width="32" height="32" rx="6" fill="#0d5c4d"/>
+  <text
+    x="16"
+    y="22"
+    text-anchor="middle"
+    font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="13"
+    font-weight="700"
+    fill="#ffffff"
+    letter-spacing="-0.04em"
+  >AK</text>
+</svg>
