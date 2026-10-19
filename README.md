@@ -8,6 +8,8 @@
 
 It is a single monolith: AdonisJS serves the API and renders React pages through Inertia.js.
 
+<img width="1358" height="708" alt="Screenshot 2026-10-17 at 11 04 06 PM" src="https://github.com/user-attachments/assets/6bbf11d6-b4ca-4451-be72-b55f381d9bd1" />
+
 ## How Akinai compares
 
 Self-hosted, free open source commerce with Shopify-style themes and a modern AdonisJS stack — without SaaS fees or WordPress baggage.
