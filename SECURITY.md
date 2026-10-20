@@ -4,7 +4,7 @@ Thank you for helping keep Akinai and the stores built on it safe. If you find a
 
 ## Reporting a vulnerability
 
-Report it through GitHub's **private vulnerability reporting** (the "Report a vulnerability" button on this repository's Security tab), or email **security@getakinai.com**, with:
+Report it through GitHub's **private vulnerability reporting** (the "Report a vulnerability" button on this repository's Security tab), or email **hello@jsdecena.me**, with:
 
 - A description of the issue and the impact you believe it has.
 - Steps to reproduce it, or a proof of concept (URLs, requests, screenshots).
