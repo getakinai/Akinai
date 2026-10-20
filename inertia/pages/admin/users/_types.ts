@@ -37,6 +37,7 @@ export const AdminRoleOptionSchema = z.object({
   slug: z.string(),
   isLocked: z.boolean(),
   isDefault: z.boolean(),
+  permissions: z.array(z.string()),
 })
 
 export type AdminRoleOption = z.infer<typeof AdminRoleOptionSchema>

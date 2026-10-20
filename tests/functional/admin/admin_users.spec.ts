@@ -178,6 +178,7 @@ test.group('Staff users: view and role options', (group) => {
       slug: 'editors',
       isLocked: false,
       isDefault: false,
+      permissions: [],
     })
   })
 

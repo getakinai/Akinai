@@ -21,6 +21,7 @@ export const PermissionResourceSchema = z.object({
   label: z.string(),
   description: z.string(),
   actions: z.array(z.string()),
+  adminOnly: z.boolean(),
 })
 
 export type PermissionResource = z.infer<typeof PermissionResourceSchema>

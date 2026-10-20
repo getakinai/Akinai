@@ -11,11 +11,11 @@ export default class AdminRolePermissionsUpdateController {
 
   async handle(ctx: HttpContext) {
     const role = await this.roleService.findOrFail(ctx.params.id)
-    await ctx.bouncer.with(RolePolicy).authorize('editPermissions', role)
-
     const { permission, granted } = await ctx.request.validateUsing(
       adminRolePermissionUpdateValidator
     )
+    await ctx.bouncer.with(RolePolicy).authorize('editPermissions', role, { permission, granted })
+
     const updated = await this.roleService.setPermission(role, permission, granted)
 
     return ctx.serialize(RoleTransformer.transform(updated))

@@ -283,3 +283,14 @@ export const PERMISSIONS: Permission[] = PERMISSION_SECTIONS.flatMap((section) =
 export function isPermission(value: string): value is Permission {
   return (PERMISSIONS as string[]).includes(value)
 }
+
+/**
+ * Resources that are a route to further privilege. Only the locked admin
+ * role may grant them.
+ */
+const ADMIN_ONLY_RESOURCES = new Set(['users', 'roles', 'themes'])
+
+export function isAdminOnlyPermission(permission: string): boolean {
+  const resource = permission.split('.')[0]
+  return resource !== undefined && ADMIN_ONLY_RESOURCES.has(resource)
+}

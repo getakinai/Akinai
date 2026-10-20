@@ -1,6 +1,10 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import { PERMISSION_ACTIONS, PERMISSION_SECTIONS } from '#abilities/permissions'
+import {
+  isAdminOnlyPermission,
+  PERMISSION_ACTIONS,
+  PERMISSION_SECTIONS,
+} from '#abilities/permissions'
 import RoleService from '#services/role_service'
 import RoleTransformer from '#transformers/role_transformer'
 
@@ -21,6 +25,7 @@ export default class AdminRolesMatrixController {
           label: resource.label,
           description: resource.description,
           actions: [...resource.actions] as string[],
+          adminOnly: isAdminOnlyPermission(`${resource.key}.view`),
         })),
       })),
       roles: RoleTransformer.transform(roles),
