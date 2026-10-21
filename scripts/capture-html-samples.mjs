@@ -333,7 +333,11 @@ async function sanitizeSnapshot(html, fromRelPath) {
   let out = html
   // Inline + external module scripts (Vite client, react-refresh preamble, inertia entry)
   out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*>[\s\S]*?<\/script>/gi, '')
-  out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*\/>/gi, '')
+  let previous
+  do {
+    previous = out
+    out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*\/>/gi, '')
+  } while (out !== previous)
   out = out.replace(/<link\b[^>]*\brel=["']modulepreload["'][^>]*>/gi, '')
 
   // Older captures pointed assets at localhost; normalize before vendoring.
