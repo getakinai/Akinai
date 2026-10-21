@@ -4,5 +4,13 @@ export function stripHtml(html: string): string {
     const doc = new DOMParser().parseFromString(html, 'text/html')
     return doc.body.textContent ?? ''
   }
-  return html.replace(/<[^>]*>/g, '')
+
+  let current = html
+  let previous: string
+  do {
+    previous = current
+    current = current.replace(/<[^>]*>/g, '')
+  } while (current !== previous)
+
+  return current
 }
