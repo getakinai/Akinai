@@ -90,28 +90,6 @@ export const THEME_ASSET_CONTENT_TYPES: Record<string, string> = {
   otf: 'font/otf',
 }
 
-/**
- * Edge templates compile to JavaScript and are not sandboxed. Templates that
- * mention any of these are rejected, which blocks the known ways out of the
- * template state into Node globals.
- */
-export const THEME_BANNED_TEMPLATE_PATTERNS: readonly { pattern: RegExp; label: string }[] = [
-  { pattern: /constructor/, label: 'constructor' },
-  { pattern: /__proto__/, label: '__proto__' },
-  { pattern: /prototype/, label: 'prototype' },
-  { pattern: /\bprocess\b/, label: 'process' },
-  { pattern: /\brequire\b/, label: 'require' },
-  { pattern: /\bimport\s*\(/, label: 'import()' },
-  { pattern: /\bglobalThis\b/, label: 'globalThis' },
-  { pattern: /\bglobal\b/, label: 'global' },
-  { pattern: /\bFunction\b/, label: 'Function' },
-  { pattern: /\beval\b/, label: 'eval' },
-  { pattern: /\bReflect\b/, label: 'Reflect' },
-  { pattern: /\bProxy\b/, label: 'Proxy' },
-  { pattern: /@(eval|inject|debugger)\b/, label: 'unsupported tag' },
-  { pattern: /::/, label: 'disk prefix' },
-]
-
 /** How long a shared theme preview link works. */
 export const THEME_SHARE_PREVIEW_EXPIRES_IN = '14 days'
 

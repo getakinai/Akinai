@@ -244,7 +244,7 @@ test.group('Storefront themes: rendering', (group) => {
     const service = await app.container.make(ThemeService)
     const broken = {
       ...MINIMAL,
-      'layout/theme.edge': '<html><body>{{ missingHelper() }}</body></html>',
+      'layout/theme.edge': '<html><body class="minimal">{{ product.title }}</body></html>',
     }
     const path = app.tmpPath(`broken-theme-${Date.now()}.zip`)
     await writeFile(path, zip(broken))
@@ -515,11 +515,7 @@ test.group('Storefront themes: preview', (group) => {
       .withSession(session)
     assert.include(draft.body().data.content, marker)
 
-    const preview = await client
-      .get('/')
-      .withGuard('web')
-      .loginAs(user)
-      .withSession(session)
+    const preview = await client.get('/').withGuard('web').loginAs(user).withSession(session)
     assert.include(preview.text(), marker)
 
     const saveTheme = await client
@@ -535,7 +531,10 @@ test.group('Storefront themes: preview', (group) => {
     assert.include(live.text(), marker)
   })
 
-  test('editor source PUT accepts empty content (JSON empty string)', async ({ client, assert }) => {
+  test('editor source PUT accepts empty content (JSON empty string)', async ({
+    client,
+    assert,
+  }) => {
     const user = await createAdminUser(['themes.edit'])
     const theme = await dawnLite()
     const path = 'sections/image_banner.edge'

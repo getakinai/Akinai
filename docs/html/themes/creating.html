@@ -158,9 +158,20 @@
             <code>@component</code>, <code>@slot</code> and <code>@end</code>.
           </li>
           <li>
-            Template code may not mention dangerous APIs such as <code>constructor</code>,
-            <code>eval</code>, <code>require</code>, or contain <code>../</code>. Plain text
-            and escaped output (<code>@{{ }}</code>) are not checked.
+            Expressions are checked against the program Edge compiles, not against a list of
+            banned words. A template may use literals, the variables and helpers on the
+            <a href="helpers.html">helpers page</a>, static
+            property access, a numeric index such as <code>variants[0]</code>, arithmetic and
+            comparisons, <code>&amp;&amp;</code> / <code>||</code> / <code>??</code>, ternaries,
+            arrays, and object literals. Calls are limited to those helpers and to
+            <code>.slice()</code>. Computed names (<code>obj['constructor']</code>,
+            concatenation, backticks), functions, and globals are rejected.
+            <code>@include</code> paths are string literals under <code>snippets/</code>,
+            <code>sections/</code>, or <code>layout/</code> and cannot contain
+            <code>../</code> or <code>::</code>.
+          </li>
+          <li>
+            Plain text and escaped output (<code>@{{ }}</code>) are not treated as code.
           </li>
           <li>
             Each theme renders in its own Edge instance rooted at its own folder, so

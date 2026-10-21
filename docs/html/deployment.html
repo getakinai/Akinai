@@ -92,6 +92,13 @@ node bin/server.js</code></pre>
           Configure environment variables on the host—do not ship <code>.env</code> inside
           the build artifact.
         </p>
+        <p>
+          Run the process as a non-root user. Keep the root filesystem read-only except for
+          directories the app writes (<code>tmp/</code>, logs, and local uploads), and
+          restrict outbound network access to the services it uses. Theme templates run in
+          the server process; those limits keep a template bug from becoming root in the
+          container.
+        </p>
 
         <h3>Akinai production requirements</h3>
         <p>

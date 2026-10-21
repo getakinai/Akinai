@@ -132,6 +132,7 @@
     "@uiw/codemirror-theme-github": "^4.25.12",
     "@uiw/react-codemirror": "^4.25.12",
     "@vinejs/vine": "^4.4.0",
+    "acorn": "^8.16.0",
     "csv-parse": "^7.0.3",
     "date-fns": "^4.4.0",
     "dayjs": "^1.11.23",
