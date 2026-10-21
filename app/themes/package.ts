@@ -6,7 +6,6 @@ import ThemePackageException from '#exceptions/theme_package_exception'
 import {
   MAX_THEME_FILES,
   MAX_THEME_UNPACKED_MB,
-  THEME_BANNED_TEMPLATE_PATTERNS,
   THEME_FILE_EXTENSIONS,
   THEME_SECTION_TYPE,
   THEME_TEMPLATE_NAME,
@@ -16,6 +15,7 @@ import {
   type ThemeSettingsGroup,
   type ThemeTemplateData,
 } from '#constants/themes'
+import { themeTemplateProblems } from '#theme_host/template_policy'
 import {
   parseManifest,
   parseSectionSchema,
@@ -51,22 +51,6 @@ const FILE_RULES: { pattern: RegExp; extensions: readonly string[] }[] = [
   { pattern: /^assets\/.+$/, extensions: THEME_FILE_EXTENSIONS.filter((ext) => ext !== 'edge') },
 ]
 
-/** Edge tags a theme may use. Anything else (`@inject`, custom tags) is rejected. */
-const ALLOWED_TAGS = new Set([
-  'if',
-  'elseif',
-  'else',
-  'unless',
-  'each',
-  'end',
-  'let',
-  'assign',
-  'include',
-  'includeIf',
-  'component',
-  'slot',
-])
-
 /** A tag with arguments after other content on the same line, e.g. `<li>@include('card')</li>`. */
 const INLINE_TAG =
   /\S[^\n]*?(?<![\w@])@!?(include|includeIf|if|elseif|unless|each|let|assign|component|slot)\s*\(/
@@ -96,30 +80,6 @@ function stripWrapperFolder(paths: string[]): string {
   return paths.includes(`${top}/theme.json`) ? `${top}/` : ''
 }
 
-/** Expressions and tag arguments of an Edge template, without comments or escaped output. */
-function templateCode(source: string): { code: string[]; tags: string[] } {
-  const stripped = source
-    .replace(/\{\{--[\s\S]*?--\}\}/g, '')
-    .replace(/@\{\{[\s\S]*?\}\}/g, '')
-    .replace(/^\s*@@.*$/gm, '')
-  const code = [...stripped.matchAll(/\{\{\{?([\s\S]*?)\}?\}\}/g)].map((match) => match[1])
-  const tags: string[] = []
-  for (const match of stripped.matchAll(/^[ \t]*@!?([A-Za-z_]+)/gm)) {
-    tags.push(match[1])
-    let index = (match.index ?? 0) + match[0].length
-    while (stripped[index] === ' ' || stripped[index] === '\t') index++
-    if (stripped[index] !== '(') continue
-    let depth = 0
-    const start = index
-    for (; index < stripped.length; index++) {
-      if (stripped[index] === '(') depth++
-      else if (stripped[index] === ')' && --depth === 0) break
-    }
-    code.push(stripped.slice(start + 1, index))
-  }
-  return { code, tags }
-}
-
 const MAX_EDITOR_SOURCE_BYTES = 512 * 1024
 
 /** Validates a single theme template file before saving an editor draft. */
@@ -142,16 +102,7 @@ export function validateThemeSourceFile(path: string, content: string): string[]
 }
 
 function templateProblems(path: string, source: string): string[] {
-  const problems: string[] = []
-  const { code, tags } = templateCode(source)
-  for (const tag of new Set(tags)) {
-    if (!ALLOWED_TAGS.has(tag)) problems.push(`${path}: the @${tag} tag isn't allowed in themes`)
-  }
-  const joined = code.join('\n')
-  for (const { pattern, label } of THEME_BANNED_TEMPLATE_PATTERNS) {
-    if (pattern.test(joined)) problems.push(`${path}: "${label}" isn't allowed in theme templates`)
-  }
-  if (/\.\.\//.test(joined)) problems.push(`${path}: paths may not contain "../"`)
+  const problems = themeTemplateProblems(path, source)
   source.split('\n').forEach((line, index) => {
     const inline = line.match(INLINE_TAG)
     if (inline) {

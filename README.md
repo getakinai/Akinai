@@ -322,6 +322,8 @@ node ace test functional           # functional tests only
 
 This repository does not ship deployment tooling; host it however suits you (a container platform, a VM, a PaaS). Build with `yarn build` and run `node bin/server.js` from `build/` after `yarn install --production`. Run `node ace migration:run --force` on each release.
 
+Run the process as a non-root user. Keep the root filesystem read-only except for directories the app writes (`tmp/`, logs, and local uploads), and restrict outbound network access to the services it uses. Theme templates run in the server process; those limits keep a template bug from becoming root in the container.
+
 In production (`NODE_ENV=production`) the app refuses to boot unless:
 
 - `SESSION_DRIVER=database`

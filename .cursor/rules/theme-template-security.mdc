@@ -1,0 +1,33 @@
+---
+description: Storefront themes compile to server-side JavaScript — keep the AST allowlist intact and never weaken validation
+alwaysApply: true
+---
+
+# Theme templates (hard rule)
+
+Uploaded Edge themes are **trusted code**. Edge compiles `{{ }}` and tag arguments to JavaScript in the Node process. A substring denylist is **not** sufficient (`'con'+'structor'`, computed keys, and unicode escapes bypass it).
+
+## Single source of truth
+
+- Allowlist and checks: [`app/themes/template_policy.ts`](app/themes/template_policy.ts) (`themeTemplateProblems`, `themeDirectoryProblems`).
+- Wired from [`app/themes/package.ts`](app/themes/package.ts) (upload + editor) and [`app/themes/renderer.ts`](app/themes/renderer.ts) (`engineFor` before compile).
+
+## When changing themes or the renderer
+
+1. **New data or helper on the template state** in `ThemeRenderer`: add the name to `THEME_TEMPLATE_ROOTS` or `THEME_TEMPLATE_HELPERS` in `template_policy.ts` first. Comment on `base` in `renderer.ts` points here.
+2. **New expression forms** (operators, calls, tags): extend the AST walker in `template_policy.ts`, not a regex in `package.ts`. Reject computed property access except a **numeric literal** index (`variants[0]`).
+3. **Never** reintroduce `THEME_BANNED_TEMPLATE_PATTERNS` or “scan the joined template string” as the primary control.
+4. **Regression tests** in `tests/unit/theme_package.spec.ts`: Dawn Lite must pass; add cases for any new bypass class (concatenated keys, backticks, `Function`, arrows, `process`, `state` / `$context`).
+
+## Do not ship
+
+- Validation only on upload (themes already extracted under `tmp/themes/` must be rechecked at render).
+- New Edge tags (`@inject`, `@eval`, `@debugger`, …) without an explicit product decision and allowlist update.
+- Theme features that require `require`, `import()`, `globalThis`, or arbitrary JS in `.edge` files.
+
+## Permissions and ops
+
+- Treat `themes.upload` / `themes.edit` as **full server trust** (see `app/abilities/permissions.ts`, `docs/creating-a-theme.md`).
+- Document deployment hardening (non-root user, read-only root FS, restricted egress) when touching deployment docs.
+
+Before finishing theme-related work, state what you changed in the allowlist or tests and confirm bypass payloads from the security report would still be rejected.

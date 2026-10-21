@@ -108,6 +108,51 @@ test.group('readThemePackage', () => {
     assert.isTrue(problems.some((problem) => problem.includes('@inject')))
   })
 
+  test('rejects expressions that build a banned name at runtime', ({ assert }) => {
+    const payloads = [
+      "{{ ((''['con'+'structor'])['con'+'structor']('return this'))()['pro'+'cess']['version'] }}",
+      `{{ ((''['con'+'structor'])['con'+'structor']('return this'))()
+        ['pro'+'cess']['getBuiltinModule']('child_'+'pro'+'cess')['execSync']('id').toString() }}`,
+      "{{ section['constr'+'uctor'] }}",
+      '{{ section[`constructor`] }}',
+      "{{ section[`con${'structor'}`] }}",
+      '{{ section[block.type] }}',
+      '{{ String.fromCharCode(99) }}',
+      '{{ process.version }}',
+      "{{ Function('return this')() }}",
+      '{{ (() => process.version)() }}',
+      "{{ (new Function('return process'))() }}",
+      '{{ section.\\u0063onstructor }}',
+      '{{ globalThis }}',
+      '{{ state }}',
+      '{{ $context }}',
+      '@let({ constructor: c } = section)',
+      '@assign(process = 1)',
+      '@if(section)\n  @let(process = section)\n@end\n{{ process.version }}',
+    ]
+
+    for (const payload of payloads) {
+      const problems = problemsOf({
+        ...MINIMAL,
+        'sections/hello.edge': payload,
+      })
+      assert.isAbove(problems.length, 0, payload)
+    }
+  })
+
+  test('allows numeric indexes, helpers, and string concatenation', ({ assert }) => {
+    const problems = problemsOf({
+      ...MINIMAL,
+      'sections/hello.edge': [
+        '{{ product.variants[0].price }}',
+        "@let(cartProps = { label: t('header.cart') })",
+        "{{{ island('cart_button', cartProps, '<a href=\"' + route('home') + '\"></a>') }}}",
+      ].join('\n'),
+    })
+
+    assert.deepEqual(problems, [])
+  })
+
   test('rejects tags that share a line with other markup', ({ assert }) => {
     const problems = problemsOf({
       ...MINIMAL,
@@ -127,7 +172,8 @@ test.group('readThemePackage', () => {
   test('allows banned words in plain text and escaped output', ({ assert }) => {
     const problems = problemsOf({
       ...MINIMAL,
-      'sections/hello.edge': '<p>Global shipping, the process, and @{{ constructor }}</p>',
+      'sections/hello.edge':
+        '<p>Global shipping, the process, and @{{ constructor }}</p>{{-- constructor --}}',
     })
 
     assert.deepEqual(problems, [])
@@ -136,7 +182,8 @@ test.group('readThemePackage', () => {
   test('accepts @app blocks when the section schema allows them', ({ assert }) => {
     const problems = problemsOf({
       ...MINIMAL,
-      'sections/apps.edge': '<div>{{{ appBlock(block.settings) }}}</div>',
+      'sections/apps.edge':
+        '@each(block in section.blocks)\n  <div>{{{ appBlock(block.settings) }}}</div>\n@end',
       'sections/apps.schema.json': JSON.stringify({
         name: 'Apps',
         blocks: [{ type: '@app', name: 'App' }],

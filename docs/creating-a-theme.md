@@ -239,7 +239,8 @@ Edge templates run on the server, so uploads are checked before they are stored.
 - Zips may be up to 10 MB, unpack to 30 MB, and hold 500 files. A theme may have 40 sections and 50 blocks per section.
 - File names use letters, digits, `.`, `-` and `_`. Each folder only allows its own file types (see the layout above). JavaScript is never allowed; use islands.
 - Templates may use these tags: `@if`, `@elseif`, `@else`, `@unless`, `@each`, `@let`, `@assign`, `@include`, `@includeIf`, `@component`, `@slot` and `@end`.
-- Template code may not mention `constructor`, `__proto__`, `prototype`, `process`, `require`, `import()`, `globalThis`, `global`, `Function`, `eval`, `Reflect` or `Proxy`, or contain `../`. Plain text and escaped output (`@{{ }}`) are not checked.
+- Expressions are checked against the program Edge compiles, not against a list of banned words. A template may use literals, the variables and helpers above, static property access, a numeric index such as `variants[0]`, arithmetic and comparisons, `&&` / `||` / `??`, ternaries, arrays, and object literals. Calls are limited to those helpers and to `.slice()`. Computed names (`obj['constructor']`, concatenation, backticks), functions, and globals are rejected. `@include` paths are string literals under `snippets/`, `sections/`, or `layout/` and cannot contain `../` or `::`.
+- Plain text and escaped output (`@{{ }}`) are not treated as code.
 - Each theme renders in its own Edge instance rooted at its own folder, so `@include` can only reach the theme's files.
 - Theme pages do not get the CSP nonce, so inline `<script>` tags are blocked. Inline `style` attributes work.
 

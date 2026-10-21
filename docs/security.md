@@ -4,7 +4,7 @@ This guide explains the protections built into Akinai, where each one lives in t
 
 To **report a vulnerability**, see [SECURITY.md](../SECURITY.md) (private disclosure only).
 
-Contributor conventions that reinforce these rules also live in `.cursor/rules/` (`owasp-security.mdc`, `customer-resource-ownership.mdc`, `public-form-recaptcha.mdc`, `validator-strict-types.mdc`, `inertia-no-direct-injection.mdc`).
+Contributor conventions that reinforce these rules also live in `.cursor/rules/` (`owasp-security.mdc`, `theme-template-security.mdc`, `customer-resource-ownership.mdc`, `public-form-recaptcha.mdc`, `validator-strict-types.mdc`, `inertia-no-direct-injection.mdc`).
 
 ## Accounts and sessions
 
@@ -161,6 +161,16 @@ sequenceDiagram
 - **POLi nudges:** they only carry a token, and the transaction is looked up with POLi itself, so a forged nudge can't mark an order paid.
 - **Server-side totals:** totals, taxes, discounts and shipping are recalculated on the server, and money and stock changes run inside one repository transaction.
 - **Gateway keys** are encrypted at rest with their own purposes.
+
+## Themes
+
+Uploaded themes are Edge templates. Edge compiles them to JavaScript and runs that JavaScript in the server process, so a theme is trusted code.
+
+`themeTemplateProblems` in `app/themes/template_policy.ts` allows only the expressions a theme needs: literals, a fixed list of variables and helpers, static property access, numeric indexes, and calls to those helpers or `.slice()`. The check walks the AST Edge compiles. A denylist of source words is not enough, because a name such as `constructor` can be built with concatenation at runtime.
+
+The same check runs on upload, on editor saves, and again before a published or previewed theme is compiled, including themes extracted before the check existed. A theme that fails it is not rendered. Live requests fall back to the built-in storefront.
+
+Give `themes.upload` and `themes.edit` only to staff you would trust with the server. Run the process as a user that is not root, with a read-only root filesystem and restricted egress, so a template bug does not own the container.
 
 ## Files and uploads
 

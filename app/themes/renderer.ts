@@ -25,6 +25,7 @@ import {
   invalidateThemeEngine,
   registerThemeEngine,
 } from '#theme_host/theme_engine_cache'
+import { themeDirectoryProblems } from '#theme_host/template_policy'
 import { imageUrl } from '#utils/image_url'
 import { formatMoney } from '#utils/money'
 
@@ -60,10 +61,18 @@ const locales = new Map<string, Json>()
 
 export { invalidateThemeEngine }
 
-/** One Edge instance per package, rooted at its extracted folder and nothing else. */
-function engineFor(hash: string, dir: string): Edge {
+/**
+ * One Edge instance per package, rooted at its extracted folder and nothing else.
+ * Templates are checked again here so a package extracted before the allowlist
+ * existed is not compiled.
+ */
+async function engineFor(hash: string, dir: string): Promise<Edge> {
   let engine = getThemeEngine(hash) as Edge | undefined
   if (!engine) {
+    const problems = await themeDirectoryProblems(dir)
+    if (problems.length > 0) {
+      throw new Error(`Theme template rejected: ${problems.slice(0, 5).join('; ')}`)
+    }
     engine = Edge.create({ cache: app.inProduction })
     engine.mount(dir)
     registerThemeEngine(hash, engine)
@@ -178,7 +187,7 @@ export default class ThemeRenderer {
     } catch (error) {
       if (error instanceof lucidErrors.E_ROW_NOT_FOUND) throw error
       ctx.logger.error({ err: error, theme: theme.id }, 'Theme failed to render')
-      if (preview) throw error
+      if (preview || editor) throw error
       return null
     }
   }
@@ -200,7 +209,7 @@ export default class ThemeRenderer {
       ? await ensureThemeExtractedForEditor(theme, editorDrafts)
       : await ensureThemeExtracted(theme)
     const engineKey = editor ? `${theme.packageHash}:${theme.id}` : theme.packageHash
-    const edge = engineFor(engineKey, dir)
+    const edge = await engineFor(engineKey, dir)
     const [settingsRow, locale, resolver] = await Promise.all([
       this.themeRepository.settings(theme),
       localeFor(theme.packageHash, dir),
@@ -269,6 +278,8 @@ export default class ThemeRenderer {
 
     const resources: Json = { ...data }
     for (const key of BUILTIN_ONLY_KEYS) delete resources[key]
+    // A theme can only read names listed in app/themes/template_policy.ts.
+    // Add a helper or root there before exposing it on this state object.
     const base: Json = {
       ...resources,
       ...helpers,
