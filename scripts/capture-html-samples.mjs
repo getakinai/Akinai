@@ -353,6 +353,8 @@ async function sanitizeSnapshot(html, fromRelPath) {
       href.startsWith('mailto:') ||
       href.startsWith('tel:') ||
       href.startsWith('javascript:') ||
+      href.startsWith('data:') ||
+      href.startsWith('vbscript:') ||
       href.startsWith('.') ||
       href.startsWith('media/')
     ) {
