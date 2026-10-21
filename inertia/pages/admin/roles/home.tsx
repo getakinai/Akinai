@@ -7,7 +7,7 @@ import { Skeleton } from '~/components/ui'
 import AdminLayout from '~/layouts/admin'
 import { HttpError } from '~/lib/http'
 import { card } from '~/lib/styles'
-import { useCan } from '../_hooks'
+import { useAdminMe, useCan } from '../_hooks'
 import { useRoleMatrix, useToggleRolePermission } from './_hooks'
 import DeleteRoleDialog from './_delete_role_dialog'
 import PermissionMatrixCard, { cellKey } from './_permission_matrix_card'
@@ -39,6 +39,7 @@ export default function AdminRolesHome() {
   const [roleDialog, setRoleDialog] = useState<RoleDialogState>({ open: false })
   const [deleting, setDeleting] = useState<AdminRole | null>(null)
 
+  const { data: me } = useAdminMe()
   const canCreate = useCan('roles.create')
   const canEdit = useCan('roles.edit')
   const canDelete = useCan('roles.archive')
@@ -115,6 +116,9 @@ export default function AdminRolesHome() {
                     actions={data.actions}
                     roles={editableRoles}
                     canEdit={canEdit}
+                    actorRoleId={me?.roleId ?? null}
+                    actorPermissions={me?.permissions ?? []}
+                    actorIsAdmin={me?.role?.isLocked ?? false}
                     pending={pending}
                     onToggle={onToggle}
                   />

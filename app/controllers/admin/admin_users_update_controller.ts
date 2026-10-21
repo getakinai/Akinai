@@ -20,6 +20,7 @@ export default class AdminUsersUpdateController {
       { meta: { userId: user.id } }
     )
     const role = await this.roleService.findOrFail(roleId)
+    await role.load('permissions')
     await ctx.bouncer.with(UserPolicy).authorize('update', user, { role, status })
 
     const updated = await this.userService.update(user, { fullName, email, status, roleId })

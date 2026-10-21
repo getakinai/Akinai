@@ -7,6 +7,9 @@ type PermissionMatrixCardProps = {
   actions: string[]
   roles: AdminRole[]
   canEdit: boolean
+  actorRoleId: string | null
+  actorPermissions: string[]
+  actorIsAdmin: boolean
   pending: Set<string>
   onToggle: (role: AdminRole, permission: string, granted: boolean) => void
 }
@@ -24,9 +27,14 @@ export default function PermissionMatrixCard({
   actions,
   roles,
   canEdit,
+  actorRoleId,
+  actorPermissions,
+  actorIsAdmin,
   pending,
   onToggle,
 }: PermissionMatrixCardProps) {
+  const held = new Set(actorPermissions)
+
   return (
     <section
       className="overflow-hidden rounded-card border border-line-2 bg-card"
@@ -37,6 +45,9 @@ export default function PermissionMatrixCard({
           {resource.label}
         </h3>
         <p className="mt-0.5 text-[13px] text-muted">{resource.description}</p>
+        {resource.adminOnly && !actorIsAdmin && (
+          <p className="mt-1 text-[13px] text-muted">Only an admin can grant these.</p>
+        )}
       </header>
 
       <div className="overflow-x-auto">
@@ -70,13 +81,18 @@ export default function PermissionMatrixCard({
 
                   const permission = `${resource.key}.${action}`
                   const checked = role.permissions.includes(permission)
+                  const ownRole = role.id === actorRoleId && !actorIsAdmin
+                  const cannotGrant =
+                    !checked && !actorIsAdmin && (resource.adminOnly || !held.has(permission))
+                  const disabled =
+                    !canEdit || ownRole || cannotGrant || pending.has(cellKey(role.id, permission))
 
                   return (
                     <td key={action} className={td}>
                       <Checkbox
                         aria-label={`${role.name}: ${action} ${resource.label}`}
                         checked={checked}
-                        disabled={!canEdit || pending.has(cellKey(role.id, permission))}
+                        disabled={disabled}
                         onChange={(event) => onToggle(role, permission, event.target.checked)}
                       />
                     </td>

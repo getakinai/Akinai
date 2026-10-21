@@ -27,9 +27,14 @@ export default class RoleTransformer extends BaseTransformer<Role> {
   }
 
   /**
-   * Picker shape; does not need `permissions` preloaded.
+   * Picker shape. Expects `permissions` to be preloaded so the client can
+   * hide roles the actor is not allowed to assign. A locked role reports
+   * every permission without that preload.
    */
   toOption() {
-    return this.pick(this.resource, ['id', 'name', 'slug', 'isLocked', 'isDefault'])
+    return {
+      ...this.pick(this.resource, ['id', 'name', 'slug', 'isLocked', 'isDefault']),
+      permissions: this.resource.permissionKeys as string[],
+    }
   }
 }

@@ -29,7 +29,10 @@ export default class RoleRepository {
   }
 
   async allOrdered(): Promise<Role[]> {
-    return Role.query().orderBy('sort_order', 'asc').orderBy('created_at', 'asc')
+    return Role.query()
+      .preload('permissions')
+      .orderBy('sort_order', 'asc')
+      .orderBy('created_at', 'asc')
   }
 
   async find(id: string): Promise<Role | null> {

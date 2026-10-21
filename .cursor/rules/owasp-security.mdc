@@ -10,7 +10,7 @@ change would weaken one, stop and say so instead of shipping it.
 
 | Risk | Do this |
 |---|---|
-| A01 Access control | Admin routes: `auth({ guards: ['web'] })` + `middleware.can({ permission })`; record rules in a policy. Customer `:id` routes: `customerOwns` + queries scoped by session customer (404, not 403). Never trust owner ids from the client. |
+| A01 Access control | Admin routes: `auth({ guards: ['web'] })` + `middleware.can({ permission })`; record rules in a policy. Customer `:id` routes: `customerOwns` + queries scoped by session customer (404, not 403). Never trust owner ids from the client. Permission grants must not exceed the actor; see below. |
 | A02 Misconfiguration | No new secrets in code; add env vars to `start/env.ts` and `.env.example`. Keep CSP/CSRF/HSTS on; no inline styles/scripts. No stack traces outside dev/test. |
 | A03 Supply chain | `yarn add` only well-maintained packages; commit `yarn.lock`. Run `yarn security:audit` after dependency changes. Pin GitHub Action SHAs. |
 | A04 Crypto | Secrets at rest via `encryption.encrypt(value, { purpose })`; one-time codes hashed (HMAC/hash), compared with `timingSafeEqual`. Never log or return secrets (`serializeAs: null`, `auditHidden`). |
@@ -20,6 +20,36 @@ change would weaken one, stop and say so instead of shipping it.
 | A08 Integrity | Uploads: validate extension/size in Vine, store via `uploadImage()` (re-encodes, server Content-Type). Verify webhook signatures and amounts before acting. |
 | A09 Logging | Record security events with `AuditLogService.recordSecurityEvent`; alert-worthy ones log `warn` with an `event` field. Add new sensitive keys to `SENSITIVE_KEYS` in `config/logger.ts`. |
 | A10 Exceptions | Never swallow errors (`.catch(() => null)`, empty `catch {}`). Use `orNullIfMissing()` for not-found; log best-effort failures; await or `void` every promise. Fail closed. |
+
+## A01: granting permissions
+
+A management permission such as `roles.edit` is not a grant of every permission in the catalogue. Staff may create a custom role (`roles.create`): `RoleService.create` saves a name only, and the role starts with no permissions. The escalation is filling that role in.
+
+In `RolePolicy.editPermissions` and `UserPolicy.update`, for anyone who is not the locked admin (`user.isAdmin`):
+
+- Refuse edits to the actor's own role.
+- Refuse `granted` when `!user.hasPermission(permission)`.
+- Refuse granting or assigning `users.*`, `roles.*`, or `themes.*` (`isAdminOnlyPermission` in `app/abilities/permissions.ts`).
+
+Apply both checks on the role matrix and on staff role assignment. The matrix and the user role picker only hide choices the policy rejects. Revoking a permission on someone else's role may stay allowed.
+
+```typescript
+// ❌ BAD — roles.edit alone, so the actor can grant customers.view to their own role
+if (!user.hasPermission('roles.edit')) return false
+if (role.isLocked) return AuthorizationResponse.deny('The admin role always has every permission', 422)
+return true
+
+// ✅ GOOD — own role, admin-only namespaces, then permissions the actor lacks
+if (role.id === user.roleId && !user.isAdmin) {
+  return AuthorizationResponse.deny("You can't change your own role", 422)
+}
+if (change.granted && isAdminOnlyPermission(change.permission) && !user.isAdmin) {
+  return AuthorizationResponse.deny('Only admins can grant this permission', 422)
+}
+if (change.granted && !user.hasPermission(change.permission)) {
+  return AuthorizationResponse.deny("You can't grant a permission you don't have", 422)
+}
+```
 
 ## Before finishing
 

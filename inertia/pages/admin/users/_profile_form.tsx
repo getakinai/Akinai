@@ -19,9 +19,36 @@ type ProfileFormProps = {
 }
 
 /**
+ * Matches `isAdminOnlyPermission` in app/abilities/permissions.ts. The role
+ * picker only receives permission keys, so it repeats the resource list.
+ */
+const ADMIN_ONLY_PREFIXES = ['users.', 'roles.', 'themes.']
+
+/**
+ * A non-admin may keep the user's current role, and may switch to a role
+ * whose permissions they already hold and that carries no admin-only
+ * permission. Mirrors UserPolicy.
+ */
+function canAssignRole(
+  role: AdminRoleOption,
+  actorPermissions: Set<string>,
+  actorIsAdmin: boolean,
+  currentRoleId: string | null
+) {
+  if (actorIsAdmin || role.id === currentRoleId) return true
+  if (role.isLocked) return false
+  return role.permissions.every(
+    (permission) =>
+      actorPermissions.has(permission) &&
+      !ADMIN_ONLY_PREFIXES.some((prefix) => permission.startsWith(prefix))
+  )
+}
+
+/**
  * Mirrors UserPolicy so staff only see choices the server will accept:
- * non-admins can't assign the admin role or edit admins, and nobody can
- * change their own role or status.
+ * non-admins can't assign the admin role, a role with permissions they
+ * lack, or a role carrying user, role, or theme permissions, and nobody
+ * can change their own role or status.
  */
 export default function ProfileForm({ user, me, roles, rolesLoading }: ProfileFormProps) {
   const [fullName, setFullName] = useState(user.fullName ?? '')
@@ -36,8 +63,9 @@ export default function ProfileForm({ user, me, roles, rolesLoading }: ProfileFo
   const readOnly = Boolean(user.role?.isLocked) && !actorIsAdmin
   const accessLocked = readOnly || isSelf
 
+  const actorPermissions = new Set(me?.permissions ?? [])
   const roleOptions = roles
-    .filter((role) => actorIsAdmin || !role.isLocked)
+    .filter((role) => canAssignRole(role, actorPermissions, actorIsAdmin, user.roleId))
     .map((role) => ({
       value: role.id,
       label: role.name,
