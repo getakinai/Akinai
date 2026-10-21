@@ -107,8 +107,18 @@
             var select = document.getElementById('sample-page')
             var frame = document.getElementById('sample-frame')
             if (!select || !frame) return
+
+            var allowedPages = new Set(
+              Array.prototype.map.call(select.options, function (option) {
+                return option.value
+              })
+            )
+
             select.addEventListener('change', function () {
-              frame.src = select.value
+              var selectedPage = select.value
+              if (allowedPages.has(selectedPage)) {
+                frame.src = selectedPage
+              }
             })
           })()
         </script>
