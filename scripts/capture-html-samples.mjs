@@ -332,8 +332,11 @@ async function rewriteHtmlAssets(html, fromRelPath) {
 async function sanitizeSnapshot(html, fromRelPath) {
   let out = html
   // Inline + external module scripts (Vite client, react-refresh preamble, inertia entry)
-  out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*>[\s\S]*?<\/script>/gi, '')
   let previous
+  do {
+    previous = out
+    out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*>[\s\S]*?<\/script>/gi, '')
+  } while (out !== previous)
   do {
     previous = out
     out = out.replace(/<script\b[^>]*\btype=["']module["'][^>]*\/>/gi, '')
