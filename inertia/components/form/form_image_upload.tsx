@@ -27,6 +27,19 @@ type FormImageUploadProps = {
 const filePickerFocus =
   'cursor-pointer has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring has-[:disabled]:pointer-events-none has-[:disabled]:opacity-45'
 
+function toSafeImageSrc(url: string): string | null {
+  try {
+    const parsed = new URL(url, window.location.origin)
+    return parsed.protocol === 'blob:' ||
+      parsed.protocol === 'http:' ||
+      parsed.protocol === 'https:'
+      ? parsed.href
+      : null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Single image picker with preview. Uploading is up to the caller: it gets
  * the picked file through `onSelect` and passes the stored image back.
@@ -48,6 +61,8 @@ export default function FormImageUpload({
   onSelect,
   onRemove,
 }: FormImageUploadProps) {
+  const safeImageSrc = image ? toSafeImageSrc(image.url) : null
+
   function onChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     event.target.value = ''
@@ -91,9 +106,9 @@ export default function FormImageUpload({
             aspect === 'wide' ? 'aspect-video max-w-[260px]' : 'aspect-square max-w-[200px]'
           )}
         >
-          {image ? (
+          {safeImageSrc ? (
             <img
-              src={image.url}
+              src={safeImageSrc}
               alt=""
               className={cn('size-full', fit === 'contain' ? 'object-contain p-3' : 'object-cover')}
             />
