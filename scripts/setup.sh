@@ -16,10 +16,17 @@ fail() {
 }
 
 step "Checking prerequisites"
-command -v node >/dev/null 2>&1 || fail "Node.js is not installed. Install Node 26 or newer."
-NODE_MAJOR=$(node -p 'process.versions.node.split(".")[0]')
-[ "$NODE_MAJOR" -ge 26 ] || fail "Node 26 or newer is required (found $(node -v))."
-command -v corepack >/dev/null 2>&1 || fail "Corepack is not available. Use Node 26+ with Corepack enabled."
+command -v node >/dev/null 2>&1 || fail "Node.js is not installed. Install Node 26.12.1 or newer (see .nvmrc)."
+# 26.12.1+ includes the Oct 2026 security fixes (CVE-2026-111497 Brotli RCE and related).
+node -e '
+  const [maj, min, pat] = process.versions.node.split(".").map(Number)
+  const ok = maj > 26 || (maj === 26 && (min > 12 || (min === 12 && pat >= 1)))
+  if (!ok) {
+    console.error("Node 26.12.1 or newer is required (found " + process.version + "). Run: nvm use")
+    process.exit(1)
+  }
+' || fail "Node 26.12.1 or newer is required (found $(node -v))."
+command -v corepack >/dev/null 2>&1 || fail "Corepack is not available. Use Node 26.12.1+ with Corepack enabled."
 corepack enable >/dev/null 2>&1 || true
 command -v yarn >/dev/null 2>&1 || fail "Yarn is not available. Run: corepack enable"
 command -v docker >/dev/null 2>&1 || fail "Docker is not installed."
