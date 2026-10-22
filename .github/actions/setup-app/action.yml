@@ -35,10 +35,13 @@ runs:
           exit 1
         fi
 
+    # Do not pass --immutable-cache here: Actions caches node_modules, not Yarn's
+    # global cache (~/.yarn/berry/cache). --immutable-cache then fails with YN0056
+    # on public PRs (hardened mode) even when node_modules was restored.
     - name: Sync Yarn install state after cache restore
       if: steps.node-modules.outputs.cache-hit == 'true'
       shell: bash
-      run: HUSKY=0 yarn install --immutable --immutable-cache
+      run: HUSKY=0 yarn install --immutable
 
     - name: Prepare .env
       shell: bash
