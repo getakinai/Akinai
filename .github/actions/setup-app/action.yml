@@ -12,6 +12,21 @@ runs:
       shell: bash
       run: echo "${GITHUB_WORKSPACE}/scripts" >> "$GITHUB_PATH"
 
+    # Avoid Node dual-stack stalls that surface as Yarn "Timeout awaiting 'socket'".
+    - name: Tune Node networking for Yarn
+      shell: bash
+      run: echo "NODE_OPTIONS=--no-network-family-autoselection${NODE_OPTIONS:+ $NODE_OPTIONS}" >> "$GITHUB_ENV"
+
+    # Yarn's global package cache (separate from node_modules). Speeds installs and
+    # reduces registry timeouts for large optional platform packages.
+    - name: Cache Yarn downloads
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.yarn/berry/cache
+        key: yarn-berry-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          yarn-berry-${{ runner.os }}-${{ runner.arch }}-
+
     # Native modules (sharp) are built for the Node version and platform, so both are in the key.
     - name: Cache node_modules
       id: node-modules
@@ -35,10 +50,13 @@ runs:
           exit 1
         fi
 
+    # Do not pass --immutable-cache here: Actions caches node_modules, not Yarn's
+    # global cache (~/.yarn/berry/cache). --immutable-cache then fails with YN0056
+    # on public PRs (hardened mode) even when node_modules was restored.
     - name: Sync Yarn install state after cache restore
       if: steps.node-modules.outputs.cache-hit == 'true'
       shell: bash
-      run: HUSKY=0 yarn install --immutable --immutable-cache
+      run: HUSKY=0 yarn install --immutable
 
     - name: Prepare .env
       shell: bash

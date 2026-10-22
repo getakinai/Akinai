@@ -113,7 +113,7 @@ Staff authorization uses Bouncer with database-backed roles. Each User has one r
 - All database transactions and database queries must be placed in repository classes, not in controllers or services. Controllers handle validation and call services, services orchestrate business logic and call repositories, and repositories handle all database operations and transactions, for better testability and scalability (thin controller / fat repository pattern).
 - Controllers expose endpoints only: no direct DB or template calls.
 - Always use the `node ace` command for AdonisJS actions (e.g., `node ace migration:run`, `node ace db:seed`, `node ace make:controller`, etc.).
-- Always use `yarn` (Yarn classic, `yarn.lock`) as the package manager (e.g., `yarn add`, `yarn install`, `yarn remove`). Never use npm or commit a `package-lock.json`. Only commit `yarn.lock` changes when dependencies actually change.
+- Always use Yarn 4 (`yarn.lock`, vendored in `.yarn/releases/`) as the package manager (e.g., `yarn add`, `yarn install`, `yarn remove`). Enable with `corepack enable`. Never use npm or commit a `package-lock.json`. Only commit `yarn.lock` changes when dependencies actually change.
 - Back-office features always live under `/admin` routes and `inertia/pages/admin/`. Customer-facing features live under `/`, `/account`, and `inertia/pages/customers/`.
 
 ### TESTING

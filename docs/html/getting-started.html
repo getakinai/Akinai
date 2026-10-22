@@ -97,7 +97,7 @@ cd storefront</code></pre>
 
         <h2 id="quick-start">Quick start</h2>
         <p>
-          With Node 24+, Yarn, and
+          With Node 26+, Yarn 4, and
           <a href="https://docs.docker.com/get-docker/" rel="noopener noreferrer"
             >Docker</a
           >
@@ -122,8 +122,8 @@ yarn dev     # http://localhost:3333</code></pre>
 
         <h2 id="prerequisites">Prerequisites</h2>
         <ul>
-          <li>Node.js 24 or newer</li>
-          <li>Yarn classic (<code>npm i -g yarn</code>)</li>
+          <li>Node.js 26 or newer (<code>.nvmrc</code> pins the CI version)</li>
+          <li>Yarn 4 via Corepack (<code>corepack enable</code> — vendored in <code>.yarn/releases/</code>)</li>
           <li>
             Docker (for PostgreSQL, Mailpit, Typesense, Redis) —
             <a href="https://docs.docker.com/get-docker/" rel="noopener noreferrer"

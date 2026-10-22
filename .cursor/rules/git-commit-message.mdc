@@ -10,7 +10,7 @@ alwaysApply: false
 - When asked for "commit text" or a commit message, **only output the text**. Do not run `git commit` unless the user explicitly asks you to commit.
 - Base the message on the actual changes (`git status`, `git diff`, `git diff --staged`), not only on the conversation.
 - If the change set includes files the user made separately (e.g. a file they added themselves), point that out under the message so they can unstage it if they want a separate commit.
-- Never commit `.env`, secrets, or `package-lock.json` (this project uses yarn).
+- Never commit `.env`, secrets, or `package-lock.json` (this project uses Yarn 4).
 
 ## Format
 
