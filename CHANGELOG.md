@@ -5,6 +5,12 @@ All notable changes to Akinai are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- Require Node.js **26.12.1+** (`engines`, `.nvmrc`, `yarn setup`) for the [October 2026 Node.js security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases), including the Brotli decoder out-of-bounds write ([CVE-2026-111497](https://thehackernews.com/2026/10/nodejs-brotli-decoder-bug-could-allow.html)).
+
 ## [0.0.1] — 2026-10-17
 
 First public release of [Akinai](https://getakinai.com): an open-source e-commerce monolith with a staff back office and a customer storefront.
@@ -57,7 +63,7 @@ First public release of [Akinai](https://getakinai.com): an open-source e-commer
 
 ### Requirements
 
-- Node.js 26+
+- Node.js 26.12.1+
 - Yarn 4 (vendored release, immutable lockfile, install-script allowlist)
 - Docker (for local PostgreSQL, Mailpit, Typesense, Redis)
 

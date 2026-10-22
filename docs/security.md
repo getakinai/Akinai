@@ -204,6 +204,7 @@ Give `themes.upload` and `themes.edit` only to staff you would trust with the se
 
 ## Supply chain and CI
 
+- **Node.js runtime:** run **26.12.1 or newer** (`.nvmrc` and `package.json` `engines`). That release patches the bundled Brotli decoder ([CVE-2026-111497](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)) and related Oct 2026 Node security fixes. CI installs from `.nvmrc`. Production hosts must use the same floor; there is no in-app workaround for the Brotli flaw.
 - **Yarn 4** only, with `yarn.lock` committed and the release vendored under `.yarn/releases/`. CI enables Corepack and installs with `yarn install --immutable`. Third-party **install scripts are off** by default (`enableScripts: false` in `.yarnrc.yml`). Allow a package only by setting `dependenciesMeta.<name>.built` to `true` in the root `package.json`; set `built: false` on packages that warn but do not need scripts so new dependencies surface as `YN0004` in CI. The root `prepare` script (Husky) still runs.
 - `yarn security:audit` (`scripts/security-audit.sh`) runs `yarn npm audit --recursive --severity high` over production and dev dependencies. Run it after any dependency change.
 - Pull requests run **dependency review** (high severity and above) in `.github/workflows/ci.yml`.
