@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run the vendored Yarn release (no Corepack download in CI).
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+exec node "${ROOT}/.yarn/releases/yarn-4.18.1.cjs" "$@"

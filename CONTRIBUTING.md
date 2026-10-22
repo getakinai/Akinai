@@ -29,7 +29,7 @@ These come up most often in review.
 
 **General**
 
-- Use Yarn classic. Never commit `package-lock.json`, and only commit `yarn.lock` when dependencies change.
+- Use Yarn 4 (`corepack enable`, vendored in `.yarn/releases/`). Never commit `package-lock.json`, and only commit `yarn.lock` when dependencies change. New dependencies with install scripts need an entry in root `package.json` `dependenciesMeta` (`built: true` or `built: false`).
 - Use `node ace` for AdonisJS tasks (`make:migration`, `migration:run`, `db:seed`, ...).
 - Every change ships with unit and functional tests.
 

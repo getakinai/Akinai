@@ -27,8 +27,18 @@ jobs:
         env:
           GITLEAKS_VERSION: 8.30.1
         run: |
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
-            | sudo tar -xz -C /usr/local/bin gitleaks
+          set -euo pipefail
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -sSfL "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" -o /tmp/gitleaks_checksums.txt
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          expected=$(grep "  ${tarball}$" /tmp/gitleaks_checksums.txt | awk '{print $1}')
+          curl -sSfL "${base}/${tarball}" -o "/tmp/${tarball}"
+          actual=$(sha256sum "/tmp/${tarball}" | awk '{print $1}')
+          if [ "$actual" != "$expected" ]; then
+            echo "gitleaks checksum mismatch" >&2
+            exit 1
+          fi
+          sudo tar -xz -C /usr/local/bin -f "/tmp/${tarball}" gitleaks
           gitleaks version
       - name: Scan for secrets
         run: gitleaks detect --source . --verbose --redact --config .gitleaks.toml
@@ -44,8 +54,27 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      # yarn audit reads package.json and yarn.lock only; no install needed.
-      - run: yarn security:audit
+      - name: Use vendored Yarn
+        run: echo "${GITHUB_WORKSPACE}/scripts" >> "$GITHUB_PATH"
+      - name: Install for audit
+        run: HUSKY=0 yarn install --immutable
+      - run: sh scripts/security-audit.sh
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          allow-ghsas: GHSA-vfj7-8cjw-p6xm
 
   typecheck:
     name: Typecheck

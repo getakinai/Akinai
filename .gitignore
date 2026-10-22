@@ -1,6 +1,15 @@
 # Dependencies and AdonisJS build
 node_modules
 build
+
+# Yarn 4. The vendored release is committed; the cache is not.
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
 tmp/*
 !tmp/.gitkeep
 

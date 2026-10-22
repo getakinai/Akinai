@@ -92,7 +92,7 @@ Inertia pages only receive route ids; records are always fetched from JSON endpo
 
 ### Tooling
 
-- **Package manager:** Yarn classic (`yarn.lock`)
+- **Package manager:** Yarn 4 (`yarn.lock`, vendored in `.yarn/releases/`)
 - **Tests:** [Japa](https://japa.dev) (unit and functional suites)
 - **Lint and format:** ESLint (`@adonisjs/eslint-config`) and Prettier
 - **Local services:** Docker Compose (PostgreSQL, a separate test PostgreSQL, Mailpit)
@@ -157,8 +157,8 @@ The built-in React storefront (when no uploaded theme is live) still uses **Buil
 
 ### Prerequisites
 
-- Node.js 24 or newer
-- Yarn classic (`npm i -g yarn`)
+- Node.js 24 or newer (`.nvmrc` pins the version used in CI; enable it with `nvm use` or match that release locally)
+- Yarn 4 via Corepack (`corepack enable` — the project vendors Yarn in `.yarn/releases/`)
 - Docker (for PostgreSQL and Mailpit)
 
 The Docker Compose file for the local development services lives in [`.infra/`](.infra/README.md).
