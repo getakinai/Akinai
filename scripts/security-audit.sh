@@ -4,4 +4,4 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-yarn npm audit --recursive --severity high
+exec node .yarn/releases/yarn-4.18.1.cjs npm audit --recursive --severity high

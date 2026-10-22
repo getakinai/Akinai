@@ -8,16 +8,18 @@ runs:
       with:
         node-version-file: .nvmrc
 
-    - name: Enable Corepack
+    - name: Use vendored Yarn
       shell: bash
-      run: corepack enable
+      run: echo "${GITHUB_WORKSPACE}/scripts" >> "$GITHUB_PATH"
 
     # Native modules (sharp) are built for the Node version and platform, so both are in the key.
     - name: Cache node_modules
       id: node-modules
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
-        path: node_modules
+        path: |
+          node_modules
+          .yarn/install-state.gz
         key: node-modules-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
           node-modules-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
@@ -32,6 +34,11 @@ runs:
           echo 'A dependency has install scripts that are not allowlisted (YN0004). Set dependenciesMeta.built in package.json.' >&2
           exit 1
         fi
+
+    - name: Sync Yarn install state after cache restore
+      if: steps.node-modules.outputs.cache-hit == 'true'
+      shell: bash
+      run: HUSKY=0 yarn install --immutable --immutable-cache
 
     - name: Prepare .env
       shell: bash

@@ -54,9 +54,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - run: corepack enable
-      # yarn npm audit reads package.json and yarn.lock only; no install needed.
-      - run: yarn security:audit
+      - name: Use vendored Yarn
+        run: echo "${GITHUB_WORKSPACE}/scripts" >> "$GITHUB_PATH"
+      - name: Install for audit
+        run: HUSKY=0 yarn install --immutable
+      - run: sh scripts/security-audit.sh
 
   dependency-review:
     name: Dependency review
