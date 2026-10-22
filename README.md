@@ -30,7 +30,7 @@ Self-hosted, free open source commerce with Shopify-style themes and a modern Ad
 
 ## Quick start
 
-With Node 24+, Yarn and Docker installed:
+With Node 26+, Yarn 4 and Docker installed:
 
 ```bash
 yarn setup   # install, create .env, start Docker, migrate, seed (clean or demo)
@@ -65,7 +65,7 @@ Work through these in order. It takes about an hour.
 
 | Area             | Technology                                                                       |
 | ---------------- | -------------------------------------------------------------------------------- |
-| Runtime          | Node.js 24+, TypeScript                                                          |
+| Runtime          | Node.js 26+, TypeScript                                                          |
 | Framework        | [AdonisJS 7](https://docs.adonisjs.com)                                          |
 | Database         | PostgreSQL 18 via [Lucid ORM](https://lucid.adonisjs.com) (`pg` driver)          |
 | Validation       | [VineJS](https://vinejs.dev)                                                     |
@@ -157,7 +157,7 @@ The built-in React storefront (when no uploaded theme is live) still uses **Buil
 
 ### Prerequisites
 
-- Node.js 24 or newer (`.nvmrc` pins the version used in CI; enable it with `nvm use` or match that release locally)
+- Node.js 26 or newer (`.nvmrc` pins the version used in CI; enable it with `nvm use` or match that release locally)
 - Yarn 4 via Corepack (`corepack enable` — the project vendors Yarn in `.yarn/releases/`)
 - Docker (for PostgreSQL and Mailpit)
 

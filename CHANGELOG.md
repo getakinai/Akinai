@@ -57,7 +57,7 @@ First public release of [Akinai](https://getakinai.com): an open-source e-commer
 
 ### Requirements
 
-- Node.js 24+
+- Node.js 26+
 - Yarn 4 (vendored release, immutable lockfile, install-script allowlist)
 - Docker (for local PostgreSQL, Mailpit, Typesense, Redis)
 
