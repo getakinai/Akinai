@@ -154,7 +154,7 @@
     "react-dom": "^19.3.0",
     "recharts": "^3.10.1",
     "reflect-metadata": "^0.2.2",
-    "sanitize-html": "^2.18.0",
+    "sanitize-html": "^2.18.1",
     "sharp": "^0.35.5",
     "shiki": "^4.5.0",
     "slate": "^0.133.3",
