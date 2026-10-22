@@ -19,7 +19,9 @@ step "Checking prerequisites"
 command -v node >/dev/null 2>&1 || fail "Node.js is not installed. Install Node 24 or newer."
 NODE_MAJOR=$(node -p 'process.versions.node.split(".")[0]')
 [ "$NODE_MAJOR" -ge 24 ] || fail "Node 24 or newer is required (found $(node -v))."
-command -v yarn >/dev/null 2>&1 || fail "Yarn is not installed. Run: npm i -g yarn"
+command -v corepack >/dev/null 2>&1 || fail "Corepack is not available. Use Node 24+ with Corepack enabled."
+corepack enable >/dev/null 2>&1 || true
+command -v yarn >/dev/null 2>&1 || fail "Yarn is not available. Run: corepack enable"
 command -v docker >/dev/null 2>&1 || fail "Docker is not installed."
 docker info >/dev/null 2>&1 || fail "Docker is not running. Start Docker Desktop and try again."
 [ -f "$COMPOSE_FILE" ] || fail "$COMPOSE_FILE not found. Pull the latest changes from main."

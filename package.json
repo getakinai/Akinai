@@ -178,6 +178,11 @@
     "nodemailer": "^10.0.5",
     "typesense": "^3.1.1"
   },
+  "dependenciesMeta": {
+    "@swc/core": {
+      "built": false
+    }
+  },
   "prettier": "@adonisjs/prettier-config",
   "lint-staged": {
     "app/**/*.ts": [
@@ -191,5 +196,6 @@
     "database/**/*.ts": [
       "prettier --write"
     ]
-  }
+  },
+  "packageManager": "yarn@4.18.1"
 }

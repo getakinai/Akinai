@@ -14,6 +14,9 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 concurrency:
   group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
@@ -23,7 +26,7 @@ jobs:
   package:
     name: Package source zip
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Resolve tag
         id: meta
@@ -49,15 +52,41 @@ jobs:
             HEAD
           ls -lh akinai.zip
 
-      - name: Publish release asset
+      - name: Write SHA256SUMS
+        run: sha256sum akinai.zip > SHA256SUMS
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
+          upload-artifact: false
+          dependency-snapshot: false
+
+      - name: Attest release archive
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            akinai.zip
+            SHA256SUMS
+
+      - name: Attest SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: akinai.zip
+          sbom-path: sbom.cyclonedx.json
+
+      - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.meta.outputs.tag }}
         run: |
+          assets=(akinai.zip SHA256SUMS sbom.cyclonedx.json)
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" akinai.zip --clobber
+            gh release upload "$TAG" "${assets[@]}" --clobber
           else
-            gh release create "$TAG" akinai.zip \
+            gh release create "$TAG" "${assets[@]}" \
               --title "$TAG" \
               --generate-notes \
               --latest

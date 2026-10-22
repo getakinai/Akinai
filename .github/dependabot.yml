@@ -16,3 +16,11 @@ updates:
     groups:
       actions:
         patterns: ['*']
+
+  - package-ecosystem: docker
+    directory: /.infra
+    schedule:
+      interval: weekly
+    groups:
+      local-images:
+        patterns: ['*']

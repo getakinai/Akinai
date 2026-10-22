@@ -1,6 +1,6 @@
 # Akinai — Local development services
 
-This folder holds **no application code**. The app (AdonisJS + Inertia/Vite, Node 24, Yarn) is the repository root.
+This folder holds **no application code**. The app (AdonisJS + Inertia/Vite, Node 24+, Yarn 4) is the repository root. Docker images here are pinned by digest in `docker-compose.yml`.
 
 `docker-compose.yml` runs only the supporting services. The app itself runs on your machine with `yarn dev`.
 

@@ -204,11 +204,15 @@ Give `themes.upload` and `themes.edit` only to staff you would trust with the se
 
 ## Supply chain and CI
 
-- `yarn` only, with `yarn.lock` committed.
-- `yarn security:audit` (`scripts/security-audit.sh`) fails on high or critical advisories in production dependencies. Run it after any dependency change.
-- CI runs **gitleaks** (`Secret scan` job in `.github/workflows/ci.yml`, config `.gitleaks.toml`) over full git history so committed secrets fail the build. Real env files stay out of git via `.gitignore` (`.env`, `.env.*` except `.env.example` and `.env.test`).
-- Dependabot opens weekly update PRs for npm packages and GitHub Actions (`.github/dependabot.yml`).
+- **Yarn 4** only, with `yarn.lock` committed and the release vendored under `.yarn/releases/`. CI enables Corepack and installs with `yarn install --immutable`. Third-party **install scripts are off** by default (`enableScripts: false` in `.yarnrc.yml`). Allow a package only by setting `dependenciesMeta.<name>.built` to `true` in the root `package.json`; set `built: false` on packages that warn but do not need scripts so new dependencies surface as `YN0004` in CI. The root `prepare` script (Husky) still runs.
+- `yarn security:audit` (`scripts/security-audit.sh`) runs `yarn npm audit --recursive --severity high` over production and dev dependencies. Run it after any dependency change.
+- Pull requests run **dependency review** (high severity and above) in `.github/workflows/ci.yml`.
+- CI runs **gitleaks** (`Secret scan` job, config `.gitleaks.toml`) over full git history; the release tarball is verified with the published SHA256 checksum before install. Real env files stay out of git via `.gitignore` (`.env`, `.env.*` except `.env.example` and `.env.test`).
+- Local Docker images in `.infra/docker-compose.yml` are pinned by digest. Dependabot opens weekly update PRs for npm, GitHub Actions, and those images (`.github/dependabot.yml`).
 - GitHub Actions are pinned to commit SHAs.
+- **Release assets:** tagged builds publish `akinai.zip`, `SHA256SUMS`, and `sbom.cyclonedx.json`, with GitHub artifact attestations (provenance for the zip and checksum file, SBOM bound to the zip). Verify a download with:
+  - `gh attestation verify akinai.zip --repo getakinai/storefront`
+  - `sha256sum -c SHA256SUMS`
 - Husky runs lint on every commit.
 
 ## Checklist for a new feature
@@ -223,4 +227,4 @@ Before you open a PR, check the feature against each item. These map to the OWAS
 - [ ] **Secrets:** new env vars are added to `start/env.ts` and `.env.example`. New sensitive keys are added to `SENSITIVE_KEYS`.
 - [ ] **Logging:** security events are recorded through `recordSecurityEvent`.
 - [ ] **Uploads:** files are validated in Vine and stored through `uploadImage()`.
-- [ ] **Dependencies:** `yarn security:audit` passes.
+- [ ] **Dependencies:** `yarn security:audit` passes. If a new dependency runs install scripts, add `dependenciesMeta` (`built: true` or `built: false`) before CI will pass.
